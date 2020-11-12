@@ -1,0 +1,14 @@
+[Unit]
+Description=Rude bot service
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+User=username
+WorkingDirectory=/home/username/bots/rude_bot
+ExecStart=/usr/bin/python3.7 /home/username/bots/rude_bot/main.py
+
+[Install]
+WantedBy=multi-user.target

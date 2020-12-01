@@ -15,48 +15,49 @@ bot_id = None
 #bot will delete his owm nessage after defined time
 destruction_timeout = 20
 
-database_filename = 'users.txt'
+database_filename = 'users.json'
 
 stopwords = ["залупа","суха","сиха","сри","срали","срать","д@ун", "даун","хуи","хуё","хуе","хуй", "бля","Cyка", "nahui","говн","pizd","pidar","cunt","Пизд","хер","Пидарас","Пидор","Бляд","Блят","Гандон","Выеби","Еби","Блядство","Выебон","Выебать","Вхуюжить","Гомосек","Долбоёб","Далбоёб","Ебло","Еблище","Ебать","Ебическая сила","Ебунок","Еблан","Ёбнуть","Ёболызнуть","Ебош","Заебал","Заебатый","Злаебучий","Заёб","Иди на хуй","Колдоебина","Манда","Мандовошка","Мокрощелка","Наебка","Наебал","Наебаловка","Напиздеть","Отъебись","Охуеть","Отхуевертить","Опизденеть","Охуевший","Отебукать","Пизда","Пидарас","Пиздатый","Пиздец","Пизданутый","Поебать","Поебустика","Проебать","Подзалупный","Пизденыш","Припиздак","Разъебать","Распиздяй","Разъебанный","Сука","Сучка","Трахать","Уебок","Уебать","Угондошить","Уебан","Хитровыебанный","Хуй","Хуйня","Хуета","Хуево","Хуесос","Хуеть","Хуевертить","Хуеглот","Хуистика","Членосос","Членоплет","Шлюха"]
-increase_words = ['+','спасибо','дякую','благодарю', '👍', '😁', '😂', '😄', 'хаха']
+increase_words = ['+','спасибо','дякую','благодарю', '👍', '😁', '😂', '😄', '😆', 'хаха']
 decrease_words = ['-', '👎']
 
 users = {}
 user_karma = {}
 
-regex_letters = {'а' : ['а', 'a', '@'],
-  'б' : ['б', '6', 'b'],
-  'в' : ['в', 'b', 'v'],
-  'г' : ['г', 'r', 'g'],
-  'д' : ['д', 'd', 'g'],
-  'е' : ['е', 'e'],
-  'ё' : ['ё', 'е', 'e'],
-  'ж' : ['ж', 'zh', '*'],
-  'з' : ['з', '3', 'z'],
-  'и' : ['и', 'u', 'i'],
-  'й' : ['й', 'u', 'y', 'i'],
-  'к' : ['к', 'k', 'i{', '|{'],
-  'л' : ['л', 'l', 'ji'],
-  'м' : ['м', 'm'],
-  'н' : ['н', 'h', 'n'],
-  'о' : ['о', 'o', '0'],
-  'п' : ['п', 'n', 'p', '/7'],
-  'р' : ['р', 'r', 'p'],
-  'с' : ['с', 'c', 's'],
-  'т' : ['т', 'm', 't'],
-  'у' : ['у', 'y', 'u'],
-  'ф' : ['ф', 'f'],
-  'х' : ['х', 'x', 'h', 'к', '}{', ')('],
-  'ц' : ['ц', 'c', 'u,'],
-  'ч' : ['ч', 'ch'],
-  'ш' : ['ш', 'sh'],
-  'щ' : ['щ', 'sch'],
-  'ь' : ['ь', 'b'],
-  'ы' : ['ы', 'bi'],
-  'ъ' : ['ъ'],
-  'э' : ['э', 'е', 'e'],
-  'ю' : ['ю', 'io'],
-  'я' : ['я', 'ya'],
+regex_letters = {
+    'а' : ['а', 'a', '@'],
+    'б' : ['б', '6', 'b'],
+    'в' : ['в', 'b', 'v'],
+    'г' : ['г', 'r', 'g'],
+    'д' : ['д', 'd', 'g'],
+    'е' : ['е', 'e'],
+    'ё' : ['ё', 'е', 'e'],
+    'ж' : ['ж', 'zh', '*'],
+    'з' : ['з', '3', 'z'],
+    'и' : ['и', 'u', 'i'],
+    'й' : ['й', 'u', 'y', 'i'],
+    'к' : ['к', 'k', 'i{', '|{'],
+    'л' : ['л', 'l', 'ji'],
+    'м' : ['м', 'm'],
+    'н' : ['н', 'h', 'n'],
+    'о' : ['о', 'o', '0'],
+    'п' : ['п', 'n', 'p', '/7'],
+    'р' : ['р', 'r', 'p'],
+    'с' : ['с', 'c', 's'],
+    'т' : ['т', 'm', 't'],
+    'у' : ['у', 'y', 'u'],
+    'ф' : ['ф', 'f'],
+    'х' : ['х', 'x', 'h', 'к', '}{', ')('],
+    'ц' : ['ц', 'c', 'u,'],
+    'ч' : ['ч', 'ch'],
+    'ш' : ['ш', 'sh'],
+    'щ' : ['щ', 'sch'],
+    'ь' : ['ь', 'b'],
+    'ы' : ['ы', 'bi'],
+    'ъ' : ['ъ'],
+    'э' : ['э', 'е', 'e'],
+    'ю' : ['ю', 'io'],
+    'я' : ['я', 'ya'],
 }
 
 last_top = None
@@ -70,15 +71,18 @@ last_top = None
 #         return True
 
 def count_mats(message_text):
-    count_mats : int = 0
+    count_mats: int = 0
     for regex_letter in regex_letters:
         for regex_char in regex_letters[regex_letter]:
             messageText = message_text.replace(regex_char, regex_letter)
 
     for stopword in stopwords:
         if stopword.lower() in message_text:
-            count_mats+=1
+            count_mats += 1
 
+    #limit
+    if count_mats > 5:
+        count_mats = 5
     return count_mats
 
 def get_karma(user_id : int):
@@ -127,11 +131,12 @@ def increase_karma(dest_user_id: int, message_text: str):
             break
     if not is_changed:
         for decrease_word in decrease_words:
-            if decrease_word in message_text :
+            if decrease_word == message_text :
                 users[dest_user_id]['karma'] -= 1
                 new_karma = users[dest_user_id]['karma']
                 _username = users[dest_user_id]['username']
                 replytext += 'зменшили '
+                is_changed = True
                 break
     if not is_changed:
         return
@@ -176,10 +181,10 @@ def getTop():
         matscount = usr['total_mats']
         replytext+=f'`{username}` - матюків `{matscount}`\n'
 
-    replytext += "\nКулдаун топу - 5 мінут"
+    replytext += "\nКулдаун топу - 5 хвилин"
 
     replytext = replytext.replace('@', '')
-    
+
     keyboard = [[InlineKeyboardButton("Оновити", callback_data='refresh_top')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     return replytext, reply_markup
@@ -231,6 +236,9 @@ def on_msg(update, context):
                 context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id])
 
         # commands
+        if ("шарий" in messageText or "шарій" in messageText) and not is_old:
+            msg = message.reply_video(quote = True ,video=open('sh.MOV', mode='rb'))
+            context.job_queue.run_once(autodelete_message, 30, context=[msg.chat_id, msg.message_id])
         if messageText == "гіт" and not is_old:
             reply_text = 'github.com/awitwicki/rude\\_bot'
             msg = context.bot.send_message(_chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)

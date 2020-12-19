@@ -1,65 +1,33 @@
 # -*- coding: utf8 -*-
 #/usr/bin/python3.7
 
-import datetime
+from datetime import datetime, timezone
 from telegram import bot
 from telegram.ext import Updater, Filters, MessageHandler, CallbackQueryHandler
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
 import os
 import codecs
 
+from Config import Config
+from mats_counter import count_mats
+
+conf = Config('config.ini', ['telegram_token', 'destruction_timeout', 'database_filename'])
+
 # https://github.com/python-telegram-bot/python-telegram-bot/wiki/Transition-guide-to-Version-12.0
-bot_token = 'TOKEN'
-bot_id = None
+bot_token = conf.Data['telegram_token']
 
 #bot will delete his owm nessage after defined time
-destruction_timeout = 20
+destruction_timeout = int(conf.Data['destruction_timeout'])
 
-database_filename = 'users.json'
+database_filename = conf.Data['database_filename']
 
-stopwords = ["залупа","суха","сиха","сри","срали","срать","д@ун", "даун","хуи","хуё","хуе","хуй", "бля","Cyка", "nahui","говн","pizd","pidar","cunt","Пизд","хер","Пидарас","Пидор","Бляд","Блят","Гандон","Выеби","Еби","Блядство","Выебон","Выебать","Вхуюжить","Гомосек","Долбоёб","Далбоёб","Ебло","Еблище","Ебать","Ебическая сила","Ебунок","Еблан","Ёбнуть","Ёболызнуть","Ебош","Заебал","Заебатый","Злаебучий","Заёб","Иди на хуй","Колдоебина","Манда","Мандовошка","Мокрощелка","Наебка","Наебал","Наебаловка","Напиздеть","Отъебись","Охуеть","Отхуевертить","Опизденеть","Охуевший","Отебукать","Пизда","Пидарас","Пиздатый","Пиздец","Пизданутый","Поебать","Поебустика","Проебать","Подзалупный","Пизденыш","Припиздак","Разъебать","Распиздяй","Разъебанный","Сука","Сучка","Трахать","Уебок","Уебать","Угондошить","Уебан","Хитровыебанный","Хуй","Хуйня","Хуета","Хуево","Хуесос","Хуеть","Хуевертить","Хуеглот","Хуистика","Членосос","Членоплет","Шлюха"]
-increase_words = ['+','спасибо','дякую','благодарю', '👍', '😁', '😂', '😄', '😆', 'хаха']
+increase_words = ['+', 'спасибо', 'дякую', 'благодарю', '👍', '😁', '😂', '😄', '😆', 'хаха']
 decrease_words = ['-', '👎']
 
 users = {}
 user_karma = {}
 
-regex_letters = {
-    'а' : ['а', 'a', '@'],
-    'б' : ['б', '6', 'b'],
-    'в' : ['в', 'b', 'v'],
-    'г' : ['г', 'r', 'g'],
-    'д' : ['д', 'd', 'g'],
-    'е' : ['е', 'e'],
-    'ё' : ['ё', 'е', 'e'],
-    'ж' : ['ж', 'zh', '*'],
-    'з' : ['з', '3', 'z'],
-    'и' : ['и', 'u', 'i'],
-    'й' : ['й', 'u', 'y', 'i'],
-    'к' : ['к', 'k', 'i{', '|{'],
-    'л' : ['л', 'l', 'ji'],
-    'м' : ['м', 'm'],
-    'н' : ['н', 'h', 'n'],
-    'о' : ['о', 'o', '0'],
-    'п' : ['п', 'n', 'p', '/7'],
-    'р' : ['р', 'r', 'p'],
-    'с' : ['с', 'c', 's'],
-    'т' : ['т', 'm', 't'],
-    'у' : ['у', 'y', 'u'],
-    'ф' : ['ф', 'f'],
-    'х' : ['х', 'x', 'h', 'к', '}{', ')('],
-    'ц' : ['ц', 'c', 'u,'],
-    'ч' : ['ч', 'ch'],
-    'ш' : ['ш', 'sh'],
-    'щ' : ['щ', 'sch'],
-    'ь' : ['ь', 'b'],
-    'ы' : ['ы', 'bi'],
-    'ъ' : ['ъ'],
-    'э' : ['э', 'е', 'e'],
-    'ю' : ['ю', 'io'],
-    'я' : ['я', 'ya'],
-}
-
+bot_id = None
 last_top = None
 
 #Todo:
@@ -69,21 +37,6 @@ last_top = None
 #         usr_ch = user_karma[user_id]
 #     except:
 #         return True
-
-def count_mats(message_text):
-    count_mats: int = 0
-    for regex_letter in regex_letters:
-        for regex_char in regex_letters[regex_letter]:
-            messageText = message_text.replace(regex_char, regex_letter)
-
-    for stopword in stopwords:
-        if stopword.lower() in message_text:
-            count_mats += 1
-
-    #limit
-    if count_mats > 5:
-        count_mats = 5
-    return count_mats
 
 def get_karma(user_id : int):
     user = users[user_id]
@@ -98,6 +51,7 @@ def get_karma(user_id : int):
 
     return replytext
 
+
 def add_or_update_user(user_id: int, username: str, mats_count: int):
     try:
         users[user_id]['total_messages'] += 1
@@ -110,6 +64,7 @@ def add_or_update_user(user_id: int, username: str, mats_count: int):
         users[user_id]['karma'] = 0
 
     saveToFile(users)
+
 
 def increase_karma(dest_user_id: int, message_text: str):
     if dest_user_id == bot_id:
@@ -146,14 +101,16 @@ def increase_karma(dest_user_id: int, message_text: str):
 
     return replytext
 
+
 def stats(update, context):
     command = update.callback_query.data
     if command == 'refresh_top':
         replytext, reply_markup = getTop()
-        replytext += f'\n`Оновлено UTC {datetime.datetime.utcnow()}`'
+        replytext += f'\n`Оновлено UTC {datetime.now(timezone.utc)}`'
         query = update.callback_query
         query.edit_message_text(text=replytext, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
         return
+
 
 def getTop():
     replytext = "*Топ 10 карми чату:*\n"
@@ -189,13 +146,16 @@ def getTop():
     reply_markup = InlineKeyboardMarkup(keyboard)
     return replytext, reply_markup
 
+
 def saveToFile(dict):
     f = codecs.open(database_filename, "w", "utf-8")
     f.write(str(users))
     f.close()
 
+
 def autodelete_message(context):
     context.bot.delete_message(chat_id=context.job.context[0], message_id=context.job.context[1])
+
 
 def openFile():
     if os.path.isfile(database_filename):
@@ -203,6 +163,7 @@ def openFile():
         users = eval(open(database_filename, 'r', encoding= 'utf-8').read())
     else:
         print ("File not exist")
+
 
 def on_msg(update, context):
     global last_top
@@ -215,7 +176,7 @@ def on_msg(update, context):
             return
 
         is_old = False
-        if message.date and (datetime.datetime.utcnow() - message.date).seconds > 300:
+        if message.date and (datetime.now(timezone.utc) - message.date).seconds > 300:
             is_old = True
 
         user_id = message.from_user.id
@@ -248,17 +209,18 @@ def on_msg(update, context):
             msg = context.bot.send_message(_chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
             context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id])
         if messageText == "топ" and not is_old:
-            if not last_top or (datetime.datetime.utcnow() - last_top).seconds > 300:
+            if not last_top or (datetime.now(timezone.utc) - last_top).seconds > 300:
                 reply_text, reply_markup = getTop()
                 msg = context.bot.send_message(_chat_id, text=reply_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
                 context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
-                last_top = datetime.datetime.utcnow()
+                last_top = datetime.now(timezone.utc)
 
         mats = count_mats(messageText)
         add_or_update_user(user_id, username, mats)
 
     except Exception as e:
         print(e)
+
 
 def main():
     global bot_id
@@ -275,6 +237,7 @@ def main():
     bot_id = updater.bot.id
     print("Bot is started.")
     updater.idle()
+
 
 if __name__ == '__main__':
     main()

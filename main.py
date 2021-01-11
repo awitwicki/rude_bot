@@ -9,6 +9,7 @@ import codecs
 
 from Config import Config
 from mats_counter import count_mats
+from youtube_parser import *
 
 conf = Config('config.ini', ['telegram_token', 'destruction_timeout', 'database_filename'])
 
@@ -28,6 +29,8 @@ user_karma = {}
 
 bot_id = None
 last_top = None
+url_video_list_dima = None
+url_video_list_asado = None
 
 #Todo:
 #ignore karmaspam from users
@@ -242,6 +245,40 @@ def on_msg(update, context):
         print(e)
 
 
+def callback_minute(context: CallbackContext):
+    global url_video_list_dima
+    global url_video_list_asado
+
+    new_video_list_dima = get_urls('https://www.youtube.com/feeds/videos.xml?channel_id=UC20M3T-H-Pv0FPOEfeQJtNQ')
+    new_video_list_asado = get_urls('https://www.youtube.com/feeds/videos.xml?channel_id=UCfkPlh5dfjbw8hc1s-yJQdw')
+
+    # get new url list
+    if url_video_list_dima is None:
+        url_video_list_dima = new_video_list_dima
+        return
+
+    if url_video_list_asado is None:
+        url_video_list_asado = new_video_list_asado
+        return
+
+
+    # look for new videos
+    new_videos_dima = get_new_urls(url_video_list_dima, new_video_list_dima)
+    new_videos_asado = get_new_urls(url_video_list_asado, new_video_list_asado)
+
+    if len(new_videos_dima) > 0:
+        url_video_list_dima = new_video_list_dima
+
+        for new_video in new_videos_dima:
+            context.bot.send_message(chat_id='@rude_chat', text=new_video)
+
+    if len(new_videos_asado) > 0:
+        url_video_list_asado = new_video_list_asado
+
+        for new_video in new_videos_asado:
+            context.bot.send_message(chat_id='@rude_chat', text=new_video)
+
+
 def add_group(update, context):
     for member in update.message.new_chat_members:
         if not member.is_bot:
@@ -264,6 +301,10 @@ def main():
     dp.add_handler(MessageHandler(Filters.text, on_msg, edited_updates = True))
     dp.add_handler(CallbackQueryHandler(btn_clicked))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, add_group))
+
+    # new videos
+    j = updater.job_queue
+    job_minute = j.run_repeating(callback_minute, interval=60, first=0)
 
     updater.start_polling()
     bot_id = updater.bot.id

@@ -10,6 +10,7 @@ import codecs
 from Config import Config
 from mats_counter import count_mats
 from youtube_parser import *
+from helper import *
 
 conf = Config('config.ini', ['telegram_token', 'destruction_timeout', 'database_filename'])
 
@@ -237,6 +238,10 @@ def on_msg(update, context):
                 msg = context.bot.send_message(_chat_id, text=reply_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
                 context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
                 last_top = datetime.now(timezone.utc)
+        if messageText == "cat" and not is_old:
+            cat_url = get_random_cat_image_url()
+            msg = context.bot.send_photo(_chat_id, cat_url)
+            context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
 
         mats = count_mats(messageText)
         add_or_update_user(user_id, username, mats)

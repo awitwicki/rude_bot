@@ -2,8 +2,7 @@
 #/usr/bin/python3.7
 
 from datetime import datetime, timezone
-from telegram import bot
-from telegram.ext import Updater, Filters, MessageHandler, CallbackQueryHandler
+from telegram.ext import Updater, Filters, MessageHandler, CallbackQueryHandler, CallbackContext
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
 import os
 import codecs
@@ -102,7 +101,7 @@ def increase_karma(dest_user_id: int, message_text: str):
     return replytext
 
 
-def stats(update, context):
+def btn_clicked(update, context):
     command = update.callback_query.data
     if command == 'refresh_top':
         replytext, reply_markup = getTop()
@@ -110,6 +109,21 @@ def stats(update, context):
         query = update.callback_query
         query.edit_message_text(text=replytext, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
         return
+    else: #new user clicked
+        user_id = int(command)
+        user_clicked_id = update.callback_query.from_user.id
+
+        if user_id == user_clicked_id:
+            chat_id = update.callback_query.message.chat_id
+            message_id = update.callback_query.message.message_id
+
+            try:
+                context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+
+            except:
+                pass
+        else:
+            context.bot.answer_callback_query(callback_query_id=update.callback_query.id, text='Ще раз і бан :)', show_alert=True)
 
 
 def getTop():
@@ -155,6 +169,11 @@ def saveToFile(dict):
 
 def autodelete_message(context):
     context.bot.delete_message(chat_id=context.job.context[0], message_id=context.job.context[1])
+    if len(context.job.context) > 2:
+        try:
+            context.bot.delete_message(chat_id=context.job.context[0], message_id=context.job.context[2])
+        except:
+            pass
 
 
 def openFile():
@@ -182,6 +201,7 @@ def on_msg(update, context):
         user_id = message.from_user.id
         username = message.from_user.name
         _chat_id = message.chat_id
+        _message_id = message.message_id
 
         # chats control, you can define it in telegram bot father
         # if _chat_id != chat_id and user_id != admin_id:
@@ -222,6 +242,17 @@ def on_msg(update, context):
         print(e)
 
 
+def add_group(update, context):
+    for member in update.message.new_chat_members:
+        if not member.is_bot:
+            keyboard = [[InlineKeyboardButton("Я обіцяю!", callback_data=member.id)]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            # update.message.reply_text(f"{member.username} add group")
+            message_text = f"Вітаємо {member.name} у нашому чаті! Ми не чат, а дружня, толерантна IT спільнота, яка поважає думку кожного, приєднавшись, ти згоджуєшся стати чемною частиною спільноти (та полюбити епл). I якшо не важко, пліз тут анкета на 8 питань https://forms.gle/pY6EjJhNRosUbd9P9"
+            msg = update.message.reply_text(message_text, reply_markup=reply_markup)
+            context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
+
+
 def main():
     global bot_id
 
@@ -231,7 +262,8 @@ def main():
 
     dp = updater.dispatcher
     dp.add_handler(MessageHandler(Filters.text, on_msg, edited_updates = True))
-    dp.add_handler(CallbackQueryHandler(stats))
+    dp.add_handler(CallbackQueryHandler(btn_clicked))
+    dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, add_group))
 
     updater.start_polling()
     bot_id = updater.bot.id

@@ -2,8 +2,9 @@
 #/usr/bin/python3.7
 
 from datetime import datetime, timezone
+import telegram
 from telegram.ext import Updater, Filters, MessageHandler, CallbackQueryHandler, CallbackContext
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode, Message
 import os
 import codecs
 
@@ -191,7 +192,7 @@ def openFile():
 def on_msg(update, context):
     global last_top
     try:
-        message = update.message
+        message: Message = update.message
         if message is None:
             return
 
@@ -222,7 +223,10 @@ def on_msg(update, context):
 
         # commands
         if ("шарий" in messageText or "шарій" in messageText) and not is_old:
-            msg = message.reply_video(quote = True ,video=open('sh.MOV', mode='rb'))
+            msg = message.reply_video(quote=True, video=open('sh.MOV', mode='rb'))
+            context.job_queue.run_once(autodelete_message, 30, context=[msg.chat_id, msg.message_id])
+        if ("xiaomi" in messageText or "сяоми" in messageText) and not is_old:
+            msg = context.bot.send_photo(_chat_id, reply_to_message_id=_message_id, photo=open('xiaomi.jpg', 'rb'))
             context.job_queue.run_once(autodelete_message, 30, context=[msg.chat_id, msg.message_id])
         if messageText == "гіт" and not is_old:
             reply_text = 'github.com/awitwicki/rude\\_bot'

@@ -130,3 +130,10 @@ dmypy.json
 
 #config files
 *.ini
+*.json
+
+#test files
+*.ipynb
+*.xlsx
+
+*.txt

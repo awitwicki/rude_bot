@@ -168,7 +168,7 @@ def getTop():
         matscount = usr['total_mats']
         replytext+=f'`{username}` - матюків `{matscount}`\n'
 
-    replytext += "\nКолдаун топу - 5 хвилин"
+    replytext += "\nКулдаун топу - 5 хвилин"
 
     replytext = replytext.replace('@', '')
 

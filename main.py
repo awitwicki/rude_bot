@@ -34,6 +34,8 @@ last_top = None
 url_video_list_dima = None
 url_video_list_asado = None
 
+saved_messages_ids = []
+
 #Todo:
 #ignore karmaspam from users
 # def check_user_for_karma(user_id: int, dest_user_id: int):
@@ -108,20 +110,29 @@ def increase_karma(dest_user_id: int, message_text: str):
 
 def btn_clicked(update, context):
     command = update.callback_query.data
+    chat_id = update.callback_query.message.chat_id
+    message_id = update.callback_query.message.message_id
+
     if command == 'refresh_top':
         replytext, reply_markup = getTop()
         replytext += f'\n`Оновлено UTC {datetime.now(timezone.utc)}`'
         query = update.callback_query
         query.edit_message_text(text=replytext, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
         return
+    elif 'like_cat' in command:
+        likes = command.split('|')[1]
+        likes = int(likes) + 1
+        like_text = f'😻 x {likes}'
+        keyboard = [[InlineKeyboardButton(like_text, callback_data=f'like_cat|{likes}')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        context.bot.edit_message_reply_markup(chat_id = chat_id, message_id = message_id, reply_markup = reply_markup)
+        if likes == 1:
+            saved_messages_ids.append(message_id)
     else: #new user clicked
         user_id = int(command)
         user_clicked_id = update.callback_query.from_user.id
 
         if user_id == user_clicked_id:
-            chat_id = update.callback_query.message.chat_id
-            message_id = update.callback_query.message.message_id
-
             try:
                 context.bot.delete_message(chat_id=chat_id, message_id=message_id)
 
@@ -173,10 +184,16 @@ def saveToFile(dict):
 
 
 def autodelete_message(context):
+    chat_id = context.job.context[0]
+    message_id = context.job.context[1]
+    if message_id in saved_messages_ids:
+        saved_messages_ids.remove(message_id)
+        return
+
     context.bot.delete_message(chat_id=context.job.context[0], message_id=context.job.context[1])
     if len(context.job.context) > 2:
         try:
-            context.bot.delete_message(chat_id=context.job.context[0], message_id=context.job.context[2])
+            context.bot.delete_message(chat_id=chat_id, message_id=message_id)
         except:
             pass
 
@@ -242,9 +259,11 @@ def on_msg(update, context):
                 msg = context.bot.send_message(_chat_id, text=reply_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
                 context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
                 last_top = datetime.now(timezone.utc)
-        if messageText == "cat" and not is_old:
+        if messageText == "cat" or messageText == "кот" or messageText == "кіт" and not is_old:
             cat_url = get_random_cat_image_url()
-            msg = context.bot.send_photo(_chat_id, cat_url)
+            keyboard = [[InlineKeyboardButton("😻", callback_data='like_cat|0')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            msg = context.bot.send_photo(_chat_id, cat_url, reply_markup=reply_markup)
             context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
 
         mats = count_mats(messageText)

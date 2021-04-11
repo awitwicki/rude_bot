@@ -23,7 +23,7 @@ destruction_timeout = int(conf.Data['destruction_timeout'])
 
 database_filename = conf.Data['database_filename']
 
-increase_words = ['+', 'спасибо', 'дякую', 'благодарю', '👍', '😁', '😂', '😄', '😆', 'хаха']
+increase_words = ['+', 'спасибі', 'спс', 'дяки', 'дякс', 'благодарочка', 'вдячний', 'спасибо', 'дякую', 'благодарю', '👍', '😁', '😂', '😄', '😆', 'хаха', 'ахах']
 decrease_words = ['-', '👎']
 
 users = {}
@@ -47,7 +47,7 @@ saved_messages_ids = []
 def get_karma(user_id : int):
     user = users[user_id]
 
-    replytext = f"Привіt {user['username']}, tвоя карма:\n\n"
+    replytext = f"Привіт {user['username']}, твоя карма:\n\n"
     replytext += f"Карма: `{user['karma']}`\n"
     replytext += f"Повідомлень: `{user['total_messages']}`\n"
     replytext += f"Матюків: `{user['total_mats']}`"
@@ -87,7 +87,7 @@ def increase_karma(dest_user_id: int, message_text: str):
             users[dest_user_id]['karma'] += 1
             new_karma = users[dest_user_id]['karma']
             _username = users[dest_user_id]['username']
-            replytext += 'підняли '
+            replytext += 'збільшили '
             is_changed = True
             break
     if not is_changed:
@@ -102,7 +102,7 @@ def increase_karma(dest_user_id: int, message_text: str):
     if not is_changed:
         return
 
-    replytext += f'карму користувача {_username} до вартості {new_karma}!'
+    replytext += f'карму користувача {_username} до значення {new_karma}!'
     saveToFile(users)
 
     return replytext
@@ -143,7 +143,7 @@ def btn_clicked(update, context):
 
 
 def getTop():
-    replytext = "*Топ 10 карми чату:*\n"
+    replytext = "*Топ-10 карми чату:*\n"
     users_list = [ v for k, v in users.items()]
     sorted_users_list = sorted(users_list, key = lambda i: i['karma'], reverse = True)[:10]
 
@@ -152,7 +152,7 @@ def getTop():
         karma = usr['karma']
         replytext+=f'`{username}` - карма `{karma}`\n'
 
-    replytext += "\n*Топ 10 актив чату:*\n"
+    replytext += "\n*Топ-10 актив чату:*\n"
     sorted_users_list = sorted(users_list, key = lambda i: i['total_messages'], reverse = True)[:10]
 
     for usr in sorted_users_list:
@@ -160,7 +160,7 @@ def getTop():
         messagescount = usr['total_messages']
         replytext+=f'`{username}` - повідомлень `{messagescount}`\n'
 
-    replytext += "\n*Топ 10 емоціонали чату:*\n"
+    replytext += "\n*Топ-10 емоціонали чату:*\n"
     sorted_users_list = sorted(users_list, key = lambda i: i['total_mats'], reverse = True)[:10]
 
     for usr in sorted_users_list:
@@ -259,7 +259,7 @@ def on_msg(update, context):
                 msg = context.bot.send_message(_chat_id, text=reply_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
                 context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
                 last_top = datetime.now(timezone.utc)
-        if messageText == "cat" or messageText == "кот" or messageText == "кіт" and not is_old:
+        if messageText == "cat" or messageText == "кот" or messageText == "кіт" or messageText == "кицька" and not is_old:
             cat_url = get_random_cat_image_url()
             keyboard = [[InlineKeyboardButton("😻", callback_data='like_cat|0')]]
             reply_markup = InlineKeyboardMarkup(keyboard)

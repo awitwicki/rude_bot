@@ -49,12 +49,23 @@ saved_messages_ids = []
 def get_karma(user_id : int):
     user = users[user_id]
 
-    replytext = f"Привіт {user['username']}, твоя карма:\n\n"
-    replytext += f"Карма: `{user['karma']}`\n"
-    replytext += f"Повідомлень: `{user['total_messages']}`\n"
-    replytext += f"Матюків: `{user['total_mats']}`\n"
-    replytext += f"Rude-коїнів: `{user['rude_coins']}`💰"
-    replytext += ''
+    username = user['username']
+    karma = user['karma']
+    rude_coins = user['rude_coins']
+    total_messages = user['total_messages']
+    total_mats = user['total_mats']
+    mats_percent = 0
+
+    if total_mats > 0 and total_messages > 0:
+        mats_percent = total_mats / total_messages
+        mats_percent *= 100
+        mats_percent = round(mats_percent, 2)
+
+    replytext = f"Привіт {username}, твоя карма:\n\n"
+    replytext += f"Карма: `{karma}`\n"
+    replytext += f"Повідомлень: `{total_messages}`\n"
+    replytext += f"Матюків: `{total_mats} ({mats_percent}%)`\n"
+    replytext += f"Rude-коїнів: `{rude_coins}`💰"
 
     replytext = replytext.replace('_', '\\_')
 

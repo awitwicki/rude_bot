@@ -3,6 +3,7 @@
 #read mats from file
 mats_filename = 'mats.txt'
 stopwords = open(mats_filename, 'r', encoding= 'utf-8').read().split('\n')
+stopwords.remove('')
 
 def count_mats(message_text: str):
     count_mats: int = 0

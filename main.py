@@ -2,8 +2,10 @@
 #/usr/bin/python3.7
 
 from datetime import datetime, timezone
+from os.path import commonpath
+from requests.models import RequestEncodingMixin
 import telegram
-from telegram.ext import Updater, Filters, MessageHandler, CallbackQueryHandler, CallbackContext
+from telegram.ext import Updater, Filters, MessageHandler, CommandHandler, CallbackQueryHandler, CallbackContext
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode, Message
 import os
 import codecs
@@ -50,7 +52,8 @@ def get_karma(user_id : int):
     replytext = f"Привіт {user['username']}, твоя карма:\n\n"
     replytext += f"Карма: `{user['karma']}`\n"
     replytext += f"Повідомлень: `{user['total_messages']}`\n"
-    replytext += f"Матюків: `{user['total_mats']}`"
+    replytext += f"Матюків: `{user['total_mats']}`\n"
+    replytext += f"Rude-коїнів: `{user['rude_coins']}`💰"
     replytext += ''
 
     replytext = replytext.replace('_', '\\_')
@@ -62,12 +65,15 @@ def add_or_update_user(user_id: int, username: str, mats_count: int):
     try:
         users[user_id]['total_messages'] += 1
         users[user_id]['total_mats'] += mats_count
+        if not users[user_id].get('rude_coins'):
+            users[user_id]['rude_coins'] = 0
     except:
         users[user_id] = {}
         users[user_id]['total_messages'] = 1
         users[user_id]['total_mats'] = mats_count
         users[user_id]['username'] = username
         users[user_id]['karma'] = 0
+        users[user_id]['rude_coins'] = 0
 
     saveToFile(users)
 
@@ -190,10 +196,10 @@ def autodelete_message(context):
         saved_messages_ids.remove(message_id)
         return
 
-    context.bot.delete_message(chat_id=context.job.context[0], message_id=context.job.context[1])
+    context.bot.delete_message(chat_id=chat_id, message_id=message_id)
     if len(context.job.context) > 2:
         try:
-            context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+            context.bot.delete_message(chat_id=chat_id, message_id=context.job.context[2])
         except:
             pass
 
@@ -230,6 +236,8 @@ def on_msg(update, context):
             # return
 
         messageText = message.text.lower()
+        mats = count_mats(messageText)
+        add_or_update_user(user_id, username, mats)
 
         # karma message
         if message.reply_to_message and message.reply_to_message.from_user.id and user_id != message.reply_to_message.from_user.id:
@@ -266,9 +274,60 @@ def on_msg(update, context):
             msg = context.bot.send_photo(_chat_id, cat_url, reply_markup=reply_markup)
             context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
 
-        mats = count_mats(messageText)
-        add_or_update_user(user_id, username, mats)
+    except Exception as e:
+        print(e)
 
+
+def give(update, context):
+    try:
+        message: Message = update.message
+
+        is_old = False
+        if message.date and (datetime.now(timezone.utc) - message.date).seconds > 300:
+            is_old = True
+
+        if is_old: return
+
+        user_id = message.from_user.id
+        _chat_id = message.chat_id
+        _message_id = message.message_id
+
+        if message.reply_to_message and user_id != message.reply_to_message.from_user.id:
+            username = message.reply_to_message.from_user.name
+
+            if not 'rude_coins' in users[message.reply_to_message.from_user.id]:
+                users[message.reply_to_message.from_user.id]['rude_coins'] = 100
+
+            #get user coins
+            user_coins = users[user_id]['rude_coins']
+
+            #parse coins amount
+            if context.args:
+                amount = int(context.args[0])
+                if amount > user_coins:
+                    msg = context.bot.send_message(_chat_id, reply_to_message_id=_message_id, text=f"Недостатньо коїнів, вы маєте тільки {user_coins}💰")
+                    context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
+                    return
+
+                if amount <= 0:
+                    msg = context.bot.send_message(_chat_id, reply_to_message_id=_message_id, text=f"Самий умний?")
+                    context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
+                    return
+
+                users[message.reply_to_message.from_user.id]['rude_coins'] +=amount
+                users[user_id]['rude_coins'] -= amount
+
+                msg = context.bot.send_message(_chat_id, reply_to_message_id=_message_id, text=f"Ви переказали {username} {amount} коїнів 💰")
+                context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
+                return
+            else:
+                msg = context.bot.send_message(_chat_id, reply_to_message_id=_message_id, text=f"/get 1..{user_coins}")
+                context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
+                return
+        else:
+            msg = context.bot.send_message(_chat_id, reply_to_message_id=_message_id, text=f'Щоб поділитися коїнами, вы маєте зробити реплай на повідомлення особи отримувача, текст має бути таким:\n\n"/give 25" (переказ 25 коїнів)', parse_mode=ParseMode.MARKDOWN)
+            context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
+            return
     except Exception as e:
         print(e)
 
@@ -288,7 +347,6 @@ def callback_minute(context: CallbackContext):
     if url_video_list_asado is None:
         url_video_list_asado = new_video_list_asado
         return
-
 
     # look for new videos
     new_videos_dima = get_new_urls(url_video_list_dima, new_video_list_dima)
@@ -326,6 +384,7 @@ def main():
     updater = Updater(bot_token, use_context=True)
 
     dp = updater.dispatcher
+    dp.add_handler(CommandHandler('give', give, pass_args=True))
     dp.add_handler(MessageHandler(Filters.text, on_msg, edited_updates = True))
     dp.add_handler(CallbackQueryHandler(btn_clicked))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, add_group))

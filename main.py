@@ -49,6 +49,7 @@ saved_messages_ids = []
 def check_message_is_old(message: Message):
     return (datetime.now(timezone.utc) - message.date).seconds > 300
 
+
 def ignore_old_message(func):
     def wrapper(*args, **kwargs):
         update, context = args
@@ -60,6 +61,7 @@ def ignore_old_message(func):
             func(*args, **kwargs)
 
     return wrapper
+
 
 def get_karma(user_id : int):
     user = users[user_id]
@@ -320,6 +322,7 @@ def git(update: Update, context: CallbackContext):
     msg = context.bot.send_message(_chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
     context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
 
+
 @ignore_old_message
 def top_list(update: Update, context: CallbackContext):
     global last_top
@@ -331,6 +334,7 @@ def top_list(update: Update, context: CallbackContext):
         msg = context.bot.send_message(_chat_id, text=reply_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
         context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
         last_top = datetime.now(timezone.utc)
+
 
 @ignore_old_message
 def cat(update: Update, context: CallbackContext):

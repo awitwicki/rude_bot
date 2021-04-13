@@ -38,6 +38,7 @@ url_video_list_asado = None
 
 saved_messages_ids = []
 
+
 #Todo:
 #ignore karmaspam from users
 # def check_user_for_karma(user_id: int, dest_user_id: int):
@@ -45,6 +46,7 @@ saved_messages_ids = []
 #         usr_ch = user_karma[user_id]
 #     except:
 #         return True
+
 
 def check_message_is_old(message: Message):
     return (datetime.now(timezone.utc) - message.date).seconds > 300
@@ -148,7 +150,7 @@ def btn_clicked(update, context):
     message_id = update.callback_query.message.message_id
 
     if command == 'refresh_top':
-        replytext, reply_markup = getTop()
+        replytext, reply_markup = get_top()
         replytext += f'\n`Оновлено UTC {datetime.now(timezone.utc)}`'
         query = update.callback_query
         query.edit_message_text(text=replytext, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
@@ -176,7 +178,7 @@ def btn_clicked(update, context):
             context.bot.answer_callback_query(callback_query_id=update.callback_query.id, text='Ще раз і бан :)', show_alert=True)
 
 
-def getTop():
+def get_top():
     replytext = "*Топ-10 карми чату:*\n"
     users_list = [ v for k, v in users.items()]
     sorted_users_list = sorted(users_list, key = lambda i: i['karma'], reverse = True)[:10]
@@ -235,7 +237,8 @@ def autodelete_message(context):
 def read_users():
     if os.path.isfile(database_filename):
         global users
-        users = eval(open(database_filename, 'r', encoding= 'utf-8').read())
+        with open(database_filename, 'r', encoding= 'utf-8') as f:
+            users = eval(f.read())
     else:
         print ("File not exist")
 
@@ -330,7 +333,7 @@ def top_list(update: Update, context: CallbackContext):
     _chat_id = update.message.chat_id
 
     if not last_top or (datetime.now(timezone.utc) - last_top).seconds > 300:
-        reply_text, reply_markup = getTop()
+        reply_text, reply_markup = get_top()
         msg = context.bot.send_message(_chat_id, text=reply_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
         context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
         last_top = datetime.now(timezone.utc)

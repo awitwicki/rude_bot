@@ -1,14 +1,14 @@
 # -*- coding: utf8 -*-
 #/usr/bin/python3.7
 
+import codecs
 from datetime import datetime, timezone
 from os.path import commonpath
-from requests.models import RequestEncodingMixin
-import telegram
+import os
 from telegram.ext import Updater, Filters, MessageHandler, CommandHandler, CallbackQueryHandler, CallbackContext
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode, Message
-import os
-import codecs
+from telegram.update import Update
+
 
 from Config import Config
 from mats_counter import count_mats
@@ -45,6 +45,21 @@ saved_messages_ids = []
 #         usr_ch = user_karma[user_id]
 #     except:
 #         return True
+
+def check_message_is_old(message: Message):
+    return (datetime.now(timezone.utc) - message.date).seconds > 300
+
+def ignore_old_message(func):
+    def wrapper(*args, **kwargs):
+        update, context = args
+        message: Message = update.message
+
+        is_old = check_message_is_old(message)
+
+        if not is_old:
+            func(*args, **kwargs)
+
+    return wrapper
 
 def get_karma(user_id : int):
     user = users[user_id]
@@ -86,7 +101,7 @@ def add_or_update_user(user_id: int, username: str, mats_count: int):
         users[user_id]['karma'] = 0
         users[user_id]['rude_coins'] = 0
 
-    saveToFile(users)
+    save_to_file(users)
 
 
 def increase_karma(dest_user_id: int, message_text: str):
@@ -120,7 +135,7 @@ def increase_karma(dest_user_id: int, message_text: str):
         return
 
     replytext += f'карму користувача {_username} до значення {new_karma}!'
-    saveToFile(users)
+    save_to_file(users)
 
     return replytext
 
@@ -194,7 +209,7 @@ def getTop():
     return replytext, reply_markup
 
 
-def saveToFile(dict):
+def save_to_file(dict):
     f = codecs.open(database_filename, "w", "utf-8")
     f.write(str(users))
     f.close()
@@ -215,7 +230,7 @@ def autodelete_message(context):
             pass
 
 
-def openFile():
+def read_users():
     if os.path.isfile(database_filename):
         global users
         users = eval(open(database_filename, 'r', encoding= 'utf-8').read())
@@ -223,81 +238,35 @@ def openFile():
         print ("File not exist")
 
 
-def on_msg(update, context):
-    global last_top
+def on_msg(update: Update, context: CallbackContext):
     try:
         message: Message = update.message
-        if message is None:
-            return
-
-        if message.text == None:
-            return
-
-        is_old = False
-        if message.date and (datetime.now(timezone.utc) - message.date).seconds > 300:
-            is_old = True
+        is_old = check_message_is_old(message)
 
         user_id = message.from_user.id
         username = message.from_user.name
         _chat_id = message.chat_id
         _message_id = message.message_id
 
-        # chats control, you can define it in telegram bot father
-        # if _chat_id != chat_id and user_id != admin_id:
-            # return
-
         messageText = message.text.lower()
         mats = count_mats(messageText)
         add_or_update_user(user_id, username, mats)
 
-        # karma message
+        # update karma message
         if message.reply_to_message and message.reply_to_message.from_user.id and user_id != message.reply_to_message.from_user.id:
             karma_changed = increase_karma(message.reply_to_message.from_user.id, messageText)
             if karma_changed and not is_old:
                 msg = context.bot.send_message(_chat_id, text=karma_changed)
                 context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id])
 
-        # commands
-        if ("шарий" in messageText or "шарій" in messageText) and not is_old:
-            msg = message.reply_video(quote=True, video=open('sh.MOV', mode='rb'))
-            context.job_queue.run_once(autodelete_message, 30, context=[msg.chat_id, msg.message_id])
-        if ("xiaomi" in messageText or "сяоми" in messageText) and not is_old:
-            msg = context.bot.send_photo(_chat_id, reply_to_message_id=_message_id, photo=open('xiaomi.jpg', 'rb'))
-            context.job_queue.run_once(autodelete_message, 30, context=[msg.chat_id, msg.message_id])
-        if messageText == "гіт" and not is_old:
-            reply_text = 'github.com/awitwicki/rude\\_bot'
-            msg = context.bot.send_message(_chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
-            context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
-        if messageText == "карма" and not is_old:
-            reply_text = get_karma(user_id)
-            msg = context.bot.send_message(_chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
-            context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id])
-        if messageText == "топ" and not is_old:
-            if not last_top or (datetime.now(timezone.utc) - last_top).seconds > 300:
-                reply_text, reply_markup = getTop()
-                msg = context.bot.send_message(_chat_id, text=reply_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
-                context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
-                last_top = datetime.now(timezone.utc)
-        if messageText == "cat" or messageText == "кот" or messageText == "кіт" or messageText == "кицька" and not is_old:
-            cat_url = get_random_cat_image_url()
-            keyboard = [[InlineKeyboardButton("😻", callback_data='like_cat|0')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            msg = context.bot.send_photo(_chat_id, cat_url, reply_markup=reply_markup)
-            context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
-
     except Exception as e:
         print(e)
 
 
-def give(update, context):
+@ignore_old_message
+def give(update: Update, context: CallbackContext):
     try:
         message: Message = update.message
-
-        is_old = False
-        if message.date and (datetime.now(timezone.utc) - message.date).seconds > 300:
-            is_old = True
-
-        if is_old: return
 
         user_id = message.from_user.id
         _chat_id = message.chat_id
@@ -341,6 +310,63 @@ def give(update, context):
             return
     except Exception as e:
         print(e)
+
+
+@ignore_old_message
+def git(update: Update, context: CallbackContext):
+    _chat_id = update.message.chat_id
+
+    reply_text = 'github.com/awitwicki/rude\\_bot'
+    msg = context.bot.send_message(_chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
+    context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
+
+@ignore_old_message
+def top_list(update: Update, context: CallbackContext):
+    global last_top
+
+    _chat_id = update.message.chat_id
+
+    if not last_top or (datetime.now(timezone.utc) - last_top).seconds > 300:
+        reply_text, reply_markup = getTop()
+        msg = context.bot.send_message(_chat_id, text=reply_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
+        context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
+        last_top = datetime.now(timezone.utc)
+
+@ignore_old_message
+def cat(update: Update, context: CallbackContext):
+    _chat_id = update.message.chat_id
+    _message_id = update.message.message_id
+
+    cat_url = get_random_cat_image_url()
+    keyboard = [[InlineKeyboardButton("😻", callback_data='like_cat|0')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    msg = context.bot.send_photo(_chat_id, cat_url, reply_markup=reply_markup)
+    context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
+
+
+@ignore_old_message
+def xiaomi(update: Update, context: CallbackContext):
+    _chat_id = update.message.chat_id
+    _message_id = update.message.message_id
+
+    msg = context.bot.send_photo(_chat_id, reply_to_message_id=_message_id, photo=open('xiaomi.jpg', 'rb'))
+    context.job_queue.run_once(autodelete_message, 30, context=[msg.chat_id, msg.message_id])
+
+
+@ignore_old_message
+def karma(update: Update, context: CallbackContext):
+    user_id = update.message.from_user.id
+    _chat_id = update.message.chat_id
+
+    reply_text = get_karma(user_id)
+    msg = context.bot.send_message(_chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
+    context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id])
+
+
+@ignore_old_message
+def сockman(update: Update, context: CallbackContext):
+    msg = update.message.reply_video(quote=True, video=open('sh.MOV', mode='rb'))
+    context.job_queue.run_once(autodelete_message, 30, context=[msg.chat_id, msg.message_id])
 
 
 def callback_minute(context: CallbackContext):
@@ -390,12 +416,18 @@ def add_group(update, context):
 def main():
     global bot_id
 
-    openFile()
+    read_users()
 
     updater = Updater(bot_token, use_context=True)
 
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('give', give, pass_args=True))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^гіт$', re.IGNORECASE)), git))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^топ$', re.IGNORECASE)), top_list))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^cat$)|(^кот$)|(^кіт$)|(^кицька$)', re.IGNORECASE)), cat))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^xiaomi$)|(^сяоми$)', re.IGNORECASE)), xiaomi))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^карма$', re.IGNORECASE)), karma))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^шарий$)|(^шарій$)', re.IGNORECASE)), сockman))
     dp.add_handler(MessageHandler(Filters.text, on_msg, edited_updates = True))
     dp.add_handler(CallbackQueryHandler(btn_clicked))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, add_group))

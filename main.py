@@ -161,7 +161,16 @@ def btn_clicked(update, context):
         like_text = f'😻 x {likes}'
         keyboard = [[InlineKeyboardButton(like_text, callback_data=f'like_cat|{likes}')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        context.bot.edit_message_reply_markup(chat_id = chat_id, message_id = message_id, reply_markup = reply_markup)
+        context.bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=reply_markup)
+        if likes == 1:
+            saved_messages_ids.append(message_id)
+    elif 'zrada' in command:
+        likes = command.split('|')[1]
+        likes = int(likes) + 1
+        like_text = f'🚓 x {likes}'
+        keyboard = [[InlineKeyboardButton(like_text, callback_data=f'zrada|{likes}')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        context.bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=reply_markup)
         if likes == 1:
             saved_messages_ids.append(message_id)
     else: #new user clicked
@@ -361,6 +370,23 @@ def cat(update: Update, context: CallbackContext):
 
 
 @ignore_old_message
+def zrada(update: Update, context: CallbackContext):
+    if update.message.reply_to_message and update.message.from_user.id != update.message.reply_to_message.from_user.id and update.message.reply_to_message.from_user.id != bot_id:
+        chat_id = update.message.chat_id
+        reply_to_message_id = update.message.reply_to_message.message_id
+
+        user_name = update.message.reply_to_message.from_user.name
+
+        text = f'Ви оголосили зраду {user_name}!\n' \
+            f'{user_name}, якшо на твоє повідомлення ти отримав зраду, ' \
+            'слід задуматися над свою поведінкою, адміни вирішать твою судьбу (тюрма або бан)'
+
+        keyboard = [[InlineKeyboardButton("🚓", callback_data='zrada|0')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        context.bot.send_message(chat_id, text, reply_to_message_id=reply_to_message_id, reply_markup=reply_markup)
+
+
+@ignore_old_message
 def xiaomi(update: Update, context: CallbackContext):
     _chat_id = update.message.chat_id
     _message_id = update.message.message_id
@@ -440,10 +466,11 @@ def main():
     dp.add_handler(CommandHandler('give', give, pass_args=True))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^гіт$', re.IGNORECASE)), git))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^топ$', re.IGNORECASE)), top_list))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^cat$)|(^кот$)|(^кіт$)|(^кицька$)', re.IGNORECASE)), cat))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^xiaomi$)|(^сяоми$)', re.IGNORECASE)), xiaomi))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^cat|кот|кіт|кицька$)', re.IGNORECASE)), cat))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^зрада|/report$)', re.IGNORECASE)), zrada))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^xiaomi|сяоми$)', re.IGNORECASE)), xiaomi))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^карма$', re.IGNORECASE)), karma))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^шарий$)|(^шарій$)', re.IGNORECASE)), сockman))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^шарий|шарій$)', re.IGNORECASE)), сockman))
     dp.add_handler(MessageHandler(Filters.text, on_msg, edited_updates = True))
     dp.add_handler(CallbackQueryHandler(btn_clicked))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, add_group))

@@ -399,8 +399,8 @@ def zrada(update: Update, context: CallbackContext):
         user_name = update.message.reply_to_message.from_user.name
 
         text = f'Ви оголосили зраду {user_name}!\n' \
-            f'{user_name}, якшо на твоє повідомлення ти отримав зраду, ' \
-            'слід задуматися над свою поведінкою, адміни вирішать твою судьбу (тюрма або бан)'
+            f'{user_name}, слід подумати над своєю поведінкою!\n' \
+            'Адміни вирішать твою долю (тюрма або бан)'
 
         keyboard = [[InlineKeyboardButton("🚓", callback_data='zrada|0')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -487,8 +487,8 @@ def main():
     dp.add_handler(CommandHandler('give', give, pass_args=True))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^гіт$', re.IGNORECASE)), git))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^топ$', re.IGNORECASE)), top_list))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^cat|кот|кіт|кицька$)', re.IGNORECASE)), cat))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^гра$)', re.IGNORECASE)), game))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^cat$|^кот$|^кіт$|^кицька$)', re.IGNORECASE)), cat))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^гра$', re.IGNORECASE)), game))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^зрада|/report$)', re.IGNORECASE)), zrada))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^xiaomi|сяоми$)', re.IGNORECASE)), xiaomi))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^карма$', re.IGNORECASE)), karma))

@@ -3,6 +3,7 @@
 
 import codecs
 from datetime import datetime, timezone
+import random
 from os.path import commonpath
 import os
 from telegram.ext import Updater, Filters, MessageHandler, CommandHandler, CallbackQueryHandler, CallbackContext
@@ -144,10 +145,11 @@ def increase_karma(dest_user_id: int, message_text: str):
     return replytext
 
 
-def btn_clicked(update, context):
+def btn_clicked(update: Update, context: CallbackContext):
     command = update.callback_query.data
     chat_id = update.callback_query.message.chat_id
     message_id = update.callback_query.message.message_id
+    callback_query_id = update.callback_query.id
 
     if command == 'refresh_top':
         replytext, reply_markup = get_top()
@@ -173,6 +175,11 @@ def btn_clicked(update, context):
         context.bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=reply_markup)
         if likes == 1:
             saved_messages_ids.append(message_id)
+    elif 'game' in command:
+        clicked_variant = command.split('|')[1]
+        response = "Правильно! :)" if clicked_variant == str(True) else "Не правильно! :("
+        context.bot.answerCallbackQuery(callback_query_id, text=response, show_alert=True)
+
     else: #new user clicked
         user_id = int(command)
         user_clicked_id = update.callback_query.from_user.id
@@ -370,6 +377,20 @@ def cat(update: Update, context: CallbackContext):
 
 
 @ignore_old_message
+def game(update: Update, context: CallbackContext):
+    _chat_id = update.message.chat_id
+    _message_id = update.message.message_id
+
+    cat_url = get_random_cat_image_url()
+    cat_gender = bool(random.getrandbits(1))
+    variant_1, variant_2 = (True, False) if cat_gender else (False, True)
+    keyboard = [[InlineKeyboardButton("Кіт", callback_data=f'game|{variant_1}'), InlineKeyboardButton("Кітесса", callback_data=f'game|{variant_2}')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    msg = context.bot.send_photo(_chat_id, cat_url, caption='Кіт чи кітесса?', reply_markup=reply_markup)
+    context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
+
+
+@ignore_old_message
 def zrada(update: Update, context: CallbackContext):
     if update.message.reply_to_message and update.message.from_user.id != update.message.reply_to_message.from_user.id and update.message.reply_to_message.from_user.id != bot_id:
         chat_id = update.message.chat_id
@@ -467,6 +488,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^гіт$', re.IGNORECASE)), git))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^топ$', re.IGNORECASE)), top_list))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^cat|кот|кіт|кицька$)', re.IGNORECASE)), cat))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^гра$)', re.IGNORECASE)), game))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^зрада|/report$)', re.IGNORECASE)), zrada))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^xiaomi|сяоми$)', re.IGNORECASE)), xiaomi))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^карма$', re.IGNORECASE)), karma))

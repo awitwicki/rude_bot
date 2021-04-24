@@ -465,17 +465,16 @@ def callback_minute(context: CallbackContext):
             context.bot.send_message(chat_id='@rude_chat', text=new_video)
 
 
-def add_group(update, context):
+def add_group(update: Update, context: CallbackContext):
     for member in update.message.new_chat_members:
         if not member.is_bot:
-            gif_msg = update.message.reply_animation(animation=open("welcome.mp4", 'rb'))
-            context.job_queue.run_once(autodelete_message, 60, context=[gif_msg.chat_id, gif_msg.message_id])
+            chat_id = update.message.chat_id
+            message_id = update.message.message_id
 
             keyboard = [[InlineKeyboardButton("Я обіцяю!", callback_data=member.id)]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            # update.message.reply_text(f"{member.username} add group")
             message_text = f"Вітаємо {member.name} у нашому чаті! Ми не чат, а дружня, толерантна IT спільнота, яка поважає думку кожного, приєднавшись, ти згоджуєшся стати чемною частиною спільноти (та полюбити епл). I якшо не важко, пліз тут анкета на 8 питань https://forms.gle/pY6EjJhNRosUbd9P9"
-            msg = update.message.reply_text(message_text, reply_markup=reply_markup)
+            msg = context.bot.sendAnimation(chat_id = chat_id, reply_to_message_id = message_id, animation = open("welcome.mp4", 'rb'), caption = message_text, reply_markup = reply_markup)
             context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
 
 

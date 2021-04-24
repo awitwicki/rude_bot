@@ -468,6 +468,9 @@ def callback_minute(context: CallbackContext):
 def add_group(update, context):
     for member in update.message.new_chat_members:
         if not member.is_bot:
+            gif_msg = update.message.reply_animation(animation=open("welcome.mp4", 'rb'))
+            context.job_queue.run_once(autodelete_message, 60, context=[gif_msg.chat_id, gif_msg.message_id])
+
             keyboard = [[InlineKeyboardButton("Я обіцяю!", callback_data=member.id)]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             # update.message.reply_text(f"{member.username} add group")

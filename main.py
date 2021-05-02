@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 import random
 from os.path import commonpath
 import os
+import hashlib
+
 from telegram.ext import Updater, Filters, MessageHandler, CommandHandler, CallbackQueryHandler, CallbackContext
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode, Message
 from telegram.update import Update
@@ -67,9 +69,16 @@ def ignore_old_message(func):
 
 
 def get_karma(user_id : int):
+    def size(id: int):
+        result = hashlib.md5(id.to_bytes(8, 'big', signed=True)).hexdigest()
+        size = int(result, 16) 
+        size = size % 15 + 7
+        return size
+
     user = users[user_id]
 
-    username = user['username']
+    user_size = size(user_id)
+    user_name = user['username']
     karma = user['karma']
     rude_coins = user['rude_coins']
     total_messages = user['total_messages']
@@ -81,11 +90,12 @@ def get_karma(user_id : int):
         mats_percent *= 100
         mats_percent = round(mats_percent, 2)
 
-    replytext = f"Привіт {username}, твоя карма:\n\n"
+    replytext = f"Привіт {user_name}, твоя карма:\n\n"
     replytext += f"Карма: `{karma}`\n"
     replytext += f"Повідомлень: `{total_messages}`\n"
     replytext += f"Матюків: `{total_mats} ({mats_percent}%)`\n"
-    replytext += f"Rude-коїнів: `{rude_coins}`💰"
+    replytext += f"Rude-коїнів: `{rude_coins}`💰\n"
+    replytext += f"Довжина: `{user_size}` сантиметрів, ну і гігант..."
 
     replytext = replytext.replace('_', '\\_')
 

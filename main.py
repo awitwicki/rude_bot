@@ -341,7 +341,7 @@ def give(update: Update, context: CallbackContext):
                 context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
                 return
             else:
-                msg = context.bot.send_message(_chat_id, reply_to_message_id=_message_id, text=f"/get 1..{user_coins}")
+                msg = context.bot.send_message(_chat_id, reply_to_message_id=_message_id, text=f"/give 1..{user_coins}")
                 context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
                 return
         else:

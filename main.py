@@ -510,7 +510,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^xiaomi|сяоми$)', re.IGNORECASE)), xiaomi))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^карма$', re.IGNORECASE)), karma))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^шарий|шарій$)', re.IGNORECASE)), сockman))
-    dp.add_handler(MessageHandler(Filters.text, on_msg, edited_updates = True))
+    dp.add_handler(MessageHandler(Filters.text | Filters.sticker, on_msg, edited_updates = True))
     dp.add_handler(CallbackQueryHandler(btn_clicked))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, add_group))
 

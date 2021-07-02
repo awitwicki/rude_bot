@@ -213,7 +213,7 @@ def on_msg(update, context):
         if message is None:
             return
 
-        if message.text == None:
+        if message.text is None and message.sticker is None:
             return
 
         is_old = False
@@ -229,7 +229,11 @@ def on_msg(update, context):
         # if _chat_id != chat_id and user_id != admin_id:
             # return
 
-        messageText = message.text.lower()
+        messageText = ""
+        if message.text is not None:
+            messageText = message.text.lower()
+        elif message.sticker is not None:
+            messageText = message.sticker.emoji
 
         # karma message
         if message.reply_to_message and message.reply_to_message.from_user.id and user_id != message.reply_to_message.from_user.id:

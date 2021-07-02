@@ -288,7 +288,12 @@ def on_msg(update: Update, context: CallbackContext):
         _chat_id = message.chat_id
         _message_id = message.message_id
 
-        messageText = message.text.lower()
+        messageText = ""
+        if message.sticker is not None:
+            messageText = message.sticker.emoji
+        else:
+            messageText = message.text.lower()
+
         mats = count_mats(messageText)
         add_or_update_user(user_id, username, mats)
 

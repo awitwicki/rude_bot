@@ -288,7 +288,12 @@ def on_msg(update: Update, context: CallbackContext):
         _chat_id = message.chat_id
         _message_id = message.message_id
 
-        messageText = message.text.lower()
+        messageText = ""
+        if message.sticker is not None:
+            messageText = message.sticker.emoji
+        else:
+            messageText = message.text.lower()
+
         mats = count_mats(messageText)
         add_or_update_user(user_id, username, mats)
 
@@ -505,7 +510,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^xiaomi|сяоми$)', re.IGNORECASE)), xiaomi))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^карма$', re.IGNORECASE)), karma))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^шарий|шарій$)', re.IGNORECASE)), сockman))
-    dp.add_handler(MessageHandler(Filters.text, on_msg, edited_updates = True))
+    dp.add_handler(MessageHandler(Filters.text | Filters.sticker, on_msg, edited_updates = True))
     dp.add_handler(CallbackQueryHandler(btn_clicked))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, add_group))
 

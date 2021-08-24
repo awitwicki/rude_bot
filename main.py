@@ -447,6 +447,14 @@ def сockman(update: Update, context: CallbackContext):
     context.job_queue.run_once(autodelete_message, 30, context=[msg.chat_id, msg.message_id])
 
 
+@ignore_old_message
+def tesla(update: Update, context: CallbackContext):
+    _chat_id = update.message.chat_id
+    reply_text = "Днів без згадування тесли: `0`\n🚗🚗🚗"
+    msg = context.bot.send_message(_chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
+    context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id])
+
+
 def callback_minute(context: CallbackContext):
     global url_video_list_dima
     global url_video_list_asado
@@ -479,7 +487,6 @@ def callback_minute(context: CallbackContext):
         for new_video in new_videos_asado:
             context.bot.send_message(chat_id='@rude_chat', text=new_video)
 
-
 def add_group(update: Update, context: CallbackContext):
     for member in update.message.new_chat_members:
         if not member.is_bot:
@@ -510,6 +517,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^xiaomi|сяоми$)', re.IGNORECASE)), xiaomi))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^карма$', re.IGNORECASE)), karma))
     dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^шарий|шарій$)', re.IGNORECASE)), сockman))
+    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'tesl|тесл', re.IGNORECASE)), tesla))
     dp.add_handler(MessageHandler(Filters.text | Filters.sticker, on_msg, edited_updates = True))
     dp.add_handler(CallbackQueryHandler(btn_clicked))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, add_group))
@@ -520,7 +528,8 @@ def main():
 
     updater.start_polling()
     bot_id = updater.bot.id
-    print("Bot is started.")
+    bot_name = updater.bot.name
+    print(f"{bot_name} is started.")
     updater.idle()
 
 

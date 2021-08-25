@@ -284,7 +284,7 @@ async def add_group(message: types.Message):
 
 
     message_text = f"Вітаємо {message.from_user.mention} у нашому чаті! Ми не чат, а дружня, толерантна IT спільнота, яка поважає думку кожного, приєднавшись, ти згоджуєшся стати чемною частиною спільноти (та полюбити епл). I якшо не важко, пліз тут анкета на 8 питань https://forms.gle/pY6EjJhNRosUbd9P9"
-    msg = await bot.send_animation(chat_id = message.chat.id, reply_to_message_id = message.message_id, animation = open("welcome.mp4", 'rb'), caption = message_text, reply_markup = keyboard)
+    msg = await bot.send_animation(chat_id = message.chat.id, reply_to_message_id = message.message_id, animation = open("media/welcome.mp4", 'rb'), caption = message_text, reply_markup = keyboard)
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout * 5)
 
 
@@ -355,21 +355,21 @@ async def zrada(message: types.Message):
 @dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='xiaomi|сяоми|ксиоми|ксяоми')
 @update_user
 async def xiaomi(message: types.Message):
-    msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('xiaomi.jpg', 'rb'))
+    msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('media/xiaomi.jpg', 'rb'))
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
 @dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='iphone|айфон|іфон|епл|еппл|apple|ipad|айпад|macbook|макбук')
 @update_user
 async def iphone(message: types.Message):
-    msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('iphon.jpg', 'rb'))
+    msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('media/iphon.jpg', 'rb'))
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
 @dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='шарий|шарій')
 @update_user
 async def сockman(message: types.Message):
-    msg = await bot.send_video(message.chat.id, video=open('sh.MOV', mode='rb'))
+    msg = await bot.send_video(message.chat.id, video=open('media/sh.MOV', mode='rb'))
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 

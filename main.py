@@ -1,71 +1,94 @@
 # -*- coding: utf8 -*-
 #/usr/bin/python3.7
 
+import asyncio
 import codecs
 from datetime import datetime, timezone
-import random
-from os.path import commonpath
-import os
 import hashlib
+import os
+import random
 
-from telegram.ext import Updater, Filters, MessageHandler, CommandHandler, CallbackQueryHandler, CallbackContext
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode, Message
-from telegram.update import Update
+from aiogram import Bot, types, executor
+from aiogram.dispatcher import Dispatcher
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
+from aiogram.types.message import Message
+from aiogram.dispatcher.filters import Filter
+from aiogram.types import ChatMemberUpdated
 
-
-from Config import Config
 from mats_counter import count_mats
-from youtube_parser import *
 from helper import *
 
-conf = Config('config.ini', ['telegram_token', 'destruction_timeout', 'database_filename'])
+bot_token = os.getenv('RUDEBOT_TELEGRAM_TOKEN')
+flood_timeout = int(os.getenv('RUDEBOT_FLOOD_TIMEOUT', '10'))
+destruction_timeout = int(os.getenv('RUDEBOT_DELETE_TIMEOUT', '30'))
+database_filename = (os.getenv('RUDEBOT_DATABASE_FILENAME', 'db.json'))
+whitelist_chats = os.getenv('RUDEBOT_ALLOWED_CHATS', '')
 
-# https://github.com/python-telegram-bot/python-telegram-bot/wiki/Transition-guide-to-Version-12.0
-bot_token = conf.Data['telegram_token']
+whitelist_chats: list = None if whitelist_chats == '' else [int(chat) for chat in whitelist_chats.split(',')]
 
-#bot will delete his owm nessage after defined time
-destruction_timeout = int(conf.Data['destruction_timeout'])
-
-database_filename = conf.Data['database_filename']
 
 increase_words = ['+', 'спасибі', 'спс', 'дяки', 'дякс', 'благодарочка', 'вдячний', 'спасибо', 'дякую', 'благодарю', '👍', '😁', '😂', '😄', '😆', 'хаха', 'ахах']
 decrease_words = ['-', '👎']
 
 users = {}
 user_karma = {}
-
-bot_id = None
+# chat_messages = {}
 last_top = None
-url_video_list_dima = None
-url_video_list_asado = None
 
-saved_messages_ids = []
-
-
-#Todo:
-#ignore karmaspam from users
-# def check_user_for_karma(user_id: int, dest_user_id: int):
-#     try:
-#         usr_ch = user_karma[user_id]
-#     except:
-#         return True
+bot: Bot = Bot(token=bot_token)
+dp: Dispatcher = Dispatcher(bot)
 
 
-def check_message_is_old(message: Message):
-    return (datetime.now(timezone.utc) - message.date).seconds > 300
+# def is_flood_message(message: types.Message):
+#     chat_id: int = message.chat.id
+#     chat_last_msg: Message = chat_messages.get(chat_id)
+#     if not chat_last_msg:
+#         chat_messages[chat_id] = message.date
+#         return False
+#     else:
+#         is_flood = (message.date - chat_last_msg).seconds < flood_timeout
+#         chat_messages[chat_id] = message.date
+#         return is_flood
+
+class ignore_old_messages(Filter):
+    async def check(self, message: types.Message):
+        return (datetime.now() - message.date).seconds < destruction_timeout
+
+class white_list_chats(Filter):
+    async def check(self, message: types.Message):
+        if whitelist_chats:
+            return message.chat.id in whitelist_chats
+        return True
 
 
-def ignore_old_message(func):
-    def wrapper(*args, **kwargs):
-        update, context = args
-        message: Message = update.message
+def update_user(func):
+    async def wrapper(message: Message):
+        user_id = message.from_user.id
+        username = message.from_user.mention
+        messageText = message.text.lower()
 
-        is_old = check_message_is_old(message)
-
-        if not is_old:
-            func(*args, **kwargs)
-
+        mats = count_mats(messageText)
+        add_or_update_user(user_id, username, mats)
+        return await func(message)
     return wrapper
+
+
+def add_or_update_user(user_id: int, username: str, mats_count: int):
+    try:
+        users[user_id]['total_messages'] += 1
+        users[user_id]['total_mats'] += mats_count
+        if not users[user_id].get('rude_coins'):
+            users[user_id]['rude_coins'] = 0
+    except:
+        users[user_id] = {}
+        users[user_id]['total_messages'] = 1
+        users[user_id]['total_mats'] = mats_count
+        users[user_id]['username'] = username
+        users[user_id]['karma'] = 0
+        users[user_id]['rude_coins'] = 0
+        # users[user_id]['warns'] = 0
+
+    save_to_file(users)
 
 
 def get_karma(user_id : int):
@@ -74,6 +97,13 @@ def get_karma(user_id : int):
         size = int(result, 16) 
         size = size % 15 + 7
         return size
+
+    def orientation(id: int):
+        result = hashlib.md5(id.to_bytes(8, 'big', signed=True)).hexdigest()
+        _orientation = int(result, 16) 
+        _orientation_1 = _orientation % 1
+        _orientation_2 = _orientation % 5 % 1
+        return _orientation_1, _orientation_2
 
     user = users[user_id]
 
@@ -95,32 +125,21 @@ def get_karma(user_id : int):
     replytext += f"Повідомлень: `{total_messages}`\n"
     replytext += f"Матюків: `{total_mats} ({mats_percent}%)`\n"
     replytext += f"Rude-коїнів: `{rude_coins}`💰\n"
-    replytext += f"Довжина: `{user_size}` сантиметрів, ну і гігант..."
+    replytext += f"Довжина: `{user_size}` сантиметрів, ну і гігант...\n"
+
+    user_values = orientation(user_id)
+    orientation_type = ['Латентний', ''][user_values[0]]
+    orientation_name = ['Android', 'Apple'][user_values[0]]
+    replytext += f"Орієнтація: `{orientation_type} {orientation_name}` користувач"
 
     replytext = replytext.replace('_', '\\_')
 
     return replytext
 
 
-def add_or_update_user(user_id: int, username: str, mats_count: int):
-    try:
-        users[user_id]['total_messages'] += 1
-        users[user_id]['total_mats'] += mats_count
-        if not users[user_id].get('rude_coins'):
-            users[user_id]['rude_coins'] = 0
-    except:
-        users[user_id] = {}
-        users[user_id]['total_messages'] = 1
-        users[user_id]['total_mats'] = mats_count
-        users[user_id]['username'] = username
-        users[user_id]['karma'] = 0
-        users[user_id]['rude_coins'] = 0
-
-    save_to_file(users)
-
-
 def increase_karma(dest_user_id: int, message_text: str):
-    if dest_user_id == bot_id:
+    global bot
+    if dest_user_id == bot.id:
         if message_text in increase_words :
             return "дякую"
 
@@ -149,59 +168,10 @@ def increase_karma(dest_user_id: int, message_text: str):
     if not is_changed:
         return
 
-    replytext += f'карму користувача {_username} до значення {new_karma}!'
+    replytext += f'карму користувача {_username}\nДо значення {new_karma}!'
     save_to_file(users)
 
     return replytext
-
-
-def btn_clicked(update: Update, context: CallbackContext):
-    command = update.callback_query.data
-    chat_id = update.callback_query.message.chat_id
-    message_id = update.callback_query.message.message_id
-    callback_query_id = update.callback_query.id
-
-    if command == 'refresh_top':
-        replytext, reply_markup = get_top()
-        replytext += f'\n`Оновлено UTC {datetime.now(timezone.utc)}`'
-        query = update.callback_query
-        query.edit_message_text(text=replytext, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
-        return
-    elif 'like_cat' in command:
-        likes = command.split('|')[1]
-        likes = int(likes) + 1
-        like_text = f'😻 x {likes}'
-        keyboard = [[InlineKeyboardButton(like_text, callback_data=f'like_cat|{likes}')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        context.bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=reply_markup)
-        if likes == 1:
-            saved_messages_ids.append(message_id)
-    elif 'zrada' in command:
-        likes = command.split('|')[1]
-        likes = int(likes) + 1
-        like_text = f'🚓 x {likes}'
-        keyboard = [[InlineKeyboardButton(like_text, callback_data=f'zrada|{likes}')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        context.bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=reply_markup)
-        if likes == 1:
-            saved_messages_ids.append(message_id)
-    elif 'game' in command:
-        clicked_variant = command.split('|')[1]
-        response = "Правильно! :)" if clicked_variant == str(True) else "Не правильно! :("
-        context.bot.answerCallbackQuery(callback_query_id, text=response, show_alert=True)
-
-    else: #new user clicked
-        user_id = int(command)
-        user_clicked_id = update.callback_query.from_user.id
-
-        if user_id == user_clicked_id:
-            try:
-                context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-
-            except:
-                pass
-        else:
-            context.bot.answer_callback_query(callback_query_id=update.callback_query.id, text='Ще раз і бан :)', show_alert=True)
 
 
 def get_top():
@@ -243,9 +213,9 @@ def get_top():
 
     replytext = replytext.replace('@', '')
 
-    keyboard = [[InlineKeyboardButton("Оновити", callback_data='refresh_top')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    return replytext, reply_markup
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton(text="Оновити", callback_data="refresh_top"))
+    return replytext, keyboard
 
 
 def save_to_file(dict):
@@ -254,19 +224,9 @@ def save_to_file(dict):
     f.close()
 
 
-def autodelete_message(context):
-    chat_id = context.job.context[0]
-    message_id = context.job.context[1]
-    if message_id in saved_messages_ids:
-        saved_messages_ids.remove(message_id)
-        return
-
-    context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-    if len(context.job.context) > 2:
-        try:
-            context.bot.delete_message(chat_id=chat_id, message_id=context.job.context[2])
-        except:
-            pass
+async def autodelete_message(chat_id: int, message_id: int, seconds=0):
+    await asyncio.sleep(seconds)
+    await bot.delete_message(chat_id=chat_id, message_id=message_id)
 
 
 def read_users():
@@ -278,260 +238,180 @@ def read_users():
         print ("File not exist")
 
 
-def on_msg(update: Update, context: CallbackContext):
-    try:
-        message: Message = update.message
-        is_old = check_message_is_old(message)
-
-        user_id = message.from_user.id
-        username = message.from_user.name
-        _chat_id = message.chat_id
-        _message_id = message.message_id
-
-        messageText = ""
-        if message.sticker is not None:
-            messageText = message.sticker.emoji
-        else:
-            messageText = message.text.lower()
-
-        mats = count_mats(messageText)
-        add_or_update_user(user_id, username, mats)
-
-        # update karma message
-        if message.reply_to_message and message.reply_to_message.from_user.id and user_id != message.reply_to_message.from_user.id:
-            karma_changed = increase_karma(message.reply_to_message.from_user.id, messageText)
-            if karma_changed and not is_old:
-                msg = context.bot.send_message(_chat_id, text=karma_changed)
-                context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id])
-
-    except Exception as e:
-        print(e)
+@dp.callback_query_handler(lambda call: call.data == "refresh_top")
+async def refresh_top(call: types.CallbackQuery):
+    replytext, reply_markup = get_top()
+    replytext += f'\n`Оновлено UTC {datetime.now(timezone.utc)}`'
+    await bot.edit_message_text(text=replytext, chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
 
 
-@ignore_old_message
-def give(update: Update, context: CallbackContext):
-    try:
-        message: Message = update.message
+@dp.callback_query_handler(lambda call: "counter" in call.data)
+async def counter(call: types.CallbackQuery):
+    like_text = call.data.split('|')[1]
+    like_count = call.data.split('|')[2]
+    like_count = int(like_count) + 1
+    like_message_text = f'{like_text} x {like_count}'
+    like_data = f'counter|{like_text}|{like_count}'
 
-        user_id = message.from_user.id
-        _chat_id = message.chat_id
-        _message_id = message.message_id
-
-        if message.reply_to_message and user_id != message.reply_to_message.from_user.id:
-            username = message.reply_to_message.from_user.name
-
-            if not 'rude_coins' in users[message.reply_to_message.from_user.id]:
-                users[message.reply_to_message.from_user.id]['rude_coins'] = 100
-
-            #get user coins
-            user_coins = users[user_id]['rude_coins']
-
-            #parse coins amount
-            if context.args:
-                amount = int(context.args[0])
-                if amount > user_coins:
-                    msg = context.bot.send_message(_chat_id, reply_to_message_id=_message_id, text=f"Недостатньо коїнів, вы маєте тільки {user_coins}💰")
-                    context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
-                    return
-
-                if amount <= 0:
-                    msg = context.bot.send_message(_chat_id, reply_to_message_id=_message_id, text=f"Самий умний?")
-                    context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
-                    return
-
-                users[message.reply_to_message.from_user.id]['rude_coins'] +=amount
-                users[user_id]['rude_coins'] -= amount
-
-                msg = context.bot.send_message(_chat_id, reply_to_message_id=_message_id, text=f"Ви переказали {username} {amount} коїнів 💰")
-                context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
-                return
-            else:
-                msg = context.bot.send_message(_chat_id, reply_to_message_id=_message_id, text=f"/give 1..{user_coins}")
-                context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
-                return
-        else:
-            msg = context.bot.send_message(_chat_id, reply_to_message_id=_message_id, text=f'Щоб поділитися коїнами, вы маєте зробити реплай на повідомлення особи отримувача, текст має бути таким:\n\n"/give 25" (переказ 25 коїнів)', parse_mode=ParseMode.MARKDOWN)
-            context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
-            return
-    except Exception as e:
-        print(e)
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton(text=like_message_text, callback_data=like_data))
+    await bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=keyboard)
 
 
-@ignore_old_message
-def git(update: Update, context: CallbackContext):
-    _chat_id = update.message.chat_id
-
-    reply_text = 'github.com/awitwicki/rude\\_bot'
-    msg = context.bot.send_message(_chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
-    context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
+@dp.callback_query_handler(lambda call: "print" in call.data)
+async def print(call: types.CallbackQuery):
+    print_value = call.data.split('|')[1]
+    await call.answer(print_value, show_alert=True)
 
 
-@ignore_old_message
-def top_list(update: Update, context: CallbackContext):
+@dp.callback_query_handler(lambda call: "new_user" in call.data)
+async def new_user(call: types.CallbackQuery):
+    user_id = call.data.split('|')[1]
+    user_id = int(user_id)
+    user_clicked_id = call.from_user.id
+
+    if user_id == user_clicked_id:
+        await call.answer("Дуже раді вас бачити! Будь ласка, ознайомтеся з Конституцією чату в закріплених повідомленнях.", show_alert=True)
+        await bot.delete_message(message_id=call.message.message_id, chat_id=call.message.chat.id)
+    else:
+        await call.answer("Ще раз і бан :)", show_alert=True)
+
+
+@dp.message_handler(white_list_chats(), ignore_old_messages(), content_types=['new_chat_members'])
+async def add_group(message: types.Message):
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton(text="Я обіцяю!", callback_data=f'new_user|{message.from_user.id}'))
+
+
+    message_text = f"Вітаємо {message.from_user.mention} у нашому чаті! Ми не чат, а дружня, толерантна IT спільнота, яка поважає думку кожного, приєднавшись, ти згоджуєшся стати чемною частиною спільноти (та полюбити епл). I якшо не важко, пліз тут анкета на 8 питань https://forms.gle/pY6EjJhNRosUbd9P9"
+    msg = await bot.send_animation(chat_id = message.chat.id, reply_to_message_id = message.message_id, animation = open("welcome.mp4", 'rb'), caption = message_text, reply_markup = keyboard)
+    await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout * 5)
+
+
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='(^карма$|^karma$)')
+@update_user
+async def on_msg_karma(message: types.Message):
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+
+    reply_text = get_karma(user_id)
+    msg = await bot.send_message(chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
+    await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
+
+
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='(^топ|top$)')
+@update_user
+async def top_list(message: types.Message):
+    chat_id = message.chat.id
+
     global last_top
-
-    _chat_id = update.message.chat_id
-
-    if not last_top or (datetime.now(timezone.utc) - last_top).seconds > 300:
-        reply_text, reply_markup = get_top()
-        msg = context.bot.send_message(_chat_id, text=reply_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
-        context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
+    top_list_destruction_timeout = 300
+    if not last_top or (datetime.now(timezone.utc) - last_top).seconds > top_list_destruction_timeout:
+        reply_text, inline_kb = get_top()
+        msg: types.Message = await bot.send_message(chat_id, text=reply_text, reply_markup=inline_kb, parse_mode=ParseMode.MARKDOWN)
         last_top = datetime.now(timezone.utc)
+        await autodelete_message(msg.chat.id, msg.message_id, top_list_destruction_timeout)
 
 
-@ignore_old_message
-def cat(update: Update, context: CallbackContext):
-    _chat_id = update.message.chat_id
-    _message_id = update.message.message_id
-
-    cat_url = get_random_cat_image_url()
-    keyboard = [[InlineKeyboardButton("😻", callback_data='like_cat|0')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    msg = context.bot.send_photo(_chat_id, cat_url, reply_markup=reply_markup)
-    context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='(^git|гіт$)')
+@update_user
+async def git(message: types.Message):
+    reply_text = 'github.com/awitwicki/rude_bot'
+    msg = await bot.send_message(message.chat.id, reply_to_message_id=message.message_id, text=reply_text, disable_web_page_preview=True)
+    await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
-@ignore_old_message
-def game(update: Update, context: CallbackContext):
-    _chat_id = update.message.chat_id
-    _message_id = update.message.message_id
-
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='cat|кот|кіт|кицька')
+@update_user
+async def cat(message: types.Message):
     cat_url = get_random_cat_image_url()
     cat_gender = bool(random.getrandbits(1))
-    variant_1, variant_2 = (True, False) if cat_gender else (False, True)
-    keyboard = [[InlineKeyboardButton("Кіт", callback_data=f'game|{variant_1}'), InlineKeyboardButton("Кітесса", callback_data=f'game|{variant_2}')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    msg = context.bot.send_photo(_chat_id, cat_url, caption='Кіт чи кітесса?', reply_markup=reply_markup)
-    context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id, _message_id])
+    variant_1, variant_2 = ("Правильно", "Не правильно :(") if cat_gender else ("Не правильно :(", "Правильно")
+
+    keyboard = types.InlineKeyboardMarkup()
+    # keyboard.add(types.InlineKeyboardButton(text="😻", callback_data="counter|😻|0"))
+    keyboard.add(types.InlineKeyboardButton(text="Кіт", callback_data=f'print|{variant_1}'))
+    keyboard.add(types.InlineKeyboardButton(text="Кітесса", callback_data=f'print|{variant_2}'))
+    await bot.send_photo(chat_id=message.chat.id, reply_to_message_id=message.message_id, caption='Кіт чи кітесса?', photo=cat_url, reply_markup=keyboard)
 
 
-@ignore_old_message
-def zrada(update: Update, context: CallbackContext):
-    if update.message.reply_to_message and update.message.from_user.id != update.message.reply_to_message.from_user.id and update.message.reply_to_message.from_user.id != bot_id:
-        chat_id = update.message.chat_id
-        reply_to_message_id = update.message.reply_to_message.message_id
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='(^зрада$|^/report$)')
+@update_user
+async def zrada(message: types.Message):
+    global bot
+    if message.reply_to_message and message.from_user.id != message.reply_to_message.from_user.id and message.reply_to_message.from_user.id != bot.id:
+        user_name = message.reply_to_message.from_user.mention
 
-        user_name = update.message.reply_to_message.from_user.name
-
-        text = f'Ви оголосили зраду {user_name}!\n' \
+        text = f'Ви оголосили зраду!\n' \
             f'{user_name}, слід подумати над своєю поведінкою!\n' \
             'Адміни вирішать твою долю (тюрма або бан)'
 
-        keyboard = [[InlineKeyboardButton("🚓", callback_data='zrada|0')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        context.bot.send_message(chat_id, text, reply_to_message_id=reply_to_message_id, reply_markup=reply_markup)
+        keyboard = types.InlineKeyboardMarkup()
+        keyboard.add(types.InlineKeyboardButton(text="🚓", callback_data=f'counter|🚓|0'))
+
+        await bot.send_message(message.chat.id, text, reply_markup=keyboard)
 
 
-@ignore_old_message
-def xiaomi(update: Update, context: CallbackContext):
-    _chat_id = update.message.chat_id
-    _message_id = update.message.message_id
-
-    msg = context.bot.send_photo(_chat_id, reply_to_message_id=_message_id, photo=open('xiaomi.jpg', 'rb'))
-    context.job_queue.run_once(autodelete_message, 30, context=[msg.chat_id, msg.message_id])
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='xiaomi|сяоми|ксиоми|ксяоми')
+@update_user
+async def xiaomi(message: types.Message):
+    msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('xiaomi.jpg', 'rb'))
+    await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
-@ignore_old_message
-def karma(update: Update, context: CallbackContext):
-    user_id = update.message.from_user.id
-    _chat_id = update.message.chat_id
-
-    reply_text = get_karma(user_id)
-    msg = context.bot.send_message(_chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
-    context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id])
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='iphone|айфон|іфон|епл|еппл|apple|ipad|айпад|macbook|макбук')
+@update_user
+async def iphone(message: types.Message):
+    msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('iphon.jpg', 'rb'))
+    await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
-@ignore_old_message
-def сockman(update: Update, context: CallbackContext):
-    msg = update.message.reply_video(quote=True, video=open('sh.MOV', mode='rb'))
-    context.job_queue.run_once(autodelete_message, 30, context=[msg.chat_id, msg.message_id])
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='шарий|шарій')
+@update_user
+async def сockman(message: types.Message):
+    msg = await bot.send_video(message.chat.id, video=open('sh.MOV', mode='rb'))
+    await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
-@ignore_old_message
-def tesla(update: Update, context: CallbackContext):
-    _chat_id = update.message.chat_id
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='tesl|тесл')
+@update_user
+async def tesla(message: types.Message):
     reply_text = "Днів без згадування тесли: `0`\n🚗🚗🚗"
-    msg = context.bot.send_message(_chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
-    context.job_queue.run_once(autodelete_message, destruction_timeout, context=[msg.chat_id, msg.message_id])
+    msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
+    await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
-def callback_minute(context: CallbackContext):
-    global url_video_list_dima
-    global url_video_list_asado
+@dp.message_handler(white_list_chats(), ignore_old_messages())
+@update_user
+async def on_msg(message: types.Message):
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+    message_id = message.message_id
 
-    new_video_list_dima = get_urls('https://www.youtube.com/feeds/videos.xml?channel_id=UC20M3T-H-Pv0FPOEfeQJtNQ')
-    new_video_list_asado = get_urls('https://www.youtube.com/feeds/videos.xml?channel_id=UCfkPlh5dfjbw8hc1s-yJQdw')
+    messageText = ""
+    if message.sticker is not None:
+        messageText = message.sticker.emoji
+    else:
+        messageText = message.text.lower()
 
-    # get new url list
-    if url_video_list_dima is None:
-        url_video_list_dima = new_video_list_dima
-        return
+    # karma message
+    if message.reply_to_message and message.reply_to_message.from_user.id and user_id != message.reply_to_message.from_user.id:
+        # check user on karmaspam
+        # if not is_flood_message(message):
+        karma_changed = increase_karma(message.reply_to_message.from_user.id, messageText)
+        if karma_changed:
+            msg = await bot.send_message(chat_id, text=karma_changed, reply_to_message_id=message_id)
+            await autodelete_message(msg.chat.id, message_id=msg.message_id, seconds=destruction_timeout)
 
-    if url_video_list_asado is None:
-        url_video_list_asado = new_video_list_asado
-        return
-
-    # look for new videos
-    new_videos_dima = get_new_urls(url_video_list_dima, new_video_list_dima)
-    new_videos_asado = get_new_urls(url_video_list_asado, new_video_list_asado)
-
-    if len(new_videos_dima) > 0:
-        url_video_list_dima = new_video_list_dima
-
-        for new_video in new_videos_dima:
-            context.bot.send_message(chat_id='@rude_chat', text=new_video)
-
-    if len(new_videos_asado) > 0:
-        url_video_list_asado = new_video_list_asado
-
-        for new_video in new_videos_asado:
-            context.bot.send_message(chat_id='@rude_chat', text=new_video)
-
-def add_group(update: Update, context: CallbackContext):
-    for member in update.message.new_chat_members:
-        if not member.is_bot:
-            chat_id = update.message.chat_id
-            message_id = update.message.message_id
-
-            keyboard = [[InlineKeyboardButton("Я обіцяю!", callback_data=member.id)]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            message_text = f"Вітаємо {member.name} у нашому чаті! Ми не чат, а дружня, толерантна IT спільнота, яка поважає думку кожного, приєднавшись, ти згоджуєшся стати чемною частиною спільноти (та полюбити епл). I якшо не важко, пліз тут анкета на 8 питань https://forms.gle/pY6EjJhNRosUbd9P9"
-            msg = context.bot.sendAnimation(chat_id = chat_id, reply_to_message_id = message_id, animation = open("welcome.mp4", 'rb'), caption = message_text, reply_markup = reply_markup)
-            context.job_queue.run_once(autodelete_message, 300, context=[msg.chat_id, msg.message_id])
-
-
-def main():
-    global bot_id
-
-    read_users()
-
-    updater = Updater(bot_token, use_context=True)
-
-    dp = updater.dispatcher
-    dp.add_handler(CommandHandler('give', give, pass_args=True))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^гіт$', re.IGNORECASE)), git))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^топ$', re.IGNORECASE)), top_list))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^cat$|^кот$|^кіт$|^кицька$)', re.IGNORECASE)), cat))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^гра$', re.IGNORECASE)), game))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^зрада|/report$)', re.IGNORECASE)), zrada))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^xiaomi|сяоми$)', re.IGNORECASE)), xiaomi))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'^карма$', re.IGNORECASE)), karma))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'(^шарий|шарій$)', re.IGNORECASE)), сockman))
-    dp.add_handler(MessageHandler(Filters.regex(re.compile(r'tesl|тесл', re.IGNORECASE)), tesla))
-    dp.add_handler(MessageHandler(Filters.text | Filters.sticker, on_msg, edited_updates = True))
-    dp.add_handler(CallbackQueryHandler(btn_clicked))
-    dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, add_group))
-
-    # new videos
-    j = updater.job_queue
-    job_minute = j.run_repeating(callback_minute, interval=60, first=0)
-
-    updater.start_polling()
-    bot_id = updater.bot.id
-    bot_name = updater.bot.name
-    print(f"{bot_name} is started.")
-    updater.idle()
+    #ru filter
+    if '.ru' in messageText:
+        reply_mesage = "*Російська пропаганда не може вважатися пруфом!*\n\n"
+        msg = await bot.send_message(chat_id, text=reply_mesage, reply_to_message_id=message_id)
+        await autodelete_message(msg.chat.id, message_id=msg.message_id, seconds=destruction_timeout)
 
 
 if __name__ == '__main__':
-    main()
+    read_users()
+    dp.bind_filter(white_list_chats)
+    dp.bind_filter(ignore_old_messages)
+    executor.start_polling(dp)

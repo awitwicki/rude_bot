@@ -1,5 +1,5 @@
 # rude_bot
-Karmabot for telegram chat [@rude_chat]('https://t.me/rude_chat')
+Karmabot for telegram chat [@rude_chat](https://t.me/rude_chat)
 
 ## Install
 

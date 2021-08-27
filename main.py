@@ -21,7 +21,7 @@ from helper import *
 bot_token = os.getenv('RUDEBOT_TELEGRAM_TOKEN')
 flood_timeout = int(os.getenv('RUDEBOT_FLOOD_TIMEOUT', '10'))
 destruction_timeout = int(os.getenv('RUDEBOT_DELETE_TIMEOUT', '30'))
-database_filename = (os.getenv('RUDEBOT_DATABASE_FILENAME', 'db.json'))
+database_filename = 'data/' + (os.getenv('RUDEBOT_DATABASE_FILENAME', 'db.json'))
 whitelist_chats = os.getenv('RUDEBOT_ALLOWED_CHATS', '')
 
 whitelist_chats: list = None if whitelist_chats == '' else [int(chat) for chat in whitelist_chats.split(',')]
@@ -93,16 +93,13 @@ def add_or_update_user(user_id: int, username: str, mats_count: int):
 
 def get_karma(user_id : int):
     def size(id: int):
-        result = hashlib.md5(id.to_bytes(8, 'big', signed=True)).hexdigest()
-        size = int(result, 16) 
-        size = size % 15 + 7
-        return size
+        return (id+6) % 15 + 7
 
     def orientation(id: int):
         result = hashlib.md5(id.to_bytes(8, 'big', signed=True)).hexdigest()
         _orientation = int(result, 16) 
-        _orientation_1 = _orientation % 1
-        _orientation_2 = _orientation % 5 % 1
+        _orientation_1 = _orientation % 3
+        _orientation_2 = _orientation % 5 % 2
         return _orientation_1, _orientation_2
 
     user = users[user_id]
@@ -128,11 +125,9 @@ def get_karma(user_id : int):
     replytext += f"Довжина: `{user_size}` сантиметрів, ну і гігант...\n"
 
     user_values = orientation(user_id)
-    orientation_type = ['Латентний', ''][user_values[0]]
+    orientation_type = ['Латентний', 'Гендерфлюід', ''][user_values[0]]
     orientation_name = ['Android', 'Apple'][user_values[0]]
     replytext += f"Орієнтація: `{orientation_type} {orientation_name}` користувач"
-
-    replytext = replytext.replace('_', '\\_')
 
     return replytext
 
@@ -235,7 +230,7 @@ def read_users():
         with open(database_filename, 'r', encoding= 'utf-8') as f:
             users = eval(f.read())
     else:
-        print ("File not exist")
+        print("File not exist")
 
 
 @dp.callback_query_handler(lambda call: call.data == "refresh_top")
@@ -284,7 +279,7 @@ async def add_group(message: types.Message):
 
 
     message_text = f"Вітаємо {message.from_user.mention} у нашому чаті! Ми не чат, а дружня, толерантна IT спільнота, яка поважає думку кожного, приєднавшись, ти згоджуєшся стати чемною частиною спільноти (та полюбити епл). I якшо не важко, пліз тут анкета на 8 питань https://forms.gle/pY6EjJhNRosUbd9P9"
-    msg = await bot.send_animation(chat_id = message.chat.id, reply_to_message_id = message.message_id, animation = open("media/welcome.mp4", 'rb'), caption = message_text, reply_markup = keyboard)
+    msg = await bot.send_animation(chat_id = message.chat.id, reply_to_message_id = message.message_id, animation = open("data/media/welcome.mp4", 'rb'), caption = message_text, reply_markup = keyboard)
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout * 5)
 
 
@@ -355,21 +350,21 @@ async def zrada(message: types.Message):
 @dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='xiaomi|сяоми|ксиоми|ксяоми')
 @update_user
 async def xiaomi(message: types.Message):
-    msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('media/xiaomi.jpg', 'rb'))
+    msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('data/media/xiaomi.jpg', 'rb'))
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
 @dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='iphone|айфон|іфон|епл|еппл|apple|ipad|айпад|macbook|макбук')
 @update_user
 async def iphone(message: types.Message):
-    msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('media/iphon.jpg', 'rb'))
+    msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('data/media/iphon.jpg', 'rb'))
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
 @dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='шарий|шарій')
 @update_user
 async def сockman(message: types.Message):
-    msg = await bot.send_video(message.chat.id, video=open('media/sh.MOV', mode='rb'))
+    msg = await bot.send_video(message.chat.id, video=open('data/media/sh.MOV', mode='rb'))
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 

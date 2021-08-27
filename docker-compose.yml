@@ -1,0 +1,10 @@
+version: "3.3"
+services:
+  karmabot:
+    build: .
+    image: rudebot
+    volumes:
+      - ./data:/app/data
+    env_file:
+    - .env
+    container_name: rudebot-container

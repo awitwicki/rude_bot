@@ -13,7 +13,6 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
 from aiogram.types.message import Message
 from aiogram.dispatcher.filters import Filter
-from aiogram.types import ChatMemberUpdated
 
 from mats_counter import count_mats
 from helper import *
@@ -403,6 +402,12 @@ async def on_msg(message: types.Message):
         reply_mesage = "*Російська пропаганда не може вважатися пруфом!*\n\n"
         msg = await bot.send_message(chat_id, text=reply_mesage, reply_to_message_id=message_id)
         await autodelete_message(msg.chat.id, message_id=msg.message_id, seconds=destruction_timeout)
+
+    #random advice
+    if random.randint(0, 100) < 3:
+        reply_mesage = get_random_better_advice()
+        msg = await bot.send_message(chat_id, text=reply_mesage, reply_to_message_id=message_id)
+        # await autodelete_message(msg.chat.id, message_id=msg.message_id, seconds=destruction_timeout)
 
 
 if __name__ == '__main__':

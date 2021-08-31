@@ -375,6 +375,25 @@ async def tesla(message: types.Message):
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
+@dp.message_handler(white_list_chats(), ignore_old_messages(), commands=['start', 'help'])
+@update_user
+async def start(message: types.Message):
+    reply_text = "Привіт, я Рудекіт!\n\n" \
+                    "Я можу дещо зробити, якшо ти скажеш чарівне слово:\n" \
+                    "`Карма` - покажу твою карму,\n" \
+                    "`Топ` - покажу топ учасників чату,\n" \
+                    "`Тесла` - порахую дні без згадування тесли,\n" \
+                    "`Кіт` - покажу котика,\n" \
+                    "`Шарій` - покажу півника,\n" \
+                    "`Зрада` - розпочну процедуру бану,\n" \
+                    "`Айфон/сяомі` - скажу правду,\n" \
+                    "`гіт/git` - дам посилання на github, де можна мене вдосконалити,\n" \
+                    "А ще я вітаю новеньких у чаті."
+
+    msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
+    await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
+
+
 @dp.message_handler(white_list_chats(), ignore_old_messages())
 @update_user
 async def on_msg(message: types.Message):

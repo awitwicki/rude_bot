@@ -1,10 +1,10 @@
 version: "3.3"
 services:
-  karmabot:
+  autobot:
     build: .
-    image: rudebot
+    image: autohaterbot
     volumes:
       - ./data:/app/data
     env_file:
     - .env
-    container_name: rudebot-container
+    container_name: autohater-container

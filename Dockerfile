@@ -4,4 +4,4 @@ RUN mkdir data
 COPY . .
 RUN pip3 install -r requirements.txt
 ENTRYPOINT ["python"]
-CMD ["main.py"]
+CMD ["src/main.py"]

@@ -9,9 +9,9 @@ from aiogram.types import ParseMode
 
 from const import days_without, bot_start_text, Skoda, Vag, Tesla
 
-bot_token = os.getenv("RUDEBOT_TELEGRAM_TOKEN")
-destruction_timeout = int(os.getenv("RUDEBOT_DELETE_TIMEOUT", "130"))
-whitelist_chats = os.getenv("RUDEBOT_ALLOWED_CHATS", "")
+bot_token = os.getenv("AUTOHATERBOT_TELEGRAM_TOKEN")
+destruction_timeout = int(os.getenv("AUTOHATERBOT_DELETE_TIMEOUT", "130"))
+whitelist_chats = os.getenv("AUTOHATERBOT_ALLOWED_CHATS", "")
 
 whitelist_chats = (
     None

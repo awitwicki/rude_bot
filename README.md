@@ -28,6 +28,6 @@ docker-compose up -d
 ### Python
 
 ```
-pip3 install -r requirements.txt
+pip3 install -r src/requirements.txt
 python main.py
 ```

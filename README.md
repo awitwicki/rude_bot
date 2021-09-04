@@ -9,7 +9,7 @@ Use next environment variables:
 
     (other variables is not necessary and have default values)
 
-* `AUTOHATERBOT_DELETE_TIMEOUT=120` - time before bot messages being deleted
+* `AUTOHATERBOT_DELETE_TIMEOUT=180` - time before bot messages being deleted
 * `AUTOHATERBOT_ALLOWED_CHATS=-10010101,-10000101010` - whitelist chats. If it empty or not added to envs, whitelist mode will be turned off.
 
 **Python:** Add mentioned env vars to the system environment.

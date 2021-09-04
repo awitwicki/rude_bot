@@ -1,4 +1,9 @@
+import os
 from dataclasses import dataclass
+
+bot_token = os.getenv("AUTOHATERBOT_TELEGRAM_TOKEN")
+destruction_timeout = int(os.getenv("AUTOHATERBOT_DELETE_TIMEOUT", 180))
+whitelist_chats = os.getenv("AUTOHATERBOT_ALLOWED_CHATS", "")
 
 days_without = "Днів без згадування {name}: `0` {emoji}"
 bot_start_text = (
@@ -28,5 +33,5 @@ class CarMention:
 
 
 Skoda = CarMention("[Ss]kod|[Шш]код", "Шкоди", "🚘🚘🚘")
-Vag = CarMention("VAG|vag|[Вв][Аа][Гг][аио]", "ВАГа", "🚙🚙🚙")
-Tesla = CarMention("[Tt]esl|[Тт]есл", "Тесли", "🚗🚗🚗")
+Vag = CarMention("vag|ваг", "ВАГа", "🚙🚙🚙")
+Tesla = CarMention("tesl|тесл", "Тесли", "🚗🚗🚗")

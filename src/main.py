@@ -1,5 +1,4 @@
 import asyncio
-import os
 from datetime import datetime
 
 from aiogram import Bot, types, executor
@@ -7,11 +6,8 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.dispatcher.filters import Filter
 from aiogram.types import ParseMode
 
-from const import days_without, bot_start_text, Skoda, Vag, Tesla
-
-bot_token = os.getenv("AUTOHATERBOT_TELEGRAM_TOKEN")
-destruction_timeout = int(os.getenv("AUTOHATERBOT_DELETE_TIMEOUT", "130"))
-whitelist_chats = os.getenv("AUTOHATERBOT_ALLOWED_CHATS", "")
+from const import days_without, bot_start_text, Vag, Tesla
+from src.const import bot_token, destruction_timeout, whitelist_chats
 
 whitelist_chats = (
     None
@@ -40,32 +36,6 @@ async def auto_delete_message(chat_id: int, message_id: int, seconds=0):
     await bot.delete_message(chat_id=chat_id, message_id=message_id)
 
 
-# @dp.callback_query_handler(lambda call: "new_user" in call.data)
-# async def new_user(call: types.CallbackQuery):
-#     user_id = call.data.split('|')[1]
-#     user_id = int(user_id)
-#     user_clicked_id = call.from_user.id
-#
-#     if user_id == user_clicked_id:
-#         await call.answer(new_user_greeting, show_alert=True)
-#         await bot.delete_message(message_id=call.message.message_id, chat_id=call.message.chat.id)
-#     else:
-#         await call.answer(new_user_warning, show_alert=True)
-
-
-# @dp.message_handler(WhiteListChats(), IgnoreOldMessages(), content_types=['new_chat_members'])
-# async def add_group(message: types.Message):
-#     keyboard = types.InlineKeyboardMarkup()
-#     keyboard.add(types.InlineKeyboardButton(text=new_member_button_text,
-#                                             callback_data=f'new_user|{message.from_user.id}'))
-#
-#     msg = await bot.send_animation(chat_id=message.chat.id, reply_to_message_id=message.message_id,
-#                                    animation=open("data/media/welcome.mp4", 'rb'),
-#                                    caption=new_member_greeting.format(
-#                                        user=message.from_user.mention), reply_markup=keyboard)
-#     await auto_delete_message(msg.chat.id, msg.message_id, destruction_timeout * 5)
-
-
 @dp.message_handler(WhiteListChats(), IgnoreOldMessages(), regexp=Tesla.regexp)
 async def tesla(message: types.Message):
     msg = await bot.send_message(
@@ -81,16 +51,6 @@ async def vag(message: types.Message):
     msg = await bot.send_message(
         message.chat.id,
         text=days_without.format(name=Vag.name_cyrillic, emoji=Vag.emoji),
-        parse_mode=ParseMode.MARKDOWN,
-    )
-    await auto_delete_message(msg.chat.id, msg.message_id, destruction_timeout)
-
-
-@dp.message_handler(WhiteListChats(), IgnoreOldMessages(), regexp=Skoda.regexp)
-async def skoda(message: types.Message):
-    msg = await bot.send_message(
-        message.chat.id,
-        text=days_without.format(name=Skoda.name_cyrillic, emoji=Skoda.emoji),
         parse_mode=ParseMode.MARKDOWN,
     )
     await auto_delete_message(msg.chat.id, msg.message_id, destruction_timeout)

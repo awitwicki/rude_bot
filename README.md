@@ -5,9 +5,9 @@ For telegram chat [@rivne_autochat](https://t.me/autorivne)
 
 Use next environment variables:
 
-* `AUTOHATERBOT_TELEGRAM_TOKEN={YOUR_TOKEN}` - telegram token
+* `AUTOHATERBOT_TELEGRAM_TOKEN={YOUR_TOKEN}` - telegram token, required
 
-    (other variables is not necessary and have default values)
+    (other variables have default values)
 
 * `AUTOHATERBOT_DELETE_TIMEOUT=180` - time before bot messages being deleted
 * `AUTOHATERBOT_ALLOWED_CHATS=-10010101,-10000101010` - whitelist chats. If it empty or not added to envs, whitelist mode will be turned off.
@@ -31,3 +31,6 @@ docker-compose up -d
 pip3 install -r src/requirements.txt
 python main.py
 ```
+
+### TODO
+* make filters and reactions configurable, add file-based storage

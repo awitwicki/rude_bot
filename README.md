@@ -5,7 +5,7 @@ For telegram chat [@rivne_autochat](https://t.me/autorivne)
 
 **Use next environment variables:**
 
-* `AUTOHATERBOT_TELEGRAM_TOKEN={YOUR_TOKEN}` - telegram token
+* `AUTOHATERBOT_TELEGRAM_TOKEN={YOUR_TOKEN}` - telegram token, required
 
     (other variables are optional and have default values)
 
@@ -46,3 +46,6 @@ docker-compose up -d
 pip3 install -r src/requirements.txt
 python main.py
 ```
+
+### TODO
+* make filters and reactions configurable, add file-based storage

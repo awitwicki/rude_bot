@@ -135,5 +135,3 @@ dmypy.json
 #test files
 *.ipynb
 *.xlsx
-
-*.txt

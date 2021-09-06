@@ -128,6 +128,8 @@ def get_karma(user_id : int):
     orientation_name = ['Android', 'Apple'][user_values[1]]
     replytext += f"Орієнтація: `{orientation_type} {orientation_name}` користувач"
 
+    replytext = replytext.replace('_', '\\_')
+
     return replytext
 
 

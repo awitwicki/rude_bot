@@ -125,7 +125,7 @@ def get_karma(user_id : int):
 
     user_values = orientation(user_id)
     orientation_type = ['Латентний', 'Гендерфлюід', ''][user_values[0]]
-    orientation_name = ['Android', 'Apple'][user_values[0]]
+    orientation_name = ['Android', 'Apple'][user_values[1]]
     replytext += f"Орієнтація: `{orientation_type} {orientation_name}` користувач"
 
     return replytext
@@ -293,7 +293,7 @@ async def on_msg_karma(message: types.Message):
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
-@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='(^топ|top$)')
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='(^топ$|^top$)')
 @update_user
 async def top_list(message: types.Message):
     chat_id = message.chat.id
@@ -307,7 +307,7 @@ async def top_list(message: types.Message):
         await autodelete_message(msg.chat.id, msg.message_id, top_list_destruction_timeout)
 
 
-@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='(^git|гіт$)')
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='(^git$|^гіт$)')
 @update_user
 async def git(message: types.Message):
     reply_text = 'github.com/awitwicki/rude_bot'
@@ -315,7 +315,7 @@ async def git(message: types.Message):
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
-@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='cat|кот|кіт|кицька')
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='(^cat$|^кот$|^кіт$|^кицька$)')
 @update_user
 async def cat(message: types.Message):
     cat_url = get_random_cat_image_url()

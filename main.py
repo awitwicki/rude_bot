@@ -116,8 +116,12 @@ def get_karma(user_id : int):
         mats_percent *= 100
         mats_percent = round(mats_percent, 2)
 
+    karma_percent = 0
+    if karma and total_messages:
+        karma_percent = round(karma * 100 / total_messages, 2)
+
     replytext = f"Привіт {user_name}, твоя карма:\n\n"
-    replytext += f"Карма: `{karma}`\n"
+    replytext += f"Карма: `{karma} ({karma_percent}%)`\n"
     replytext += f"Повідомлень: `{total_messages}`\n"
     replytext += f"Матюків: `{total_mats} ({mats_percent}%)`\n"
     replytext += f"Rude-коїнів: `{rude_coins}`💰\n"
@@ -178,15 +182,21 @@ def get_top():
     for usr in sorted_users_list:
         username = usr['username']
         karma = usr['karma']
-        replytext+=f'`{username}` - карма `{karma}`\n'
+        messages_count = usr['total_messages']
+
+        karma_percent = 0
+        if karma and messages_count:
+            karma_percent = round(karma * 100 / messages_count, 2)
+
+        replytext+=f'`{username}` - карма `{karma} ({karma_percent}%)`\n'
 
     replytext += "\n*Топ-10 актив чату:*\n"
     sorted_users_list = sorted(users_list, key = lambda i: i['total_messages'], reverse = True)[:10]
 
     for usr in sorted_users_list:
         username = usr['username']
-        messagescount = usr['total_messages']
-        replytext+=f'`{username}` - повідомлень `{messagescount}`\n'
+        messages_count = usr['total_messages']
+        replytext+=f'`{username}` - повідомлень `{messages_count}`\n'
 
     replytext += "\n*Топ-10 емоціонали чату:*\n"
     sorted_users_list = sorted(users_list, key = lambda i: i['total_mats'], reverse = True)[:10]

@@ -8,3 +8,4 @@ services:
     env_file:
     - .env
     container_name: rudebot-container
+    restart: always

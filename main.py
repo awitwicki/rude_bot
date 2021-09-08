@@ -425,7 +425,7 @@ async def on_msg(message: types.Message):
         await autodelete_message(msg.chat.id, message_id=msg.message_id, seconds=destruction_timeout)
 
     #random advice
-    if random.randint(0, 100) < 3:
+    if random.randint(0, 100) < 2:
         reply_mesage = get_random_better_advice()
         msg = await bot.send_message(chat_id, text=reply_mesage, reply_to_message_id=message_id)
         # await autodelete_message(msg.chat.id, message_id=msg.message_id, seconds=destruction_timeout)

@@ -400,7 +400,8 @@ async def start(message: types.Message):
                     "`Зрада` - розпочну процедуру бану,\n" \
                     "`Айфон/сяомі` - скажу правду,\n" \
                     "`гіт/git` - дам посилання на github, де можна мене вдосконалити,\n" \
-                    "А ще я вітаю новеньких у чаті."
+                    "А ще я вітаю новеньких у чаті.\n\n" \
+                    "Версія `2.3.6`"
 
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
@@ -435,9 +436,10 @@ async def on_msg(message: types.Message):
         await autodelete_message(msg.chat.id, message_id=msg.message_id, seconds=destruction_timeout)
 
     #random advice
-    if random.randint(0, 100) < 2:
+    if random.randint(0, 100) < 1:
         reply_mesage = get_random_better_advice()
-        msg = await bot.send_message(chat_id, text=reply_mesage, reply_to_message_id=message_id)
+        reply_to_message_id = None if random.randint(0, 100) < 50 else message_id
+        msg = await bot.send_message(chat_id, text=reply_mesage, reply_to_message_id=reply_to_message_id)
         # await autodelete_message(msg.chat.id, message_id=msg.message_id, seconds=destruction_timeout)
 
 

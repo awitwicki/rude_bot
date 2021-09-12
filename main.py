@@ -37,6 +37,9 @@ last_top = None
 bot: Bot = Bot(token=bot_token)
 dp: Dispatcher = Dispatcher(bot)
 
+def random_bool(probability: int) -> bool:
+    '''probability 0..100'''
+    return random.randint(0, 100) < probability
 
 # def is_flood_message(message: types.Message):
 #     chat_id: int = message.chat.id
@@ -361,15 +364,17 @@ async def zrada(message: types.Message):
 @dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='xiaomi|сяоми|ксиоми|ксяоми')
 @update_user
 async def xiaomi(message: types.Message):
-    msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('data/media/xiaomi.jpg', 'rb'))
-    await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
+    if random_bool(10):
+        msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('data/media/xiaomi.jpg', 'rb'))
+        await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
 @dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='iphone|айфон|іфон|епл|еппл|apple|ipad|айпад|macbook|макбук')
 @update_user
 async def iphone(message: types.Message):
-    msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('data/media/iphon.jpg', 'rb'))
-    await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
+    if random_bool(10):
+        msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('data/media/iphon.jpg', 'rb'))
+        await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
 @dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='шарий|шарій')
@@ -401,7 +406,7 @@ async def start(message: types.Message):
                     "`Айфон/сяомі` - скажу правду,\n" \
                     "`гіт/git` - дам посилання на github, де можна мене вдосконалити,\n" \
                     "А ще я вітаю новеньких у чаті.\n\n" \
-                    "Версія `2.3.6`"
+                    "Версія `2.3.7`"
 
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
@@ -436,7 +441,7 @@ async def on_msg(message: types.Message):
         await autodelete_message(msg.chat.id, message_id=msg.message_id, seconds=destruction_timeout)
 
     #random advice
-    if random.randint(0, 100) < 1:
+    if random_bool(1):
         reply_mesage = get_random_better_advice()
         reply_to_message_id = None if random.randint(0, 100) < 50 else message_id
         msg = await bot.send_message(chat_id, text=reply_mesage, reply_to_message_id=reply_to_message_id)

@@ -63,6 +63,32 @@ class white_list_chats(Filter):
         return True
 
 
+async def match_warn_message(message: types.Message) -> str:
+    global bot
+
+    #check if its reply
+    if not message.reply_to_message:
+        reply_text = '/warn або /unwarn має бути відповіддю, на чиєсь повідомлення'
+        return reply_text
+
+    #check if user have rights
+    member = await bot.get_chat_member(message.chat.id, message.from_user.id)
+    is_admin = member.status == 'creator' or (member.status == 'administrator' and member.can_delete_messages)
+
+    if not is_admin:
+        reply_text = '/warn або /unwarn дозволений тільки для адмінів'
+        return reply_text
+
+    #check if reply not to another admin
+    reply_to_member = await bot.get_chat_member(message.chat.id,  message.reply_to_message.from_user.id)
+    is_member_admin = reply_to_member.status == 'creator' or (reply_to_member.status == 'administrator' and reply_to_member.can_delete_messages)
+    if is_member_admin:
+        reply_text = '/warn або /unwarn не діє на адмінів'
+        return reply_text
+
+    return None
+
+
 def update_user(func):
     async def wrapper(message: Message):
         user_id = message.from_user.id
@@ -88,9 +114,20 @@ def add_or_update_user(user_id: int, username: str, mats_count: int):
         users[user_id]['username'] = username
         users[user_id]['karma'] = 0
         users[user_id]['rude_coins'] = 0
-        # users[user_id]['warns'] = 0
+        users[user_id]['warns'] = 0
 
     save_to_file(users)
+
+
+def change_user_warns(user_id: int, warns_count: int):
+    try:
+        users[user_id]['warns'] += warns_count
+    except:
+        users[user_id]['warns'] = warns_count
+
+    save_to_file(users)
+
+    return users[user_id]['warns']
 
 
 def get_karma(user_id : int):
@@ -125,6 +162,14 @@ def get_karma(user_id : int):
 
     replytext = f"Привіт {user_name}, твоя карма:\n\n"
     replytext += f"Карма: `{karma} ({karma_percent}%)`\n"
+
+    #will selffix when add sql migrations
+    try:
+        warns = user['warns']
+        replytext += f"🚧Попереджень: `{warns}`\n" if warns > 0 else ''
+    except:
+        pass
+
     replytext += f"Повідомлень: `{total_messages}`\n"
     replytext += f"Матюків: `{total_mats} ({mats_percent}%)`\n"
     replytext += f"Rude-коїнів: `{rude_coins}`💰\n"
@@ -396,11 +441,58 @@ async def start(message: types.Message):
                     "`Шарій` - покажу півника,\n" \
                     "`Зрада` - розпочну процедуру бану,\n" \
                     "`гіт/git` - дам посилання на github, де можна мене вдосконалити,\n" \
+                    "`/warn /unwarn` - (admins only) винесу попередження за погану поведінку,\n" \
                     "А ще я вітаю новеньких у чаті.\n\n" \
-                    "Версія `2.3.9`"
+                    "Версія `2.3.10`"
 
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
+
+
+@dp.message_handler(white_list_chats(), ignore_old_messages(), commands=['warn'])
+async def warn(message: types.Message):
+    global bot
+    match_message_result = await match_warn_message(message)
+
+    if match_message_result:
+        msg = await bot.send_message(message.chat.id, text=match_message_result, parse_mode=ParseMode.MARKDOWN)
+        await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
+        return
+
+    user_total_warns = change_user_warns(message.reply_to_message.from_user.id, 1)
+
+    user_name = message.reply_to_message.from_user.mention
+
+    reply_text = f'{user_name}, вам винесено попередження адміна! \n' \
+        'Треба думати що ви пишете, \n' \
+        f'ви маєте вже {user_total_warns} попередження!\n\n' \
+        '1 попередження - будь-який адмін може заборонити медіа/стікери/ввести ліміт повідомлень!\n' \
+        '2 попередження - мют на день (або тиждень, на розсуд адміна)!\n' \
+        '3 попередження - бан!\n' \
+        'Адміни вирішать твою долю'
+
+    msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
+
+
+@dp.message_handler(white_list_chats(), ignore_old_messages(), commands=['unwarn'])
+async def unwarn(message: types.Message):
+    match_message_result = await match_warn_message(message)
+
+    if match_message_result:
+        msg = await bot.send_message(message.chat.id, text=match_message_result, parse_mode=ParseMode.MARKDOWN)
+        await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
+        return
+
+    user_total_warns = change_user_warns(message.reply_to_message.from_user.id, -1)
+
+    user_name = message.reply_to_message.from_user.mention
+
+    reply_text = f'{user_name}, ваше попередження анульовано!'
+
+    if user_total_warns > 0:
+        reply_text += f'\nНа балансі ще {user_total_warns} попередженнь!\n\n' 
+
+    msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
 
 
 @dp.message_handler(white_list_chats(), ignore_old_messages())
@@ -429,7 +521,6 @@ async def on_msg(message: types.Message):
     if '.ru' in messageText:
         reply_mesage = "*Російська пропаганда не може вважатися пруфом!*\n\n"
         msg = await bot.send_message(chat_id, text=reply_mesage, reply_to_message_id=message_id)
-        await autodelete_message(msg.chat.id, message_id=msg.message_id, seconds=destruction_timeout)
 
     #random advice
     if random_bool(1):

@@ -361,27 +361,11 @@ async def zrada(message: types.Message):
         await bot.send_message(message.chat.id, text, reply_markup=keyboard)
 
 
-@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='xiaomi|сяоми|ксиоми|ксяоми')
-@update_user
-async def xiaomi(message: types.Message):
-    if random_bool(10):
-        msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('data/media/xiaomi.jpg', 'rb'))
-        await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
-
-
 @dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='samsung|самсунг|сасунг')
 @update_user
 async def samsung(message: types.Message):
     if random_bool(10):
         msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('data/media/samsung.jpg', 'rb'))
-        await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
-
-
-@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='iphone|айфон|іфон|епл|еппл|apple|ipad|айпад|macbook|макбук')
-@update_user
-async def iphone(message: types.Message):
-    if random_bool(10):
-        msg = await bot.send_photo(message.chat.id, reply_to_message_id=message.message_id, photo=open('data/media/iphon.jpg', 'rb'))
         await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
@@ -411,10 +395,9 @@ async def start(message: types.Message):
                     "`Кіт` - покажу котика,\n" \
                     "`Шарій` - покажу півника,\n" \
                     "`Зрада` - розпочну процедуру бану,\n" \
-                    "`Айфон/сяомі` - скажу правду,\n" \
                     "`гіт/git` - дам посилання на github, де можна мене вдосконалити,\n" \
                     "А ще я вітаю новеньких у чаті.\n\n" \
-                    "Версія `2.3.8`"
+                    "Версія `2.3.9`"
 
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)

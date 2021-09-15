@@ -73,7 +73,7 @@ async def match_warn_message(message: types.Message) -> str:
 
     #check if user have rights
     member = await bot.get_chat_member(message.chat.id, message.from_user.id)
-    is_admin = member.status == 'creator' or (member.status == 'administrator' and member.can_delete_messages)
+    is_admin = member.user.mention == '@GroupAnonymousBot' or member.status == 'creator' or (member.status == 'administrator' and member.can_delete_messages)
 
     if not is_admin:
         reply_text = '/warn або /unwarn дозволений тільки для адмінів'
@@ -81,7 +81,7 @@ async def match_warn_message(message: types.Message) -> str:
 
     #check if reply not to another admin
     reply_to_member = await bot.get_chat_member(message.chat.id,  message.reply_to_message.from_user.id)
-    is_member_admin = reply_to_member.status == 'creator' or (reply_to_member.status == 'administrator' and reply_to_member.can_delete_messages)
+    is_member_admin = reply_to_member.user.mention == '@GroupAnonymousBot' or reply_to_member.status == 'creator' or (reply_to_member.status == 'administrator' and reply_to_member.can_delete_messages)
     if is_member_admin:
         reply_text = '/warn або /unwarn не діє на адмінів'
         return reply_text
@@ -283,6 +283,12 @@ async def autodelete_message(chat_id: int, message_id: int, seconds=0):
     await bot.delete_message(chat_id=chat_id, message_id=message_id)
 
 
+async def autodelete_messages(chat_id: int, message_ids: list, seconds=0):
+    await asyncio.sleep(seconds)
+    for message_id in message_ids:
+        await bot.delete_message(chat_id=chat_id, message_id=message_id)
+
+
 def read_users():
     if os.path.isfile(database_filename):
         global users
@@ -443,7 +449,7 @@ async def start(message: types.Message):
                     "`гіт/git` - дам посилання на github, де можна мене вдосконалити,\n" \
                     "`/warn /unwarn` - (admins only) винесу попередження за погану поведінку,\n" \
                     "А ще я вітаю новеньких у чаті.\n\n" \
-                    "Версія `2.3.10`"
+                    "Версія `2.3.11`"
 
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
@@ -456,7 +462,7 @@ async def warn(message: types.Message):
 
     if match_message_result:
         msg = await bot.send_message(message.chat.id, text=match_message_result, parse_mode=ParseMode.MARKDOWN)
-        await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
+        await autodelete_messages(msg.chat.id, [msg.message_id, message.message_id], destruction_timeout)
         return
 
     user_total_warns = change_user_warns(message.reply_to_message.from_user.id, 1)
@@ -472,6 +478,7 @@ async def warn(message: types.Message):
         'Адміни вирішать твою долю'
 
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
+    await autodelete_message(msg.chat.id,  message.message_id, 0)
 
 
 @dp.message_handler(white_list_chats(), ignore_old_messages(), commands=['unwarn'])
@@ -480,7 +487,7 @@ async def unwarn(message: types.Message):
 
     if match_message_result:
         msg = await bot.send_message(message.chat.id, text=match_message_result, parse_mode=ParseMode.MARKDOWN)
-        await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
+        await autodelete_messages(msg.chat.id, [msg.message_id, message.message_id], destruction_timeout)
         return
 
     user_total_warns = change_user_warns(message.reply_to_message.from_user.id, -1)
@@ -493,6 +500,7 @@ async def unwarn(message: types.Message):
         reply_text += f'\nНа балансі ще {user_total_warns} попередженнь!\n\n' 
 
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
+    await autodelete_message(msg.chat.id,  message.message_id, 0)
 
 
 @dp.message_handler(white_list_chats(), ignore_old_messages())

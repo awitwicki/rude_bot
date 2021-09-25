@@ -17,6 +17,8 @@ from aiogram.dispatcher.filters import Filter
 from mats_counter import count_mats
 from helper import *
 
+bot_version = '2.3.13'
+
 bot_token = os.getenv('RUDEBOT_TELEGRAM_TOKEN')
 flood_timeout = int(os.getenv('RUDEBOT_FLOOD_TIMEOUT', '10'))
 destruction_timeout = int(os.getenv('RUDEBOT_DELETE_TIMEOUT', '30'))
@@ -450,6 +452,8 @@ async def сockman(message: types.Message):
 @update_user
 async def tesla(message: types.Message):
     reply_text = "Днів без згадування тесли: `0`\n🚗🚗🚗"
+    reply_text += '\n\n...btw ' + get_tesla_stock()
+
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
@@ -493,7 +497,7 @@ async def start(message: types.Message):
                     "`/warn /unwarn` - (admins only) винесу попередження за погану поведінку,\n" \
                     "`/scan` - (admins only) просканую когось,\n" \
                     "А ще я вітаю новеньких у чаті.\n\n" \
-                    "Версія `2.3.12`"
+                    f"Версія `{bot_version}`"
 
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)

@@ -1,6 +1,9 @@
+import cachetools.func
 import random
+import json
 import requests
 import re
+import urllib.request
 
 better_advices: list
 
@@ -19,3 +22,13 @@ def get_random_cat_image_url():
 
 def get_random_better_advice():
     return random.choice(better_advices)
+
+@cachetools.func.ttl_cache(maxsize=1, ttl=60 * 5)
+def get_tesla_stock():
+    try:
+        resp = urllib.request.urlopen('https://query2.finance.yahoo.com/v10/finance/quoteSummary/tsla?modules=price')
+        data = json.loads(resp.read())
+        price = data['quoteSummary']['result'][0]['price']['regularMarketPrice']['raw']
+        return f'${price}'
+    except:
+        return 'nothing'

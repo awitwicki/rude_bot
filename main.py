@@ -89,6 +89,25 @@ async def match_warn_message(message: types.Message) -> str:
     return None
 
 
+async def match_scan_message(message: types.Message) -> str:
+    global bot
+
+    #check if its reply
+    if not message.reply_to_message:
+        reply_text = '/scan має бути відповіддю, на чиєсь повідомлення'
+        return reply_text
+
+    #check if user have rights
+    member = await bot.get_chat_member(message.chat.id, message.from_user.id)
+    is_admin = member.user.mention == '@GroupAnonymousBot' or member.status == 'creator' or (member.status == 'administrator' and member.can_delete_messages)
+
+    if not is_admin:
+        reply_text = '/scan дозволений тільки для адмінів'
+        return reply_text
+
+    return None
+
+
 def update_user(func):
     async def wrapper(message: Message):
         user_id = message.from_user.id
@@ -435,6 +454,30 @@ async def tesla(message: types.Message):
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
+
+@dp.message_handler(white_list_chats(), ignore_old_messages(), commands=['scan'])
+@update_user
+async def scan(message: types.Message):
+    global bot
+    match_message_result = await match_scan_message(message)
+
+    if match_message_result:
+        msg = await bot.send_message(message.chat.id, text=match_message_result, parse_mode=ParseMode.MARKDOWN)
+        await autodelete_messages(msg.chat.id, [msg.message_id, message.message_id], destruction_timeout)
+        return
+
+    try:
+        user_id = message.reply_to_message.from_user.id
+        chat_id = message.chat.id
+
+        reply_text = get_karma(user_id)
+    except:
+        reply_text = "Я зломався :("
+
+    msg = await bot.send_message(chat_id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
+    await autodelete_messages(msg.chat.id, [msg.message_id, message.message_id], destruction_timeout)
+
+
 @dp.message_handler(white_list_chats(), ignore_old_messages(), commands=['start', 'help'])
 @update_user
 async def start(message: types.Message):
@@ -448,8 +491,9 @@ async def start(message: types.Message):
                     "`Зрада` - розпочну процедуру бану,\n" \
                     "`гіт/git` - дам посилання на github, де можна мене вдосконалити,\n" \
                     "`/warn /unwarn` - (admins only) винесу попередження за погану поведінку,\n" \
+                    "`/scan` - (admins only) просканую когось,\n" \
                     "А ще я вітаю новеньких у чаті.\n\n" \
-                    "Версія `2.3.11`"
+                    "Версія `2.3.12`"
 
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)

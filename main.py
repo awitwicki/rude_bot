@@ -17,7 +17,7 @@ from aiogram.dispatcher.filters import Filter
 from mats_counter import count_mats
 from helper import *
 
-bot_version = '2.3.13'
+bot_version = '2.3.14'
 
 bot_token = os.getenv('RUDEBOT_TELEGRAM_TOKEN')
 flood_timeout = int(os.getenv('RUDEBOT_FLOOD_TIMEOUT', '10'))
@@ -124,6 +124,7 @@ def update_user(func):
 
 def add_or_update_user(user_id: int, username: str, mats_count: int):
     try:
+        users[user_id]['username'] = username
         users[user_id]['total_messages'] += 1
         users[user_id]['total_mats'] += mats_count
         if not users[user_id].get('rude_coins'):

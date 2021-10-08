@@ -17,7 +17,7 @@ from aiogram.dispatcher.filters import Filter
 from mats_counter import count_mats
 from helper import *
 
-bot_version = '2.3.14'
+bot_version = '2.3.15'
 
 bot_token = os.getenv('RUDEBOT_TELEGRAM_TOKEN')
 flood_timeout = int(os.getenv('RUDEBOT_FLOOD_TIMEOUT', '10'))
@@ -501,7 +501,7 @@ async def start(message: types.Message):
                     f"Версія `{bot_version}`"
 
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
-    await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
+    await autodelete_messages(msg.chat.id, [msg.message_id, message.message_id], destruction_timeout)
 
 
 @dp.message_handler(white_list_chats(), ignore_old_messages(), commands=['warn'])
@@ -526,6 +526,8 @@ async def warn(message: types.Message):
         '3 попередження - бан!\n' \
         'Адміни вирішать твою долю'
 
+    reply_text = reply_text.replace('_', '\\_')
+
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
     await autodelete_message(msg.chat.id,  message.message_id, 0)
 
@@ -544,6 +546,7 @@ async def unwarn(message: types.Message):
     user_name = message.reply_to_message.from_user.mention
 
     reply_text = f'{user_name}, ваше попередження анульовано!'
+    reply_text = reply_text.replace('_', '\\_')
 
     if user_total_warns > 0:
         reply_text += f'\nНа балансі ще {user_total_warns} попередженнь!\n\n' 
@@ -576,7 +579,7 @@ async def on_msg(message: types.Message):
 
     #ru filter
     if '.ru' in messageText:
-        reply_mesage = "*Російська пропаганда не може вважатися пруфом!*\n\n"
+        reply_mesage = "*Російська пропаганда не може вважатися пруфом!*\n\nВас буде додано до реєстру."
         msg = await bot.send_message(chat_id, text=reply_mesage, reply_to_message_id=message_id)
 
     #random advice

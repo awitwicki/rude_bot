@@ -429,7 +429,7 @@ async def zrada(message: types.Message):
             'Адміни вирішать твою долю (тюрма або бан)'
 
         keyboard = types.InlineKeyboardMarkup()
-        keyboard.add(types.InlineKeyboardButton(text="🚓", callback_data=f'counter|🚓|0'))
+        keyboard.add(types.InlineKeyboardButton(text="🍾", callback_data=f'counter|🍾|0'))
 
         await bot.send_message(message.chat.id, text, reply_markup=keyboard)
 

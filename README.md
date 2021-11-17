@@ -8,7 +8,7 @@ Use next environment variables:
 
 * `RUDEBOT_TELEGRAM_TOKEN={YOUR_TOKEN}` - telegram token
 
-    (other variables is not necessarty and have default values)
+    (other variables is not necessary and have default values)
 
 * `RUDEBOT_FLOOD_TIMEOUT=10` - cooldown to allow +- karma per chat, default 30 seconds
 * `RUDEBOT_DELETE_TIMEOUT=30` - time before bot messages being deleted
@@ -25,7 +25,7 @@ Use next environment variables:
 ### Docker compose
 
 ```
-docker-compose up -d
+docker-compose up --build -d
 ```
 
 ### Python

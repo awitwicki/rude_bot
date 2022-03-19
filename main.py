@@ -497,6 +497,7 @@ async def start(message: types.Message):
                     "`гіт/git` - дам посилання на github, де можна мене вдосконалити,\n" \
                     "`/warn /unwarn` - (admins only) винесу попередження за погану поведінку,\n" \
                     "`/scan` - (admins only) просканую когось,\n" \
+                    "`/give 25` - поділитися рудекоїнами,\n" \
                     "А ще я вітаю новеньких у чаті.\n\n" \
                     f"Версія `{bot_version}`"
 

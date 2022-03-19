@@ -17,7 +17,7 @@ from aiogram.dispatcher.filters import Filter
 from mats_counter import count_mats
 from helper import *
 
-bot_version = '2.3.18'
+bot_version = '2.4.0'
 
 bot_token = os.getenv('RUDEBOT_TELEGRAM_TOKEN')
 flood_timeout = int(os.getenv('RUDEBOT_FLOOD_TIMEOUT', '10'))
@@ -553,6 +553,51 @@ async def unwarn(message: types.Message):
 
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
     await autodelete_message(msg.chat.id,  message.message_id, 0)
+
+@dp.message_handler(white_list_chats(), ignore_old_messages(), commands=['give'])
+async def give(message: types.Message):
+    try:
+        user_id = message.from_user.id
+        chat_id = message.chat.id
+        message_id = message.message_id
+
+        if message.reply_to_message and message.from_user.id != message.reply_to_message.from_user.id and message.reply_to_message.from_user.id != bot.id:
+            #get user coins
+            user_coins = users[user_id]['rude_coins']
+
+            #parse coins amount
+            arguments = message.get_args()
+
+            if arguments:
+                amount = int(arguments.split()[0])
+
+                if amount > user_coins:
+                    msg = await bot.send_message(chat_id, text=f"Недостатньо коїнів, ви маєте тільки {user_coins}💰", reply_to_message_id=message_id)
+                    await autodelete_messages(msg.chat.id, [msg.message_id, message_id], destruction_timeout)
+                    return
+
+                if amount <= 0:
+                    msg = await bot.send_message(chat_id, text=f"Самий умний?", reply_to_message_id=message_id)
+                    await autodelete_messages(msg.chat.id, [msg.message_id, message_id], destruction_timeout)
+                    return
+
+                users[message.reply_to_message.from_user.id]['rude_coins'] +=amount
+                users[user_id]['rude_coins'] -= amount
+
+                msg = await bot.send_message(chat_id, text=f"Ви переказали {amount} коїнів 💰", reply_to_message_id=message_id)
+                await autodelete_messages(msg.chat.id, [msg.message_id, message_id], destruction_timeout)
+                return
+            else:
+                msg = await bot.send_message(chat_id, text=f"/give 420\n\nОсь так треба", reply_to_message_id=message_id)
+                await autodelete_messages(msg.chat.id, [msg.message_id, message_id], destruction_timeout)
+                return
+        else:
+            msg = await bot.send_message(chat_id, text=f'Щоб поділитися коїнами, ви маєте зробити реплай на повідомлення особи отримувача (не бота), текст має бути таким:\n\n/give 25', reply_to_message_id=message_id)
+            await autodelete_messages(msg.chat.id, [msg.message_id, message_id], destruction_timeout)
+            return
+    except Exception as e:
+        msg = await bot.send_message(chat_id, text="/give 25\n\nОсь так треба, ну, ти зможеш", reply_to_message_id=message_id)
+        await autodelete_messages(msg.chat.id, [msg.message_id, message_id], destruction_timeout)
 
 
 @dp.message_handler(white_list_chats(), ignore_old_messages())

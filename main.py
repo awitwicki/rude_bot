@@ -17,7 +17,7 @@ from aiogram.dispatcher.filters import Filter
 from mats_counter import count_mats
 from helper import *
 
-bot_version = '2.4.0'
+bot_version = '2.5.0'
 
 bot_token = os.getenv('RUDEBOT_TELEGRAM_TOKEN')
 flood_timeout = int(os.getenv('RUDEBOT_FLOOD_TIMEOUT', '10'))
@@ -442,6 +442,13 @@ async def samsung(message: types.Message):
         await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
+@dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='ё|ъ|ы|э')
+@update_user
+async def ru_words(message: types.Message):
+    if message.forward_from is None:
+        await bot.send_message(message.chat.id, 'Ану кажи "паляниця" 😡')
+
+
 @dp.message_handler(white_list_chats(), ignore_old_messages(), regexp='шарий|шарій')
 @update_user
 async def сockman(message: types.Message):
@@ -554,6 +561,7 @@ async def unwarn(message: types.Message):
 
     msg = await bot.send_message(message.chat.id, text=reply_text, parse_mode=ParseMode.MARKDOWN)
     await autodelete_message(msg.chat.id,  message.message_id, 0)
+
 
 @dp.message_handler(white_list_chats(), ignore_old_messages(), commands=['give'])
 async def give(message: types.Message):

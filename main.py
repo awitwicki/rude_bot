@@ -17,7 +17,7 @@ from aiogram.dispatcher.filters import Filter
 from mats_counter import count_mats
 from helper import *
 
-bot_version = '2.5.1'
+bot_version = '2.5.2'
 
 bot_token = os.getenv('RUDEBOT_TELEGRAM_TOKEN')
 flood_timeout = int(os.getenv('RUDEBOT_FLOOD_TIMEOUT', '10'))
@@ -466,7 +466,6 @@ async def tesla(message: types.Message):
     await autodelete_message(msg.chat.id, msg.message_id, destruction_timeout)
 
 
-
 @dp.message_handler(white_list_chats(), ignore_old_messages(), commands=['scan'])
 @update_user
 async def scan(message: types.Message):
@@ -637,7 +636,7 @@ async def on_msg(message: types.Message):
         msg = await bot.send_message(chat_id, text=reply_mesage, reply_to_message_id=message_id)
 
     #random advice
-    if random_bool(1):
+    if random_bool(1) or (message.reply_to_message and message.reply_to_message.from_user.id == bot.id):
         reply_mesage = get_random_better_advice()
         reply_to_message_id = None if random.randint(0, 100) < 50 else message_id
         msg = await bot.send_message(chat_id, text=reply_mesage, reply_to_message_id=reply_to_message_id)

@@ -23,6 +23,7 @@ def get_random_cat_image_url():
 def get_random_better_advice():
     return random.choice(better_advices)
 
+
 @cachetools.func.ttl_cache(maxsize=1, ttl=60 * 5)
 def get_tesla_stock():
     try:

@@ -1,11 +1,14 @@
-version: "3.3"
+version: '3.4'
+
 services:
-  karmabot:
-    build: .
-    image: rudebot
+  rudebot:
+    image: ${DOCKER_REGISTRY-}rudebot
+    build:
+      context: .
+      dockerfile: RudeBot/Dockerfile
+    container_name: rudebot-container
+    restart: always
     volumes:
       - ./data:/app/data
     env_file:
-    - .env
-    container_name: rudebot-container
-    restart: always
+      - .env

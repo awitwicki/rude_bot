@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "RudeBot": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

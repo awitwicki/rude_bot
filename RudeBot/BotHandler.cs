@@ -10,6 +10,7 @@ using PowerBot.Lite.Handlers;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using RudeBot.Managers;
+using RudeBot.Models;
 
 namespace RudeBot 
 {
@@ -55,6 +56,64 @@ namespace RudeBot
         {
             string messageText = "*Російська пропаганда не може вважатися пруфом!*\n\nВас буде додано до реєстру.";
             Message msg = await BotClient.SendTextMessageAsync(ChatId, messageText, replyToMessageId: Message.MessageId);
+        }
+
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("(^карма$|^karma$)")]
+        public async Task Karma()
+        {
+            long getSize(long id)
+            {
+                return (id + 6) % 15 + 7;
+            }
+
+            (int, int) orientation(long id)
+            {
+                return ((int)id % 3, (int)id % 5 % 2);
+            }
+          
+            TelegramUser user = await _userManager.GetUser(User.Id);
+
+            long userSize = getSize(user.Id);
+
+            float BadWordsPercent = 0;
+            if (user.TotalBadWords > 0 && user.TotalMessages > 0)
+            {
+                BadWordsPercent = user.TotalBadWords * 100 / user.TotalMessages;
+            }
+
+            float karmaPercent = 0;
+            if (user.Karma > 0 && user.TotalMessages > 0)
+            {
+                karmaPercent = user.Karma * 100 / user.TotalMessages;
+            }
+
+            List<string> orientationTypes = new List<string>() { "Латентний", "Гендерфлюід", "" };
+            List<string> orientationNames = new List<string>() { "Android", "Apple" };
+
+            (int, int) orientationValues = orientation(user.Id);
+
+            string orientationType = orientationTypes[orientationValues.Item1];
+            string orientationName = orientationNames[orientationValues.Item2];
+
+            string replyText = $"Привіт {user.UserName}, твоя карма:\n\n" +
+                $"Карма: `{user.Karma} ({karmaPercent}%)`\n" +
+                $"🚧Попереджень: `{user.Warns}`\n" +
+                $"Повідомлень: `{user.TotalMessages}`\n" +
+                $"Матюків: `{user.TotalBadWords} ({BadWordsPercent}%)`\n" +
+                $"Rude-коїнів: `{user.RudeCoins}`💰\n" +
+                $"Довжина: `{userSize}` сантиметрів, ну і гігант...\n" +
+                $"Орієнтація: `{orientationType} {orientationName}` користувач";
+
+            // Fix markdown
+            replyText = replyText.Replace("_", "\\_");
+
+            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+
+            await Task.Delay(30 * 1000);
+
+            await BotClient.TryDeleteMessage(msg);
+            await BotClient.TryDeleteMessage(Message);
         }
     }
 }

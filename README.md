@@ -1,4 +1,4 @@
-# rude_bot
+# RudeBot
 Karmabot for telegram chat [@rude_chat](https://t.me/rude_chat)
 ![Waterfall](data/media/cat.jpg)
 
@@ -21,16 +21,6 @@ Use next environment variables:
 
 ## Run
 
-
-### Docker compose
-
 ```
 docker-compose up --build -d
-```
-
-### Python
-
-```
-pip3 install -r requirements.txt
-python main.py
 ```

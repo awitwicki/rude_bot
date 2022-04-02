@@ -9,11 +9,18 @@ using PowerBot.Lite.Attributes;
 using PowerBot.Lite.Handlers;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using RudeBot.Managers;
 
 namespace RudeBot 
 {
     public class BotHandler : BaseHandler
     {
+        private IUserManager _userManager {  get; set; }
+        public BotHandler()
+        {
+            _userManager = new UserManager();
+        }
+
         [MessageReaction(ChatAction.Typing)]
         [MessageHandler("/start")]
         public async Task Start()

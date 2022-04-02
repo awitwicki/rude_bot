@@ -10,5 +10,6 @@ namespace RudeBot
     {
         public const string BotVersion = "3.2.0-alpha";
         public const string GithubUrl = "github.com/awitwicki/rude_bot/tree/dev_dotnet";
+        public const string DbPath = "data/database.sqlite";
     }
 }

@@ -11,6 +11,8 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using RudeBot.Managers;
 using RudeBot.Models;
+using RudeBot.Services;
+using Autofac;
 
 namespace RudeBot 
 {
@@ -144,6 +146,23 @@ namespace RudeBot
             string replyText = "Ану кажи \"паляниця\" 😡";
 
             Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+        }
+
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("tesl|тесл")]
+        public async Task Tesla()
+        {
+            using (var scope = DIContainerInstance.Container.BeginLifetimeScope())
+            {
+                var tickerService = scope.Resolve<ITickerService>();
+
+                double tickerPrice = await tickerService.GetTickerPrice("TSLA");
+
+                string replyText = "Днів без згадування тесли: `0`\n🚗🚗🚗" +
+                        $"\n\n...btw ${tickerPrice}";
+
+                Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+            }
         }
     }
 }

@@ -115,5 +115,22 @@ namespace RudeBot
             await BotClient.TryDeleteMessage(msg);
             await BotClient.TryDeleteMessage(Message);
         }
+
+        [MessageReaction(ChatAction.UploadVideo)]
+        [MessageHandler("шарий|шарій")]
+        public async Task CockMan()
+        {
+            Message msg;
+
+            using (FileStream stream = System.IO.File.OpenRead("data/media/sh.MOV"))
+            {
+                msg = await BotClient.SendVideoAsync(
+                    chatId: ChatId,
+                    video: stream);
+            }
+
+            await Task.Delay(30 * 1000);
+            await BotClient.TryDeleteMessage(msg);
+        }
     }
 }

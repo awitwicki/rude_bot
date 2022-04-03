@@ -6,4 +6,4 @@ obj/
 
 .env
 
-data/
+*.sqlite*

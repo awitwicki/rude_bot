@@ -132,5 +132,18 @@ namespace RudeBot
             await Task.Delay(30 * 1000);
             await BotClient.TryDeleteMessage(msg);
         }
+
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("ё|ъ|ы|э")]
+        public async Task Palanytsa()
+        {
+            // Ignore message forwards
+            if (Message.ForwardFrom != null || Message.ForwardFromChat != null)
+                return;
+
+            string replyText = "Ану кажи \"паляниця\" 😡";
+
+            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+        }
     }
 }

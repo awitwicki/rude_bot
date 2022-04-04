@@ -11,6 +11,7 @@ namespace RudeBot.Database
     public class DataContext : DbContext
     {
         public DbSet<TelegramUser> Users { get; set; }
+        public DbSet<UserChatStats> UserStats { get; set; }
 
         public DataContext()
         {

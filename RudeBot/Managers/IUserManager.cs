@@ -9,8 +9,9 @@ namespace RudeBot.Managers
 {
     public interface IUserManager
     {
-        Task<TelegramUser> GetUser(long userId);
+        Task<UserChatStats> GetUserChatStats(long userId, long chatId);
         Task<TelegramUser> CreateUser(TelegramUser user);
-        Task<TelegramUser> UpdateUser(TelegramUser user);
+        Task<UserChatStats> CreateUserChatStats(UserChatStats userChatStats);
+        Task<UserChatStats> UpdateUserChatStats(UserChatStats user);
     }
 }

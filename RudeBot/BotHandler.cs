@@ -75,36 +75,36 @@ namespace RudeBot
                 return ((int)id % 3, (int)id % 5 % 2);
             }
 
-            TelegramUser user = await _userManager.GetUser(User.Id);
+            UserChatStats userStats = await _userManager.GetUserChatStats(User.Id, ChatId);
 
-            long userSize = getSize(user.Id);
+            long userSize = getSize(userStats.Id);
 
             float BadWordsPercent = 0;
-            if (user.TotalBadWords > 0 && user.TotalMessages > 0)
+            if (userStats.TotalBadWords > 0 && userStats.TotalMessages > 0)
             {
-                BadWordsPercent = user.TotalBadWords * 100 / user.TotalMessages;
+                BadWordsPercent = userStats.TotalBadWords * 100 / userStats.TotalMessages;
             }
 
             float karmaPercent = 0;
-            if (user.Karma > 0 && user.TotalMessages > 0)
+            if (userStats.Karma > 0 && userStats.TotalMessages > 0)
             {
-                karmaPercent = user.Karma * 100 / user.TotalMessages;
+                karmaPercent = userStats.Karma * 100 / userStats.TotalMessages;
             }
 
             List<string> orientationTypes = new List<string>() { "Латентний", "Гендерфлюід", "" };
             List<string> orientationNames = new List<string>() { "Android", "Apple" };
 
-            (int, int) orientationValues = orientation(user.Id);
+            (int, int) orientationValues = orientation(userStats.Id);
 
             string orientationType = orientationTypes[orientationValues.Item1];
             string orientationName = orientationNames[orientationValues.Item2];
 
-            string replyText = $"Привіт {user.UserName}, твоя карма:\n\n" +
-                $"Карма: `{user.Karma} ({karmaPercent}%)`\n" +
-                $"🚧Попереджень: `{user.Warns}`\n" +
-                $"Повідомлень: `{user.TotalMessages}`\n" +
-                $"Матюків: `{user.TotalBadWords} ({BadWordsPercent}%)`\n" +
-                $"Rude-коїнів: `{user.RudeCoins}`💰\n" +
+            string replyText = $"Привіт {userStats.User.UserName}, твоя карма:\n\n" +
+                $"Карма: `{userStats.Karma} ({karmaPercent}%)`\n" +
+                $"🚧Попереджень: `{userStats.Warns}`\n" +
+                $"Повідомлень: `{userStats.TotalMessages}`\n" +
+                $"Матюків: `{userStats.TotalBadWords} ({BadWordsPercent}%)`\n" +
+                $"Rude-коїнів: `{userStats.RudeCoins}`💰\n" +
                 $"Довжина: `{userSize}` сантиметрів, ну і гігант...\n" +
                 $"Орієнтація: `{orientationType} {orientationName}` користувач";
 

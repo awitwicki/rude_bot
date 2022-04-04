@@ -20,17 +20,20 @@ namespace RudeBot
 
         public override async Task Invoke()
         {
-            TelegramUser user = await _userManager.GetUser(User.Id);
+            // Get UserStats
+            UserChatStats userStats = await _userManager.GetUserChatStats(User.Id, ChatId);
 
-            // Register new user
-            if (user == null)
+            // Register new user stats
+            if (userStats == null)
             {
-                user = TelegramUser.FromUser(User);
+                userStats = UserChatStats.FromChat(Chat);
+                userStats.UserId = User.Id;
+                userStats.User = TelegramUser.FromUser(User);
 
-                await _userManager.CreateUser(user);
+                await _userManager.CreateUserChatStats(userStats);
             }
 
-            user.TotalMessages++;
+            userStats.TotalMessages++;
 
             // Bad words
             // ...
@@ -39,7 +42,7 @@ namespace RudeBot
             // ...
 
             // Save user
-            await _userManager.UpdateUser(user);
+            await _userManager.UpdateUserChatStats(userStats);
         }
     }
 }

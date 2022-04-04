@@ -13,7 +13,7 @@ namespace RudeBot.Managers
     {
         private DataContext _dbContext;
 
-        private TelegramUser? _telegramUser { get; set; }
+        private UserChatStats? _telegramUserStats { get; set; }
 
         public UserManager()
         {
@@ -29,31 +29,56 @@ namespace RudeBot.Managers
         }
 
         // TODO: Make GetUser() result cache for scoped DI container?
-        public async Task<TelegramUser> GetUser(long userId)
+        public async Task<UserChatStats> GetUserChatStats(long userId, long chatId)
         {
-            if (_telegramUser != null)
+            if (_telegramUserStats != null)
             {
-                return _telegramUser;
+                return _telegramUserStats;
             }
             else
             {
-                TelegramUser user = await _dbContext
-                    .Users
+                UserChatStats userStats = await _dbContext
+                    .UserStats
+                    .Include(x => x.User)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Id == userId);
+                    .FirstOrDefaultAsync(x => x.UserId == userId && x.ChatId == chatId);
 
-                _telegramUser = user;
+                _telegramUserStats = userStats;
 
-                return user;
+                return userStats;
             }
         }
 
-        public async Task<TelegramUser> UpdateUser(TelegramUser user)
+        public async Task<UserChatStats> CreateChat(UserChatStats chat)
         {
-            _dbContext.Users.Update(user);
+            var usr = await _dbContext.UserStats.AddAsync(chat);
+            await _dbContext.SaveChangesAsync();
+
+            return usr.Entity;
+        }
+
+        public async Task<UserChatStats> UpdateUserChatStats(UserChatStats user)
+        {
+            _dbContext.UserStats.Update(user);
             await _dbContext.SaveChangesAsync();
 
             return user;
+        }
+
+        public async Task<UserChatStats> CreateUserChatStats(UserChatStats userChatStats)
+        {
+            // If user exists then remove object to prevent crating new existing user
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == userChatStats.UserId);
+            if (user != null)
+            {
+                userChatStats.User = null;
+            }
+
+            // Create new UserStats with new user (optional) in db
+            var usr = await _dbContext.AddAsync(userChatStats);
+            await _dbContext.SaveChangesAsync();
+
+            return usr.Entity;
         }
     }
 }

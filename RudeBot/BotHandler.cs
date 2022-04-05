@@ -120,14 +120,7 @@ namespace RudeBot
         [MessageHandler("шарий|шарій")]
         public async Task CockMan()
         {
-            Message msg;
-
-            using (FileStream stream = System.IO.File.OpenRead("data/media/sh.MOV"))
-            {
-                msg = await BotClient.SendVideoAsync(
-                    chatId: ChatId,
-                    video: stream);
-            }
+            Message msg = await BotClient.SendVideoAsync(chatId: ChatId, video: Consts.CockmanVideoUrl);
 
             await Task.Delay(30 * 1000);
             await BotClient.TryDeleteMessage(msg);

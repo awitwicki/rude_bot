@@ -38,9 +38,6 @@ namespace RudeBot
             // Bad words
             // ...
 
-            // Handle karma
-            // ...
-
             // Save user
             await _userManager.UpdateUserChatStats(userStats);
         }

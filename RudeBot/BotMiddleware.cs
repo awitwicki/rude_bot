@@ -1,6 +1,8 @@
-﻿using PowerBot.Lite.Middlewares;
+﻿using Autofac;
+using PowerBot.Lite.Middlewares;
 using RudeBot.Managers;
 using RudeBot.Models;
+using RudeBot.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,8 +37,22 @@ namespace RudeBot
 
             userStats.TotalMessages++;
 
-            // Bad words
-            // ...
+            // Count Bad words
+            if (Message.Text != null)
+            {
+                using (var scope = DIContainerInstance.Container.BeginLifetimeScope())
+                {
+                    TxtWordsDatasetReader badWordsTxtReader = scope.ResolveNamed<TxtWordsDatasetReader>(Consts.BadWordsReaderService);
+
+                    string messageText = Message.Text.ToLower();
+
+                    var badWords = badWordsTxtReader.GetWords();
+                    if (badWords.Any(x => messageText.Contains(x)))
+                    {
+                        userStats.TotalBadWords++;
+                    }
+                }
+            }
 
             // Save user
             await _userManager.UpdateUserChatStats(userStats);

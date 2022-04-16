@@ -2,6 +2,7 @@
 using Autofac;
 using Microsoft.EntityFrameworkCore;
 using PowerBot.Lite;
+using RudeBot;
 using RudeBot.Database;
 using RudeBot.Services;
 
@@ -18,7 +19,14 @@ _dbContext.Dispose();
 var builder = new ContainerBuilder();
 
 // Register services
-builder.RegisterType<TickerService>().As<ITickerService>().SingleInstance();
+builder.RegisterType<TickerService>()
+    .As<ITickerService>()
+    .SingleInstance();
+
+builder.RegisterType<TxtWordsDatasetReader>()
+    .Named<TxtWordsDatasetReader>(Consts.BadWordsReaderService)
+    .WithParameter("path", Consts.BadWordsTxtPath)
+    .SingleInstance();
 
 // Build container
 DIContainerInstance.Container = builder.Build();

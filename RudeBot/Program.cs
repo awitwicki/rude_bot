@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Autofac;
+using Microsoft.EntityFrameworkCore;
 using PowerBot.Lite;
 using RudeBot.Database;
 using RudeBot.Services;
@@ -10,7 +11,7 @@ string botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
 
 // Create database if not exists
 DataContext _dbContext = new DataContext();
-_dbContext.Database.EnsureCreated();
+_dbContext.Database.Migrate();
 _dbContext.Dispose();
 
 // Create DI container

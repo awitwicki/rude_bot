@@ -126,6 +126,16 @@ namespace RudeBot
             await BotClient.TryDeleteMessage(msg);
         }
 
+        [MessageReaction(ChatAction.UploadPhoto)]
+        [MessageHandler("samsung|самсунг|сасунг")]
+        public async Task Samsung()
+        {
+            Message msg = await BotClient.SendPhotoAsync(chatId: ChatId, photo: Consts.SamsungUrl, replyToMessageId: Message.MessageId);
+            
+            await Task.Delay(30 * 1000);
+            await BotClient.TryDeleteMessage(msg);
+        }
+
         [MessageReaction(ChatAction.Typing)]
         [MessageHandler("ё|ъ|ы|э")]
         public async Task Palanytsa()

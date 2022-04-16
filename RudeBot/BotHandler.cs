@@ -245,5 +245,36 @@ namespace RudeBot
 
             await BotClient.TryDeleteMessage(msg);
         }
+
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("^-$")]
+        public async Task DecreaseKarma()
+        {
+            // OOh, look at here, is this code dUpLiCatIOn???
+            // Ignore message forwards
+            if (Message.ForwardFrom != null || Message.ForwardFromChat != null)
+                return;
+
+            // Filter only reply to other user, ignore bots
+            if (Message.ReplyToMessage == null || Message.ReplyToMessage.From.Id == User.Id || Message.ReplyToMessage.From.IsBot)
+                return;
+
+            UserChatStats userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+
+            // If user not exists in db then ignore
+            if (userStats == null)
+                return;
+
+            userStats.Karma--;
+            await _userManager.UpdateUserChatStats(userStats);
+
+            string replyText = $"Ви зменщили карму {userStats.User.UserName} до значення {userStats.Karma}!";
+
+            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+
+            await Task.Delay(30 * 1000);
+
+            await BotClient.TryDeleteMessage(msg);
+        }
     }
 }

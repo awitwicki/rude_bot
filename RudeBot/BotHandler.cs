@@ -288,6 +288,128 @@ namespace RudeBot
             await BotClient.TryDeleteMessage(msg);
         }
 
+        private async Task<bool> _processWarnRights(Message message, Chat chat, User user)
+        {
+            // Ignore message forwards
+            if (message.ForwardFrom != null || message.ForwardFromChat != null)
+                return false;
+
+            Message msg = null;
+
+            // Filter only reply to other user, ignore bots
+            if (message.ReplyToMessage == null || message.ReplyToMessage.From.Id == user.Id || message.ReplyToMessage.From.IsBot)
+            {
+                msg = await BotClient.SendTextMessageAsync(chat.Id, "/warn або /unwarn має бути відповіддю, на чиєсь повідомлення", replyToMessageId: message.MessageId);
+
+                await Task.Delay(30 * 1000);
+
+                await BotClient.TryDeleteMessage(msg);
+                await BotClient.TryDeleteMessage(message);
+                return false;
+            }
+
+            // Filter for only admins
+            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(chat.Id, user.Id);
+            if (!(usrSenderRights.Status == ChatMemberStatus.Administrator || usrSenderRights.Status == ChatMemberStatus.Creator))
+            {
+                msg = await BotClient.SendTextMessageAsync(ChatId, "/warn або /unwarn дозволений тільки для адмінів", replyToMessageId: message.MessageId);
+
+                await Task.Delay(30 * 1000);
+
+                await BotClient.TryDeleteMessage(msg);
+                await BotClient.TryDeleteMessage(message);
+                return false;
+            }
+
+            // Admin cant warn other admins
+            ChatMember usrReceiverRights = await BotClient.GetChatMemberAsync(chat.Id, message.ReplyToMessage.From.Id);
+            if (usrReceiverRights.Status == ChatMemberStatus.Administrator || usrReceiverRights.Status == ChatMemberStatus.Creator)
+            {
+                msg = await BotClient.SendTextMessageAsync(chat.Id, "/warn або /unwarn не діє на адмінів", replyToMessageId: message.MessageId);
+
+                await Task.Delay(30 * 1000);
+
+                await BotClient.TryDeleteMessage(msg);
+                await BotClient.TryDeleteMessage(message);
+                return false;
+            }
+
+            return true;
+        }
+
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("^/warn")]
+        public async Task Warn()
+        {
+            bool isWarnLegit = await _processWarnRights(Message, Chat, User);
+
+            if (!isWarnLegit)
+                return;
+
+            UserChatStats userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+
+            // If user not exists in db then ignore
+            if (userStats == null)
+                return;
+
+            userStats.Warns++;
+            await _userManager.UpdateUserChatStats(userStats);
+
+            string replyText = $"{userStats.User.UserName} , вам винесено попередження адміна!\n" +
+                $"Треба думати що ви пишете, \n" +
+                $"ви маєте вже {userStats.Warns} попередження!\n\n" +
+                $"1 попередження - будь-який адмін може заборонити медіа/стікери/ввести ліміт повідомлень!\n" +
+                $"2 попередження - мют на день (або тиждень, на розсуд адміна)!\n" +
+                $"3 попередження - бан!\n\n" +
+                $"Адміни вирішать твою долю(ще не зроблено)):";
+
+            var keyboardMarkup = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>> { 
+                new List<InlineKeyboardButton> {
+                     InlineKeyboardButton.WithCallbackData("Заборона медіа", $"manage_ban_media_user|{Message.ReplyToMessage.From.Id}"),
+                     InlineKeyboardButton.WithCallbackData("Мют на день", $"manage_mute_day_user|{Message.ReplyToMessage.From.Id}"),
+                },
+                new List<InlineKeyboardButton> {
+                     InlineKeyboardButton.WithCallbackData("Стратити лагідно", $"manage_kick_user|{Message.ReplyToMessage.From.Id}"),
+                     InlineKeyboardButton.WithCallbackData("Стратити назавжди", $"manage_ban_user|{Message.ReplyToMessage.From.Id}"),
+                },
+                new List<InlineKeyboardButton> {
+                    InlineKeyboardButton.WithCallbackData("Амністувати", $"manage_amnesty_user|{Message.ReplyToMessage.From.Id}") 
+                }
+            });
+
+            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.ReplyToMessage.MessageId, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
+            await BotClient.TryDeleteMessage(Message);
+        }
+
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("^/unwarn")]
+        public async Task Unwarn()
+        {
+            bool isWarnLegit = await _processWarnRights(Message, Chat, User);
+
+            if (!isWarnLegit)
+                return;
+
+            UserChatStats userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+
+            // If user not exists in db then ignore
+            if (userStats == null)
+                return;
+
+            userStats.Warns--;
+            await _userManager.UpdateUserChatStats(userStats);
+
+            string replyText = $"{userStats.User.UserName}, попередження анульовано!";
+
+            if (userStats.Warns > 0)
+            {
+                replyText += $"\n\n На балансі ще {userStats.Warns} попередженнь";
+            }
+
+            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.ReplyToMessage.MessageId, parseMode: ParseMode.Markdown);
+            await BotClient.TryDeleteMessage(Message);
+        }
+
         [MessageTypeFilter(MessageType.Text)]
         public async Task MessageTrigger()
         {

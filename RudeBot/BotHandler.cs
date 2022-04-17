@@ -15,6 +15,7 @@ using RudeBot.Services;
 using Autofac;
 using PowerBot.Lite.Utils;
 using RudeBot.Extensions;
+using RudeBot.Keyboards;
 
 namespace RudeBot
 {
@@ -337,6 +338,83 @@ namespace RudeBot
             return true;
         }
 
+        [CallbackQueryHandler("^manage_")]
+        public async Task ManageUserRights()
+        {
+            // Filter for only admins
+            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, User.Id);
+            if (!(usrSenderRights.Status == ChatMemberStatus.Administrator || usrSenderRights.Status == ChatMemberStatus.Creator))
+            {
+                await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Це кнопка для адмінів", true);
+                return;
+            }
+
+            // Parse user id
+            long userId = long.Parse(CallbackQuery.Data!.Split('|').Last());
+            
+            // Parse command
+            string command = CallbackQuery.Data
+                .Split('|')
+                .First()
+                .Replace("manage_", "")
+                .Replace("_user", "");
+
+            string actionResult = null;
+
+            switch (command)
+            {
+                case "ban_media":
+                    await BotClient.RestrictChatMemberAsync(ChatId, userId, new ChatPermissions() { CanSendMessages = true, CanSendMediaMessages = false }, DateTime.UtcNow.AddDays(1));
+                    actionResult = "\nЗабанено медіа";
+                    break;
+                case "mute_day":
+                    await BotClient.RestrictChatMemberAsync(ChatId, userId, new ChatPermissions() { CanSendMessages = false }, DateTime.UtcNow.AddDays(1));
+                    actionResult = "\nМут на день";
+                    break;
+                case "kick":
+                    await BotClient.KickChatMemberAsync(ChatId, userId, DateTime.UtcNow.AddMinutes(1));
+                    actionResult = "\nВикинуто з чату";
+                    break;
+                case "ban":
+                    await BotClient.KickChatMemberAsync(ChatId, userId, DateTime.UtcNow.AddYears(1000));
+                    actionResult = "\nВідправився за кораблем";
+                    break;
+                case "amnesty":
+                    // Unban all restrictions
+                    ChatPermissions permissions = new ChatPermissions
+                    {
+                        CanSendMessages = true,
+                        CanSendMediaMessages = true,
+                        CanSendPolls = true,
+                        CanSendOtherMessages = true,
+                        CanAddWebPagePreviews = true,
+                        CanChangeInfo = true,
+                        CanInviteUsers = true,
+                        CanPinMessages = true,
+                    };
+                    await BotClient.RestrictChatMemberAsync(ChatId, userId, permissions);
+
+                    UserChatStats userStats = await _userManager.GetUserChatStats(userId, ChatId);
+
+                    // If user not exists in db then ignore
+                    if (userStats == null)
+                        return;
+
+                    userStats.Warns = 0;
+                    await _userManager.UpdateUserChatStats(userStats);
+                    actionResult = "\nАмністован";
+                    break;
+            }
+
+            if (actionResult == null)
+                actionResult = "\n Error :(";
+
+            var keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(Message.ReplyToMessage.From.Id);
+            await BotClient.EditMessageTextAsync(ChatId, CallbackQuery.Message.MessageId, CallbackQuery.Message.Text + actionResult, replyMarkup: keyboardMarkup);
+
+            await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Виконано", true);
+        }
+
         [MessageReaction(ChatAction.Typing)]
         [MessageHandler("^/warn")]
         public async Task Warn()
@@ -361,22 +439,10 @@ namespace RudeBot
                 $"1 попередження - будь-який адмін може заборонити медіа/стікери/ввести ліміт повідомлень!\n" +
                 $"2 попередження - мют на день (або тиждень, на розсуд адміна)!\n" +
                 $"3 попередження - бан!\n\n" +
-                $"Адміни вирішать твою долю(ще не зроблено)):";
+                $"Адміни вирішать твою долю:";
 
-            var keyboardMarkup = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>> { 
-                new List<InlineKeyboardButton> {
-                     InlineKeyboardButton.WithCallbackData("Заборона медіа", $"manage_ban_media_user|{Message.ReplyToMessage.From.Id}"),
-                     InlineKeyboardButton.WithCallbackData("Мют на день", $"manage_mute_day_user|{Message.ReplyToMessage.From.Id}"),
-                },
-                new List<InlineKeyboardButton> {
-                     InlineKeyboardButton.WithCallbackData("Стратити лагідно", $"manage_kick_user|{Message.ReplyToMessage.From.Id}"),
-                     InlineKeyboardButton.WithCallbackData("Стратити назавжди", $"manage_ban_user|{Message.ReplyToMessage.From.Id}"),
-                },
-                new List<InlineKeyboardButton> {
-                    InlineKeyboardButton.WithCallbackData("Амністувати", $"manage_amnesty_user|{Message.ReplyToMessage.From.Id}") 
-                }
-            });
-
+            var keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(Message.ReplyToMessage.From.Id);
+              
             Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.ReplyToMessage.MessageId, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
             await BotClient.TryDeleteMessage(Message);
         }

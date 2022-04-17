@@ -28,6 +28,11 @@ builder.RegisterType<TxtWordsDatasetReader>()
     .WithParameter("path", Consts.BadWordsTxtPath)
     .SingleInstance();
 
+builder.RegisterType<TxtWordsDatasetReader>()
+    .Named<TxtWordsDatasetReader>(Consts.AdvicesReaderService)
+    .WithParameter("path", Consts.AdvicesTxtPath)
+    .SingleInstance();
+
 // Build container
 DIContainerInstance.Container = builder.Build();
 

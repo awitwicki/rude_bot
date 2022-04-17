@@ -8,7 +8,7 @@ namespace RudeBot
 {
     public static class Consts
     {
-        public const string BotVersion = "3.12.0";
+        public const string BotVersion = "3.13.0";
         public const string GithubUrl = "github.com/awitwicki/rude_bot/tree/dev_dotnet";
         public const string GoogleFormForNewbies = "https://forms.gle/pY6EjJhNRosUbd9P9";
         public const string WelcomeToTheClubBuddyVideoUrl = "https://github.com/awitwicki/rude_bot/blob/main/data/media/welcome.mp4?raw=true";
@@ -17,6 +17,10 @@ namespace RudeBot
 
         public const string BadWordsReaderService = "BadWordsReaderService";
         public const string BadWordsTxtPath = "Resources/Badwords.txt";
+        public const string AdvicesReaderService = "AdvicesReaderService";
+        public const string AdvicesTxtPath = "Resources/Advices.txt";
+
+
 
         public const string DbPath = "data/database.sqlite";
 

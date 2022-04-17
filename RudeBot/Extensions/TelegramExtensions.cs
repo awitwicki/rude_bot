@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace RudeBot
+namespace RudeBot.Extensions
 {
     internal static class TelegramExtensions
     {

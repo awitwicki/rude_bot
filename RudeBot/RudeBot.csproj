@@ -24,6 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Resources\Advices.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Badwords.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

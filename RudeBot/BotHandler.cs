@@ -14,6 +14,7 @@ using RudeBot.Models;
 using RudeBot.Services;
 using Autofac;
 using PowerBot.Lite.Utils;
+using RudeBot.Extensions;
 
 namespace RudeBot
 {
@@ -285,6 +286,35 @@ namespace RudeBot
             await Task.Delay(30 * 1000);
 
             await BotClient.TryDeleteMessage(msg);
+        }
+
+        [MessageTypeFilter(MessageType.Text)]
+        public async Task MessageTrigger()
+        {
+            if (Message.Text != null)
+            {
+                string replyText = null;
+                Random random = new Random();
+
+                if ((Message?.ReplyToMessage?.From?.Id == BotClient.BotId) || (random.Next(100) > 95))
+                {
+                    using (var scope = DIContainerInstance.Container.BeginLifetimeScope())
+                    {
+                        TxtWordsDatasetReader advicesTxtReader = scope.ResolveNamed<TxtWordsDatasetReader>(Consts.AdvicesReaderService);
+
+                        string messageText = Message.Text.ToLower();
+
+                        var advices = advicesTxtReader.GetWords();
+                        replyText = advices.PickRandom();
+                    }
+                }
+
+                if (replyText != null)
+                {
+                    bool isReply = (random.Next(100) > 50);
+                    Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: isReply ? Message.MessageId : null);
+                }
+            }
         }
     }
 }

@@ -56,7 +56,7 @@ namespace RudeBot
         }
 
         [MessageReaction(ChatAction.Typing)]
-        [MessageHandler(".ru")]
+        [MessageHandler("[\\w\\-]+\\.ru")]
         public async Task DotRu()
         {
             string messageText = "*Російська пропаганда не може вважатися пруфом!*\n\nВас буде додано до реєстру.";

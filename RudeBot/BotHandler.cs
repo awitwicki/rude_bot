@@ -484,7 +484,7 @@ namespace RudeBot
                 string replyText = null;
                 Random random = new Random();
 
-                if ((Message?.ReplyToMessage?.From?.Id == BotClient.BotId) || (random.Next(100) > 95))
+                if ((Message?.ReplyToMessage?.From?.Id == BotClient.BotId) || (random.Next(1, 1000) > 985))
                 {
                     using (var scope = DIContainerInstance.Container.BeginLifetimeScope())
                     {

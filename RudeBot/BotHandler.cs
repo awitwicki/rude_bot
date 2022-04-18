@@ -67,48 +67,9 @@ namespace RudeBot
         [MessageHandler("(^карма$|^karma$)")]
         public async Task Karma()
         {
-            long getSize(long id)
-            {
-                return (id + 6) % 15 + 7;
-            }
-
-            (int, int) orientation(long id)
-            {
-                return ((int)id % 3, (int)id % 5 % 2);
-            }
-
             UserChatStats userStats = await _userManager.GetUserChatStats(User.Id, ChatId);
 
-            long userSize = getSize(userStats.Id);
-
-            float BadWordsPercent = 0;
-            if (userStats.TotalBadWords > 0 && userStats.TotalMessages > 0)
-            {
-                BadWordsPercent = userStats.TotalBadWords * 100 / userStats.TotalMessages;
-            }
-
-            float karmaPercent = 0;
-            if (userStats.Karma > 0 && userStats.TotalMessages > 0)
-            {
-                karmaPercent = userStats.Karma * 100 / userStats.TotalMessages;
-            }
-
-            List<string> orientationTypes = new List<string>() { "Латентний", "Гендерфлюід", "" };
-            List<string> orientationNames = new List<string>() { "Android", "Apple" };
-
-            (int, int) orientationValues = orientation(userStats.Id);
-
-            string orientationType = orientationTypes[orientationValues.Item1];
-            string orientationName = orientationNames[orientationValues.Item2];
-
-            string replyText = $"Привіт {userStats.User.UserName}, твоя карма:\n\n" +
-                $"Карма: `{userStats.Karma} ({karmaPercent}%)`\n" +
-                $"🚧Попереджень: `{userStats.Warns}`\n" +
-                $"Повідомлень: `{userStats.TotalMessages}`\n" +
-                $"Матюків: `{userStats.TotalBadWords} ({BadWordsPercent}%)`\n" +
-                $"Rude-коїнів: `{userStats.RudeCoins}`💰\n" +
-                $"Довжина: `{userSize}` сантиметрів, ну і гігант...\n" +
-                $"Орієнтація: `{orientationType} {orientationName}` користувач";
+            string replyText = userStats.BuildInfoString();
 
             Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
@@ -473,6 +434,61 @@ namespace RudeBot
             }
 
             Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.ReplyToMessage.MessageId, parseMode: ParseMode.Markdown);
+            await BotClient.TryDeleteMessage(Message);
+        }
+
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("^/scan$")]
+        public async Task Scan()
+        {
+            Message msg = null;
+            string replyText = null;
+
+            // =================Govnocode begin=================
+            // Check message is reply, ignore bots
+            if (Message.ReplyToMessage == null || User.IsBot && Message.ReplyToMessage == null || Message.ReplyToMessage.From.Id == User.Id || Message.ReplyToMessage.From.IsBot)
+                replyText = "/scan має бути відповіддю, на чиєсь повідомлення (боти не рахуються)";
+            else
+            {
+                // Сheck if user have rights to scan
+                ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From.Id);
+                if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
+                {
+                    replyText = "/scan дозволений тільки для адмінів";
+                }
+            }
+               
+            if (replyText != null)
+            {
+                msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId);
+
+                await Task.Delay(30 * 1000);
+
+                await BotClient.TryDeleteMessage(msg);
+                await BotClient.TryDeleteMessage(Message);
+                return;
+            }
+
+            UserChatStats userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+
+            // If user not exists in db then ignore
+            if (userStats == null)
+                return;
+
+            // =================Govnocode end=================
+
+            replyText = userStats.BuildInfoString();
+
+            InlineKeyboardMarkup keyboardMarkup = null;
+
+            // If this user is admin then dont pin manage keyboard
+            ChatMember usrReceiverRights = await BotClient.GetChatMemberAsync(ChatId, Message.ReplyToMessage.From.Id);
+            if (usrReceiverRights.Status != ChatMemberStatus.Administrator && usrReceiverRights.Status != ChatMemberStatus.Creator)
+            {
+                keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(Message.ReplyToMessage.From.Id);
+            }
+
+            msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
             await BotClient.TryDeleteMessage(Message);
         }
 

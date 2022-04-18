@@ -32,6 +32,52 @@ namespace RudeBot.Models
                 Warns = 0
             };
         }
+
+        public string BuildInfoString()
+        {
+            long getSize(long id)
+            {
+                return (id + 6) % 15 + 7;
+            }
+
+            (int, int) orientation(long id)
+            {
+                return ((int)id % 3, (int)id % 5 % 2);
+            }
+
+            long userSize = getSize(Id);
+
+            float BadWordsPercent = 0;
+            if (TotalBadWords > 0 && TotalMessages > 0)
+            {
+                BadWordsPercent = TotalBadWords * 100 / TotalMessages;
+            }
+
+            float karmaPercent = 0;
+            if (Karma > 0 && TotalMessages > 0)
+            {
+                karmaPercent = Karma * 100 / TotalMessages;
+            }
+
+            List<string> orientationTypes = new List<string>() { "Латентний", "Гендерфлюід", "" };
+            List<string> orientationNames = new List<string>() { "Android", "Apple" };
+
+            (int, int) orientationValues = orientation(Id);
+
+            string orientationType = orientationTypes[orientationValues.Item1];
+            string orientationName = orientationNames[orientationValues.Item2];
+
+            string result = $"Юзернейм: {User.UserName}\n" +
+               $"Карма: `{Karma} ({karmaPercent}%)`\n" +
+               $"🚧 Попереджень: `{Warns}`\n" +
+               $"Повідомлень: `{TotalMessages}`\n" +
+               $"Матюків: `{TotalBadWords} ({BadWordsPercent}%)`\n" +
+               $"Rude-коїнів: `{RudeCoins}`💰\n" +
+               $"Довжина: `{userSize}` сантиметрів, ну і гігант...\n" +
+               $"Орієнтація: `{orientationType} {orientationName}` користувач";
+
+            return result;
+        }
     }
     public class TelegramUser
     {

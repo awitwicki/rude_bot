@@ -21,7 +21,11 @@ namespace RudeBot.Keyboards
                      InlineKeyboardButton.WithCallbackData("Стратити назавжди", $"manage_ban_user|{userId}"),
                 },
                 new List<InlineKeyboardButton> {
+                    InlineKeyboardButton.WithCallbackData("+1 варн", $"manage_add_warn_user|{userId}"),
                     InlineKeyboardButton.WithCallbackData("Амністувати", $"manage_amnesty_user|{userId}")
+                },
+                new List<InlineKeyboardButton> {
+                    InlineKeyboardButton.WithCallbackData("Приховати клавіатуру", $"manage_hide_keyboard")
                 }
             });
 

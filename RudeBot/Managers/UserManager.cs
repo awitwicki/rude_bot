@@ -49,6 +49,18 @@ namespace RudeBot.Managers
             }
         }
 
+        public async Task<IEnumerable<UserChatStats>> GetAllUsersChatStats(long chatId)
+        {
+            List<UserChatStats> users = await _dbContext
+                .UserStats
+                .Include(x => x.User)
+                .AsNoTracking()
+                .Where(x => x.ChatId == chatId)
+                .ToListAsync();
+
+            return users;
+        }
+
         public async Task<UserChatStats> CreateChat(UserChatStats chat)
         {
             var usr = await _dbContext.UserStats.AddAsync(chat);

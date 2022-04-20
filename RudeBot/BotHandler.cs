@@ -22,9 +22,11 @@ namespace RudeBot
     public class BotHandler : BaseHandler
     {
         private IUserManager _userManager { get; set; }
+        private static Object _topLocked { get; set; } = new Object();
         public BotHandler()
         {
             _userManager = new UserManager();
+            //_topLocked = new Object();
         }
 
         [MessageReaction(ChatAction.Typing)]
@@ -210,7 +212,7 @@ namespace RudeBot
             userStats.Karma++;
             await _userManager.UpdateUserChatStats(userStats);
 
-            string replyText = $"Ви збільшили карму {userStats.User.UserName} до значення {userStats.Karma}! 🥳";
+            string replyText = $"Ви збільшили карму {userStats.User.UserMention} до значення {userStats.Karma}! 🥳";
 
             Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
@@ -241,7 +243,7 @@ namespace RudeBot
             userStats.Karma--;
             await _userManager.UpdateUserChatStats(userStats);
 
-            string replyText = $"Ви зменщили карму {userStats.User.UserName} до значення {userStats.Karma}!";
+            string replyText = $"Ви зменщили карму {userStats.User.UserMention} до значення {userStats.Karma}!";
 
             Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
@@ -299,6 +301,22 @@ namespace RudeBot
             return true;
         }
 
+        [CallbackQueryHandler("^manage_hide_keyboard$")]
+        public async Task ManageHideKeyboard()
+        {
+            // Filter for only admins
+            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, User.Id);
+            if (!(usrSenderRights.Status == ChatMemberStatus.Administrator || usrSenderRights.Status == ChatMemberStatus.Creator))
+            {
+                await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Це кнопка для адмінів", true);
+                return;
+            }
+
+            await BotClient.EditMessageReplyMarkupAsync(ChatId, MessageId, null);
+            await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Виконано", true);
+        }
+        
+
         [CallbackQueryHandler("^manage_")]
         public async Task ManageUserRights()
         {
@@ -320,6 +338,15 @@ namespace RudeBot
                 .Replace("manage_", "")
                 .Replace("_user", "");
 
+            UserChatStats userStats = await _userManager.GetUserChatStats(userId, ChatId);
+
+            // If user not exists in db then ignore
+            if (userStats == null)
+            {
+                await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Не виконано", true);
+                return;
+            }
+
             string actionResult = null;
 
             switch (command)
@@ -340,6 +367,11 @@ namespace RudeBot
                     await BotClient.KickChatMemberAsync(ChatId, userId, DateTime.UtcNow.AddYears(1000));
                     actionResult = "\nВідправився за кораблем";
                     break;
+                case "add_warn":
+                    userStats.Warns++;
+                    await _userManager.UpdateUserChatStats(userStats);
+                    actionResult = $"\n+1 варн ({userStats.Warns})";
+                    break;
                 case "amnesty":
                     // Unban all restrictions
                     ChatPermissions permissions = new ChatPermissions
@@ -355,12 +387,6 @@ namespace RudeBot
                     };
                     await BotClient.RestrictChatMemberAsync(ChatId, userId, permissions);
 
-                    UserChatStats userStats = await _userManager.GetUserChatStats(userId, ChatId);
-
-                    // If user not exists in db then ignore
-                    if (userStats == null)
-                        return;
-
                     userStats.Warns = 0;
                     await _userManager.UpdateUserChatStats(userStats);
                     actionResult = "\nАмністован";
@@ -370,8 +396,17 @@ namespace RudeBot
             if (actionResult == null)
                 actionResult = "\n Error :(";
 
-            var keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(Message.ReplyToMessage.From.Id);
-            await BotClient.EditMessageTextAsync(ChatId, CallbackQuery.Message.MessageId, CallbackQuery.Message.Text + actionResult, replyMarkup: keyboardMarkup);
+            string replyText = userStats.BuildWarnMessage();
+
+            string logs = "\n\nЛоги:" + CallbackQuery.Message.Text
+                .Split("\n\nЛоги:")
+                .Skip(1)
+                .FirstOrDefault();
+
+            logs += actionResult;
+
+            var keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(userId);
+            await BotClient.EditMessageTextAsync(ChatId, CallbackQuery.Message.MessageId, replyText + logs, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
 
             await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Виконано", true);
         }
@@ -394,13 +429,7 @@ namespace RudeBot
             userStats.Warns++;
             await _userManager.UpdateUserChatStats(userStats);
 
-            string replyText = $"{userStats.User.UserName} , вам винесено попередження адміна!\n" +
-                $"Треба думати що ви пишете, \n" +
-                $"ви маєте вже {userStats.Warns} попередження!\n\n" +
-                $"1 попередження - будь-який адмін може заборонити медіа/стікери/ввести ліміт повідомлень!\n" +
-                $"2 попередження - мют на день (або тиждень, на розсуд адміна)!\n" +
-                $"3 попередження - бан!\n\n" +
-                $"Адміни вирішать твою долю:";
+            string replyText = userStats.BuildWarnMessage();
 
             var keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(Message.ReplyToMessage.From.Id);
               
@@ -426,7 +455,7 @@ namespace RudeBot
             userStats.Warns--;
             await _userManager.UpdateUserChatStats(userStats);
 
-            string replyText = $"{userStats.User.UserName}, попередження анульовано!";
+            string replyText = $"{userStats.User.UserMention}, попередження анульовано!";
 
             if (userStats.Warns > 0)
             {
@@ -485,11 +514,121 @@ namespace RudeBot
             ChatMember usrReceiverRights = await BotClient.GetChatMemberAsync(ChatId, Message.ReplyToMessage.From.Id);
             if (usrReceiverRights.Status != ChatMemberStatus.Administrator && usrReceiverRights.Status != ChatMemberStatus.Creator)
             {
+                // TODO: bug - clicks on this keyboard makes bot change message text like it was /warn command
                 keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(Message.ReplyToMessage.From.Id);
             }
 
             msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
             await BotClient.TryDeleteMessage(Message);
+        }
+
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("(^топ$|^top$)")]
+        public async Task Top()
+        {
+            // Prevent for top spamming (1 top message per all chats, needs to rework)
+            var timeout = TimeSpan.FromMilliseconds(50);
+            bool lockTaken = false;
+
+            try
+            {
+                Monitor.TryEnter(_topLocked, timeout, ref lockTaken);
+                if (lockTaken)
+                {
+                    // Get all users
+                    var users = _userManager.GetAllUsersChatStats(ChatId).Result;
+
+                    String replyText = "*Топ 5 карми чату:*\n";
+
+                    users.OrderByDescending(x => x.Karma)
+                        .Take(5)
+                        .ToList()
+                        .ForEach(x =>
+                        {
+                            float karmaPercent = 0;
+                            if (x.Karma > 0 && x.TotalMessages > 0)
+                            {
+                                karmaPercent = x.Karma * 100 / x.TotalMessages;
+                            }
+
+                            replyText += $"`{x.User.UserName}` - карма `{x.Karma} ({karmaPercent}%)`\n";
+                        });
+
+                    replyText += "\n*Топ -3 карми чату:*\n";
+
+                    users.OrderBy(x => x.Karma)
+                        .Where(x => x.Karma < 0)
+                        .Take(3)
+                        .OrderByDescending(x => x.Karma)
+                        .ToList()
+                        .ForEach(x =>
+                        {
+                            float karmaPercent = 0;
+                            if (x.Karma > 0 && x.TotalMessages > 0)
+                            {
+                                karmaPercent = x.Karma * 100 / x.TotalMessages;
+                            }
+
+                            replyText += $"`{x.User.UserName}` - карма `{x.Karma} ({karmaPercent}%)`\n";
+                        });
+
+                    replyText += "\n*Топ 5 актив чату:*\n";
+
+                    users.OrderByDescending(x => x.TotalMessages)
+                        .Take(5)
+                        .ToList()
+                        .ForEach(x =>
+                        {
+                            replyText += $"`{x.User.UserName}` - повідомлень `{x.TotalMessages}`\n";
+                        });
+
+                    replyText += "\n*Топ 5 емоціонали чату:*\n";
+
+                    users.OrderByDescending(x => x.TotalBadWords)
+                        .Take(5)
+                        .ToList()
+                        .ForEach(x =>
+                        {
+                            float BadWordsPercent = 0;
+                            if (x.TotalBadWords > 0 && x.TotalMessages > 0)
+                            {
+                                BadWordsPercent = x.TotalBadWords * 100 / x.TotalMessages;
+                            }
+
+                            replyText += $"`{x.User.UserName}` - матюків `{x.TotalBadWords} ({BadWordsPercent}%)`\n";
+                        });
+
+                    replyText += "\n*Топ 5 варни чату:*\n";
+
+                    users.OrderByDescending(x => x.Warns)
+                        .Where(x => x.Warns > 0)
+                        .Take(5)
+                        .ToList()
+                        .ForEach(x =>
+                        {
+                            replyText += $"`{x.User.UserName}` - варнів `{x.Warns}`\n";
+                        });
+
+                    Message msg = BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown).Result;
+
+                    Task.Delay(30 * 1000).Wait();
+
+                    BotClient.TryDeleteMessage(msg).Wait();
+                    BotClient.TryDeleteMessage(Message).Wait();
+                }
+                else // Top list is already exists, just remove top command message
+                {
+                    await BotClient.TryDeleteMessage(Message);
+                }
+            }
+            finally
+            {
+                // Ensure that the lock is released.
+                if (lockTaken)
+                {
+                    Monitor.Exit(_topLocked);
+                }
+            }
         }
 
         [MessageTypeFilter(MessageType.Text)]

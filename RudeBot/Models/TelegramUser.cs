@@ -33,6 +33,7 @@ namespace RudeBot.Models
             };
         }
 
+        // TODO: move to other class
         public string BuildInfoString()
         {
             long getSize(long id)
@@ -67,7 +68,7 @@ namespace RudeBot.Models
             string orientationType = orientationTypes[orientationValues.Item1];
             string orientationName = orientationNames[orientationValues.Item2];
 
-            string result = $"Юзернейм: {User.UserName}\n" +
+            string result = $"Юзернейм: {User.UserMention}\n" +
                $"Карма: `{Karma} ({karmaPercent}%)`\n" +
                $"🚧 Попереджень: `{Warns}`\n" +
                $"Повідомлень: `{TotalMessages}`\n" +
@@ -78,18 +79,38 @@ namespace RudeBot.Models
 
             return result;
         }
+
+        // TODO: move to other class
+        public string BuildWarnMessage()
+        {
+            string result = $"{User.UserMention}, вам винесено попередження адміна!\n" +
+                $"Треба думати що ви пишете, \n" +
+                $"ви маєте вже {Warns} попередження!\n\n" +
+                $"1 попередження - будь-який адмін може заборонити медіа/стікери/ввести ліміт повідомлень!\n" +
+                $"2 попередження - мют на день (або тиждень, на розсуд адміна)!\n" +
+                $"3 попередження - бан!\n\n" +
+                $"Адміни вирішать твою долю:";
+
+            return result;
+        }
     }
     public class TelegramUser
     {
         public long Id { get; set; }
+        public string UserMention { get; set; }
         public string UserName { get; set; }
 
         public static TelegramUser FromUser(User user)
         {
+            string username = user.FirstName;
+            if (user.LastName != null)
+                username += " " + user.LastName;
+
             return new TelegramUser
             {
                 Id = user.Id,
-                UserName = user.GetUserMention(),
+                UserMention = user.GetUserMention(),
+                UserName = username
             };
         }
     }

@@ -11,7 +11,7 @@
 ![Tests](https://img.shields.io/github/issues-pr/awitwicki/rude_bot)
 ![Tests](https://img.shields.io/github/last-commit/awitwicki/rude_bot)
 
-![Waterfall](data/media/cat.jpg)
+![Waterfall](media/cat.jpg)
 
 ## Install
 

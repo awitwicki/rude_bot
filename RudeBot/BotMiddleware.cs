@@ -35,6 +35,8 @@ namespace RudeBot
                 await _userManager.CreateUserChatStats(userStats);
             }
 
+            // Update username, nickname and messages counter
+            userStats.User = TelegramUser.FromUser(User);
             userStats.TotalMessages++;
 
             // Count Bad words

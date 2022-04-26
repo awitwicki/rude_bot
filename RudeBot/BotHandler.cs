@@ -322,7 +322,6 @@ namespace RudeBot
             await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Виконано", true);
         }
         
-
         [CallbackQueryHandler("^manage_")]
         public async Task ManageUserRights()
         {
@@ -794,6 +793,13 @@ namespace RudeBot
                 await BotClient.TryDeleteMessage(Message);
                 await BotClient.TryDeleteMessage(msg2);
             }
+        }
+
+        [CallbackQueryHandler("^print|")]
+        public async Task PrintMessageCallback()
+        {
+            string message = CallbackQuery!.Data!.Replace("print|", "");
+            await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, message, true);
         }
 
         [MessageTypeFilter(MessageType.Text)]

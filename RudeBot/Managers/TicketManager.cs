@@ -57,5 +57,23 @@ namespace RudeBot.Managers
 
             return tasksString;
         }
+
+        public async Task<bool> RemoveTicket(long requestChatId, long ticketId)
+        {
+            using (var _dbContext = new DataContext())
+            {
+                var ticket = await _dbContext.Tickets.AsNoTracking()
+                   .Where(x => x.Id == ticketId && x.ChatId == requestChatId)
+                   .FirstOrDefaultAsync();
+
+                if (ticket == null) 
+                    return false;
+
+                _dbContext.Tickets.Remove(ticket);
+                await _dbContext.SaveChangesAsync();
+
+                return true;
+            }
+        }
     }
 }

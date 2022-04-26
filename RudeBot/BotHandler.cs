@@ -699,6 +699,57 @@ namespace RudeBot
             await BotClient.TryDeleteMessage(msg);
         }
 
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("^/removeticket")]
+        public async Task RemoveTicket()
+        {
+            String replyText = "";
+
+            // Сheck if user have rights to scan
+            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From.Id);
+            if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
+            {
+                replyText = "Дозволено тільки для адмінів";
+            }
+            else
+            {
+                // Parse message
+                string ticketIdString = Message!.Text!
+                    .Replace("/removeticket", "")
+                    .Trim();
+
+                if (ticketIdString == "")
+                {
+                    replyText = "Де, блять, номер тікету після команди?";
+                }
+                else
+                {
+                    if (long.TryParse(ticketIdString, out long ticketId))
+                    {
+                        TicketManager ticketManager = new TicketManager();
+
+                        bool removeResult = await ticketManager.RemoveTicket(ChatId, ticketId);
+
+                        if (removeResult)
+                            replyText = $"Тікет номер \"{ticketId}\" видалено.";
+                        else
+                            replyText = "Ой у нас тут \"хакер\" в чаті 😐, такого тікету не існує...";
+                    }
+                    else
+                    {
+                        replyText = "Думаєш я настільки тупий?";
+                    }
+                }
+            }
+
+            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
+
+            await Task.Delay(30 * 1000);
+
+            await BotClient.TryDeleteMessage(Message);
+            await BotClient.TryDeleteMessage(msg);
+        }
+
         [MessageTypeFilter(MessageType.Text)]
         public async Task MessageTrigger()
         {

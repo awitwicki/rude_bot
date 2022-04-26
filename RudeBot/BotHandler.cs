@@ -660,6 +660,45 @@ namespace RudeBot
             await BotClient.TryDeleteMessage(msg);
         }
 
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("^/addticket")]
+        public async Task AddTicket()
+        {
+            String replyText = "";
+
+            // Сheck if user have rights to scan
+            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From.Id);
+            if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
+            {
+                replyText = "Дозволено тільки для адмінів";
+            }
+            else
+            {
+                // Parse message
+                string ticketDescription = Message!.Text!
+                    .Replace("/addticket", "")
+                    .Trim();
+
+                if (ticketDescription != "")
+                {
+                    TicketManager ticketManager = new TicketManager();
+                    await ticketManager.AddTicket(ChatId, ticketDescription);
+                    replyText = $"Тікет \"{ticketDescription}\" додано до чату.";
+                }
+                else
+                {
+                    replyText = "Треба вказати текст тікету після команди";
+                }
+            }
+
+            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
+            
+            await Task.Delay(30 * 1000);
+            
+            await BotClient.TryDeleteMessage(Message);
+            await BotClient.TryDeleteMessage(msg);
+        }
+
         [MessageTypeFilter(MessageType.Text)]
         public async Task MessageTrigger()
         {

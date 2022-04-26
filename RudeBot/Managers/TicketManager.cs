@@ -18,6 +18,22 @@ namespace RudeBot.Managers
             _dbContext = new DataContext();
         }
 
+        public async Task AddTicket(long chatId, string text)
+        {
+            using (var _dbContext = new DataContext())
+            {
+                var ticket = new ChatTicket()
+                {
+                    Created = DateTime.UtcNow,
+                    ChatId = chatId,
+                    Ticket = text
+                };
+
+                await _dbContext.Tickets.AddAsync(ticket);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
         public async Task<string> GetChatTickets(long chatId)
         {
             String tasksString = "Тікетів не знайдено";

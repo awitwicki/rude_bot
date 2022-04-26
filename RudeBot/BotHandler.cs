@@ -30,7 +30,7 @@ namespace RudeBot
         }
 
         [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("/start")]
+        [MessageHandler("(^/start|^/help)")]
         public async Task Start()
         {
             string messageText = $"Привіт, я Рудекіт!\n\n" +
@@ -38,7 +38,7 @@ namespace RudeBot
                 "`Карма` - покажу твою карму,\n" +
                 "`Топ` - покажу топ учасників чату,\n" +
                 "`Тесла` - порахую дні без згадування тесли,\n" +
-                "`Кіт` - покажу котика,\n" +
+                "`/cat` або `Кіт` - покажу котика,\n" +
                 "`Шарій` - покажу півника,\n" +
                 "`Зрада` - розпочну процедуру бану,\n" +
                 "`/warn /unwarn` - (admins only) винесу попередження за погану поведінку,\n" +
@@ -54,7 +54,7 @@ namespace RudeBot
 
             Message msg = await BotClient.SendTextMessageAsync(ChatId, messageText, ParseMode.Markdown, replyMarkup: keyboard);
 
-            await Task.Delay(30 * 1000);
+            await Task.Delay(60 * 1000);
 
             await BotClient.TryDeleteMessage(msg);
             await BotClient.TryDeleteMessage(Message);
@@ -751,6 +751,49 @@ namespace RudeBot
 
             await BotClient.TryDeleteMessage(Message);
             await BotClient.TryDeleteMessage(msg);
+        }
+
+        [MessageReaction(ChatAction.UploadPhoto)]
+        [MessageHandler("(^/cat$|^cat$|^кіт$|^кицька$)")]
+        public async Task Cat()
+        {
+            using (var scope = DIContainerInstance.Container.BeginLifetimeScope())
+            {
+                var catService = scope.Resolve<ICatService>();
+
+                string carUrl = await catService.GetRandomCatImageUrl();
+
+                if (carUrl == null)
+                {
+                    Message msg = await BotClient.SendTextMessageAsync(chatId: ChatId, text: "*Пішов собі далі по своїх справах*", replyToMessageId: Message.MessageId);
+
+                    await Task.Delay(30 * 1000);
+                    await BotClient.TryDeleteMessage(msg);
+                    await BotClient.TryDeleteMessage(Message);
+
+                    return;
+                }
+
+                // Random cat gender
+                Random rnd = new Random();
+                bool catGender = rnd.NextDouble() % 2 == 0;
+
+                //List<string> variants = new List<string>() { "Правильно", "Не правильно :(", "Рофлиш?)", "Уважно подивись :)", "Добре, вгадав", "Даю ще 1 стробу", "Як не вгадаєш з трьох раз то летиш до бану :)" };
+                List<string> variants = new List<string>() { "Правильно", "Не правильно :(", "Рофлиш?)", "Уважно подивись :)", "Добре, вгадав", "Даю ще одну стробу" };
+                variants = variants.PickRandom(2).ToList();
+
+                var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[]
+                {
+                    InlineKeyboardButton.WithCallbackData("Кіт", $"print|{variants[0]}"),
+                    InlineKeyboardButton.WithCallbackData("Кітесса", $"print|{variants[1]}"),
+                });
+
+                Message msg2 = await BotClient.SendPhotoAsync(chatId: ChatId, photo: carUrl, replyToMessageId: Message.MessageId, replyMarkup: keyboard);
+
+                await Task.Delay(30 * 1000);
+                await BotClient.TryDeleteMessage(Message);
+                await BotClient.TryDeleteMessage(msg2);
+            }
         }
 
         [MessageTypeFilter(MessageType.Text)]

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using PowerBot.Lite;
 using RudeBot;
 using RudeBot.Database;
+using RudeBot.Managers;
 using RudeBot.Services;
 
 Console.WriteLine("Starting RudeBot");
@@ -32,6 +33,10 @@ builder.RegisterType<TxtWordsDatasetReader>()
     .Named<TxtWordsDatasetReader>(Consts.AdvicesReaderService)
     .WithParameter("path", Consts.AdvicesTxtPath)
     .SingleInstance();
+
+builder.RegisterType<CatService>()
+    .As<ICatService>()
+    .OwnedByLifetimeScope();
 
 // Build container
 DIContainerInstance.Container = builder.Build();

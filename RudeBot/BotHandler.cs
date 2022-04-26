@@ -112,6 +112,9 @@ namespace RudeBot
             string replyText = "Ану кажи \"паляниця\" 😡";
 
             Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+
+            await Task.Delay(30 * 1000);
+            await BotClient.TryDeleteMessage(msg);
         }
 
         [MessageReaction(ChatAction.Typing)]

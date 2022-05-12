@@ -775,7 +775,6 @@ namespace RudeBot
 
                 // Random cat gender
                 Random rnd = new Random();
-                bool catGender = rnd.NextDouble() % 2 == 0;
 
                 //List<string> variants = new List<string>() { "Правильно", "Не правильно :(", "Рофлиш?)", "Уважно подивись :)", "Добре, вгадав", "Даю ще 1 стробу", "Як не вгадаєш з трьох раз то летиш до бану :)" };
                 List<string> variants = new List<string>() { "Правильно", "Не правильно :(", "Рофлиш?)", "Уважно подивись :)", "Добре, вгадав", "Даю ще одну стробу" };
@@ -787,11 +786,7 @@ namespace RudeBot
                     InlineKeyboardButton.WithCallbackData("Кітесса", $"print|{variants[1]}"),
                 });
 
-                Message msg2 = await BotClient.SendPhotoAsync(chatId: ChatId, photo: carUrl, replyToMessageId: Message.MessageId, replyMarkup: keyboard);
-
-                await Task.Delay(30 * 1000);
-                await BotClient.TryDeleteMessage(Message);
-                await BotClient.TryDeleteMessage(msg2);
+                await BotClient.SendPhotoAsync(chatId: ChatId, photo: carUrl, replyToMessageId: Message.MessageId, replyMarkup: keyboard);
             }
         }
 

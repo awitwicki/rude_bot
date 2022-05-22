@@ -9,6 +9,8 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerBot.Lite", "PowerBot.Lite\PowerBot.Lite\PowerBot.Lite.csproj", "{8838414A-2B3B-4A96-85D4-E9D35CA2A882}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseChatMigrator", "DatabaseChatMigrator\DatabaseChatMigrator.csproj", "{2A8F53C5-5470-4DC3-89B7-055AE45EED08}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{8838414A-2B3B-4A96-85D4-E9D35CA2A882}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8838414A-2B3B-4A96-85D4-E9D35CA2A882}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8838414A-2B3B-4A96-85D4-E9D35CA2A882}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A8F53C5-5470-4DC3-89B7-055AE45EED08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A8F53C5-5470-4DC3-89B7-055AE45EED08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A8F53C5-5470-4DC3-89B7-055AE45EED08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A8F53C5-5470-4DC3-89B7-055AE45EED08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

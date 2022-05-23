@@ -319,7 +319,6 @@ namespace RudeBot
             }
 
             await BotClient.EditMessageReplyMarkupAsync(ChatId, MessageId, null);
-            await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Виконано", true);
         }
         
         [CallbackQueryHandler("^manage_")]

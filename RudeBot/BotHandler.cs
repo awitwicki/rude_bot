@@ -543,7 +543,8 @@ namespace RudeBot
                     // Get all users
                     var users = _userManager.GetAllUsersChatStats(ChatId).Result;
 
-                    String replyText = "*Топ 5 карми чату:*\n";
+                    String replyText = $"*Всього аккаунтів у цьому чаті: {users.Count()}*\n\n";
+                    replyText += "*Топ 5 карми чату:*\n";
 
                     users.OrderByDescending(x => x.Karma)
                         .Take(5)
@@ -559,14 +560,17 @@ namespace RudeBot
                             replyText += $"`{x.User.UserName}` - карма `{x.Karma} ({karmaPercent}%)`\n";
                         });
 
-                    replyText += "\n*Топ -3 карми чату:*\n";
-
-                    users.OrderBy(x => x.Karma)
+                    var topMinus3Users = users.OrderBy(x => x.Karma)
                         .Where(x => x.Karma < 0)
                         .Take(3)
                         .OrderByDescending(x => x.Karma)
-                        .ToList()
-                        .ForEach(x =>
+                        .ToList();
+
+                    if (topMinus3Users.Any())
+                    {
+                        replyText += "\n*Топ -3 карми чату:*\n";
+
+                        topMinus3Users.ForEach(x =>
                         {
                             float karmaPercent = 0;
                             if (x.Karma > 0 && x.TotalMessages > 0)
@@ -576,6 +580,7 @@ namespace RudeBot
 
                             replyText += $"`{x.User.UserName}` - карма `{x.Karma} ({karmaPercent}%)`\n";
                         });
+                    }
 
                     replyText += "\n*Топ 5 актив чату:*\n";
 
@@ -603,16 +608,20 @@ namespace RudeBot
                             replyText += $"`{x.User.UserName}` - матюків `{x.TotalBadWords} ({BadWordsPercent}%)`\n";
                         });
 
-                    replyText += "\n*Топ 5 варни чату:*\n";
-
-                    users.OrderByDescending(x => x.Warns)
+                    var topWarnsUsers = users.OrderByDescending(x => x.Warns)
                         .Where(x => x.Warns > 0)
                         .Take(5)
-                        .ToList()
-                        .ForEach(x =>
+                        .ToList();
+
+                    if (topWarnsUsers.Any())
+                    {
+                        replyText += "\n*Топ 5 варни чату:*\n";
+
+                        topWarnsUsers.ForEach(x =>
                         {
                             replyText += $"`{x.User.UserName}` - варнів `{x.Warns}`\n";
                         });
+                    }
 
                     Message msg = BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown).Result;
 

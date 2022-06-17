@@ -12,21 +12,31 @@ using Telegram.Bot.Types.ReplyMarkups;
 using RudeBot.Managers;
 using RudeBot.Models;
 using RudeBot.Services;
-using Autofac;
 using PowerBot.Lite.Utils;
 using RudeBot.Extensions;
 using RudeBot.Keyboards;
+using Autofac.Features.AttributeFilters;
 
 namespace RudeBot
 {
     public class BotHandler : BaseHandler
     {
         private IUserManager _userManager { get; set; }
+        private ITickerService _tickerService { get; set; }
+        private ICatService _catService { get; set; }
+        private TxtWordsDatasetReader _advicesReaderService { get; set; }
         private static Object _topLocked { get; set; } = new Object();
-        public BotHandler()
+        public BotHandler(
+            IUserManager userManager,
+            ITickerService tickerService,
+            ICatService catService,
+            [KeyFilter(Consts.AdvicesReaderService)] TxtWordsDatasetReader advicesReaderService
+            )
         {
-            _userManager = new UserManager();
-            //_topLocked = new Object();
+            _userManager = userManager;
+            _tickerService = tickerService;
+            _catService = catService;
+            _advicesReaderService = advicesReaderService;
         }
 
         [MessageReaction(ChatAction.Typing)]
@@ -124,17 +134,13 @@ namespace RudeBot
         [MessageHandler("tesl|тесл")]
         public async Task Tesla()
         {
-            using (var scope = DIContainerInstance.Container.BeginLifetimeScope())
-            {
-                var tickerService = scope.Resolve<ITickerService>();
 
-                double tickerPrice = await tickerService.GetTickerPrice("TSLA");
+            double tickerPrice = await _tickerService.GetTickerPrice("TSLA");
 
-                string replyText = "Днів без згадування тесли: `0`\n🚗🚗🚗" +
-                        $"\n\n...btw ${tickerPrice}";
+            string replyText = "Днів без згадування тесли: `0`\n🚗🚗🚗" +
+                    $"\n\n...btw ${tickerPrice}";
 
-                Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
-            }
+            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
         }
 
         [MessageReaction(ChatAction.Typing)]
@@ -764,38 +770,33 @@ namespace RudeBot
         [MessageHandler("(^/cat$|^cat$|^кіт$|^кицька$)")]
         public async Task Cat()
         {
-            using (var scope = DIContainerInstance.Container.BeginLifetimeScope())
+            string carUrl = await _catService.GetRandomCatImageUrl();
+
+            if (carUrl == null)
             {
-                var catService = scope.Resolve<ICatService>();
+                Message msg = await BotClient.SendTextMessageAsync(chatId: ChatId, text: "*Пішов собі далі по своїх справах*", replyToMessageId: Message.MessageId);
 
-                string carUrl = await catService.GetRandomCatImageUrl();
+                await Task.Delay(30 * 1000);
+                await BotClient.TryDeleteMessage(msg);
+                await BotClient.TryDeleteMessage(Message);
 
-                if (carUrl == null)
-                {
-                    Message msg = await BotClient.SendTextMessageAsync(chatId: ChatId, text: "*Пішов собі далі по своїх справах*", replyToMessageId: Message.MessageId);
+                return;
+            }
 
-                    await Task.Delay(30 * 1000);
-                    await BotClient.TryDeleteMessage(msg);
-                    await BotClient.TryDeleteMessage(Message);
+            // Random cat gender
+            Random rnd = new Random();
 
-                    return;
-                }
+            //List<string> variants = new List<string>() { "Правильно", "Не правильно :(", "Рофлиш?)", "Уважно подивись :)", "Добре, вгадав", "Даю ще 1 стробу", "Як не вгадаєш з трьох раз то летиш до бану :)" };
+            List<string> variants = new List<string>() { "Правильно", "Не правильно :(", "Рофлиш?)", "Уважно подивись :)", "Добре, вгадав", "Даю ще одну стробу" };
+            variants = variants.PickRandom(2).ToList();
 
-                // Random cat gender
-                Random rnd = new Random();
-
-                //List<string> variants = new List<string>() { "Правильно", "Не правильно :(", "Рофлиш?)", "Уважно подивись :)", "Добре, вгадав", "Даю ще 1 стробу", "Як не вгадаєш з трьох раз то летиш до бану :)" };
-                List<string> variants = new List<string>() { "Правильно", "Не правильно :(", "Рофлиш?)", "Уважно подивись :)", "Добре, вгадав", "Даю ще одну стробу" };
-                variants = variants.PickRandom(2).ToList();
-
-                var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[]
-                {
+            var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[]
+            {
                     InlineKeyboardButton.WithCallbackData("Кіт", $"print|{variants[0]}"),
                     InlineKeyboardButton.WithCallbackData("Кітесса", $"print|{variants[1]}"),
-                });
+            });
 
-                await BotClient.SendPhotoAsync(chatId: ChatId, photo: carUrl, replyToMessageId: Message.MessageId, replyMarkup: keyboard);
-            }
+            await BotClient.SendPhotoAsync(chatId: ChatId, photo: carUrl, replyToMessageId: Message.MessageId, replyMarkup: keyboard);
         }
 
         [CallbackQueryHandler("^print|")]
@@ -815,15 +816,10 @@ namespace RudeBot
 
                 if ((Message?.ReplyToMessage?.From?.Id == BotClient.BotId) || (random.Next(1, 1000) > 985))
                 {
-                    using (var scope = DIContainerInstance.Container.BeginLifetimeScope())
-                    {
-                        TxtWordsDatasetReader advicesTxtReader = scope.ResolveNamed<TxtWordsDatasetReader>(Consts.AdvicesReaderService);
+                    string messageText = Message.Text.ToLower();
 
-                        string messageText = Message.Text.ToLower();
-
-                        var advices = advicesTxtReader.GetWords();
-                        replyText = advices.PickRandom();
-                    }
+                    var advices = _advicesReaderService.GetWords();
+                    replyText = advices.PickRandom();
                 }
 
                 if (replyText != null)

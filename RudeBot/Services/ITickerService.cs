@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RudeBot.Services
 {
-    internal interface ITickerService
+    public interface ITickerService
     {
         Task<double> GetTickerPrice(string tickerName);
     }

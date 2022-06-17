@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Autofac.Features.AttributeFilters;
 using PowerBot.Lite.Middlewares;
 using RudeBot.Managers;
 using RudeBot.Models;
@@ -13,11 +14,15 @@ namespace RudeBot
 {
     public class BotMiddleware : BaseMiddleware
     {
-        // TODO: make _userManager scoped DI contaier
         private IUserManager _userManager { get; set; }
-        public BotMiddleware()
+        private TxtWordsDatasetReader _badWordsReaderService { get; set; }
+        public BotMiddleware(
+            IUserManager userManager,
+            [KeyFilter(Consts.BadWordsReaderService)] TxtWordsDatasetReader badWordsReaderService
+        )
         {
-            _userManager = new UserManager();
+            _userManager = userManager;
+            _badWordsReaderService = badWordsReaderService;
         }
 
         public override async Task Invoke()
@@ -42,17 +47,12 @@ namespace RudeBot
             // Count Bad words
             if (Message.Text != null)
             {
-                using (var scope = DIContainerInstance.Container.BeginLifetimeScope())
+                string messageText = Message.Text.ToLower();
+
+                var badWords = _badWordsReaderService.GetWords();
+                if (badWords.Any(x => messageText.Contains(x)))
                 {
-                    TxtWordsDatasetReader badWordsTxtReader = scope.ResolveNamed<TxtWordsDatasetReader>(Consts.BadWordsReaderService);
-
-                    string messageText = Message.Text.ToLower();
-
-                    var badWords = badWordsTxtReader.GetWords();
-                    if (badWords.Any(x => messageText.Contains(x)))
-                    {
-                        userStats.TotalBadWords++;
-                    }
+                    userStats.TotalBadWords++;
                 }
             }
 

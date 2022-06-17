@@ -11,38 +11,45 @@ Console.WriteLine("Starting RudeBot");
 
 string botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
 
-// Create database if not exists
-DataContext _dbContext = new DataContext();
-_dbContext.Database.Migrate();
-_dbContext.Dispose();
-
-// Create DI container
-var builder = new ContainerBuilder();
-
-// Register services
-builder.RegisterType<TickerService>()
-    .As<ITickerService>()
-    .SingleInstance();
-
-builder.RegisterType<TxtWordsDatasetReader>()
-    .Named<TxtWordsDatasetReader>(Consts.BadWordsReaderService)
-    .WithParameter("path", Consts.BadWordsTxtPath)
-    .SingleInstance();
-
-builder.RegisterType<TxtWordsDatasetReader>()
-    .Named<TxtWordsDatasetReader>(Consts.AdvicesReaderService)
-    .WithParameter("path", Consts.AdvicesTxtPath)
-    .SingleInstance();
-
-builder.RegisterType<CatService>()
-    .As<ICatService>()
-    .OwnedByLifetimeScope();
-
-// Build container
-DIContainerInstance.Container = builder.Build();
-
 // Run bot
 CoreBot botClient = new CoreBot(botToken);
+
+// Register services
+botClient.RegisterContainers(x =>
+{
+    x.RegisterType<TickerService>()
+        .As<ITickerService>()
+        .SingleInstance();
+
+    x.RegisterType<TxtWordsDatasetReader>()
+        .WithParameter("path", Consts.BadWordsTxtPath)
+        .Keyed<TxtWordsDatasetReader>(Consts.BadWordsReaderService)
+        .SingleInstance();
+
+    x.RegisterType<TxtWordsDatasetReader>()
+        .WithParameter("path", Consts.AdvicesTxtPath)
+        .Keyed<TxtWordsDatasetReader>(Consts.AdvicesReaderService)
+        .SingleInstance();
+
+    x.RegisterType<UserManager>()
+       .As<IUserManager>()
+       .WithParameter("path", Consts.AdvicesTxtPath)
+       .InstancePerLifetimeScope();
+
+    x.RegisterType<CatService>()
+        .As<ICatService>()
+        .OwnedByLifetimeScope();
+});
+
+botClient.Build();
+
+botClient.StartReveiving();
+
+// Create database if not exists
+using (DataContext _dbContext = new DataContext())
+{
+    _dbContext.Database.Migrate();
+}
 
 // Wait for eternity
 await Task.Delay(Int32.MaxValue);

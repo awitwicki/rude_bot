@@ -8,7 +8,7 @@ namespace RudeBot
 {
     public static class Consts
     {
-        public const string BotVersion = "3.23.6";
+        public const string BotVersion = "3.23.7";
         public const string GithubUrl = "github.com/awitwicki/rude_bot/tree/dev_dotnet";
         public const string GoogleFormForNewbies = "https://forms.gle/pY6EjJhNRosUbd9P9";
         public const string WelcomeToTheClubBuddyVideoUrl = "https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/welcome.mp4";
@@ -22,6 +22,6 @@ namespace RudeBot
 
         public const string DbPath = "data/database.sqlite";
 
-        public const string TnxWordsRegex = "\\+|спасибі|спс|сяп|tnx|дяки|дякс|благодарочка|вдячний|спасибо|дякую|благодарю|👍|😁|😂|😄|😆|хаха|хех|дзенькую|вогонь|агонь|агінь|вагінь";
+        public const string TnxWordsRegex = "(?<=\\B)\\+(?=\\B)|спасибі|спс|сяп|tnx|дяки|дякс|благодарочка|вдячний|спасибо|дякую|благодарю|👍|😁|😂|😄|😆|хаха|хех|дзенькую|вогонь|агонь|агінь|вагінь";
     }
 }

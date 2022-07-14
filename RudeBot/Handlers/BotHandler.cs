@@ -471,6 +471,28 @@ namespace RudeBot.Handlers
             await BotClient.SendPhotoAsync(chatId: ChatId, photo: carUrl, replyToMessageId: Message.MessageId, replyMarkup: keyboard);
         }
 
+        [MessageReaction(ChatAction.UploadPhoto)]
+        [MessageHandler("^https:\\/\\/twitter\\.com.*\\?\\w\\S+$")]
+        public async Task twitter()
+        {
+            var keyboardMarkup = new InlineKeyboardMarkup(new[] {
+                new InlineKeyboardButton[] { InlineKeyboardButton.WithUrl("Twitter video download", Consts.TwitterVideoDownloadUrl) },
+                new InlineKeyboardButton[] { InlineKeyboardButton.WithUrl("А як же зробити скріншот?", Consts.ScreenshotInfo) },
+                new InlineKeyboardButton[] { InlineKeyboardButton.WithCallbackData("Приховати клавіатуру", $"manage_hide_keyboard") }
+            });
+
+            string responseText = $"{User.GetUserMention()} у нашому чаті не прийнято кидати такі лінки!\n" +
+                $"Будь ласка, або скачайте і прешліть відос, або зробіть скріншот і киньте скріншотом.";
+
+            await BotClient.SendAnimationAsync(
+                    chatId: ChatId,
+                    replyToMessageId: Message.MessageId,
+                    caption: responseText,
+                    animation: Consts.PunishVideoUrl,
+                    parseMode: ParseMode.Markdown,
+                    replyMarkup: keyboardMarkup);
+        }
+
         [MessageTypeFilter(MessageType.Text)]
         public async Task MessageTrigger()
         {

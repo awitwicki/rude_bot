@@ -38,8 +38,8 @@ namespace RudeBot.Handlers
                 {
                     // Process each new user in chat
                     var keyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton[] {
-                    InlineKeyboardButton.WithUrl("Анкета", Consts.GoogleFormForNewbies),
-                    InlineKeyboardButton.WithCallbackData("Я обіцяю!", $"new_user|{newUser.Id}")
+                        InlineKeyboardButton.WithUrl("Анкета", Consts.GoogleFormForNewbies),
+                        InlineKeyboardButton.WithCallbackData("Я обіцяю!", $"new_user|{newUser.Id}")
                     });
 
                     string responseText = $"Вітаємо {newUser.GetUserMention()} у нашому чаті! " +

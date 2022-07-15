@@ -472,8 +472,8 @@ namespace RudeBot.Handlers
         }
 
         [MessageReaction(ChatAction.UploadPhoto)]
-        [MessageHandler("^https:\\/\\/twitter\\.com.*\\?\\w\\S+$")]
-        public async Task twitter()
+        [MessageHandler("https:\\/\\/twitter\\.com.*\\w\\S+")]
+        public async Task Twitter()
         {
             var keyboardMarkup = new InlineKeyboardMarkup(new[] {
                 new InlineKeyboardButton[] { InlineKeyboardButton.WithUrl("Twitter video download", Consts.TwitterVideoDownloadUrl) },

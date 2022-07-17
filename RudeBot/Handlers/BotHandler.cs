@@ -60,7 +60,7 @@ namespace RudeBot.Handlers
                 "А ще я вітаю новеньких у чаті.\n\n" +
                 $"Версія `{Consts.BotVersion}`";
 
-            var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[] { InlineKeyboardButton.WithUrl("Github", Consts.GithubUrl) });
+            var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[] { InlineKeyboardButton.WithUrl("Сторінка", Consts.ProjectUrl) });
 
             Message msg = await BotClient.SendTextMessageAsync(ChatId, messageText, ParseMode.Markdown, replyMarkup: keyboard);
 

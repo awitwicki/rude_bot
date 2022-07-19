@@ -29,8 +29,6 @@ namespace RudeBot.Services.DuplicateDetectorService
 
             float percentDistance = 1 - (distance / (float)maxLength);
 
-            Console.WriteLine(percentDistance);
-
             return percentDistance >= gain;
         }
 

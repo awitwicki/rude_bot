@@ -11,6 +11,7 @@ namespace RudeBot.Services.DuplicateDetectorService
     {
         private TimeSpan _expireTime;
         private float _gain;
+        private Dictionary<long, List<DuplicateDetectorMessageDescriptor>> _cache;
 
         public DuplicateDetectorService(TimeSpan expireTime, float gain)
         {
@@ -20,7 +21,6 @@ namespace RudeBot.Services.DuplicateDetectorService
             _cache = new Dictionary<long, List<DuplicateDetectorMessageDescriptor>>();
         }
 
-        private Dictionary<long, List<DuplicateDetectorMessageDescriptor>> _cache;
         public List<int> FindDuplicates(long chatId, int messageId, string text)
         {
             List<int> epmtyResult = new List<int>();
@@ -45,13 +45,31 @@ namespace RudeBot.Services.DuplicateDetectorService
                         .Where(x => x.Equals(text, _gain))
                         .ToList();
 
+
+                    List<int> similarMessagesIds = similarPosts
+                        .Select(x => x.MessageId)
+                        .ToList();
+
+                    if (!similarMessagesIds.Any())
+                    {
+                        // Add new message descriptor
+                        // Add nerw chat and message descriptor
+                        descriptors.Add(
+                            new DuplicateDetectorMessageDescriptor
+                            {
+                                Text = text,
+                                MessageId = messageId,
+                                Expires = DateTime.UtcNow + _expireTime
+                            });
+                        };
+
+                    _cache[chatId] = descriptors;
+
                     // Update expire time (not works)
                     //similarPosts
                     //    .ForEach(x => x.Expires += _expireTime);
 
-                    return similarPosts
-                        .Select(x => x.MessageId)
-                        .ToList();
+                    return similarMessagesIds;
                 }
                 else
                 {

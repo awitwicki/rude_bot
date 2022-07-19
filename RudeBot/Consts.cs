@@ -8,7 +8,7 @@ namespace RudeBot
 {
     public static class Consts
     {
-        public const string BotVersion = "3.24.1";
+        public const string BotVersion = "3.25";
         public const string ProjectUrl = "https://awitwicki.github.io/rude_bot/";
         public const string GoogleFormForNewbies = "https://forms.gle/pY6EjJhNRosUbd9P9";
         public const string WelcomeToTheClubBuddyVideoUrl = "https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/welcome.mp4";

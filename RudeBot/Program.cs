@@ -6,6 +6,7 @@ using RudeBot;
 using RudeBot.Database;
 using RudeBot.Managers;
 using RudeBot.Services;
+using RudeBot.Services.DuplicateDetectorService;
 
 Console.WriteLine("Starting RudeBot");
 
@@ -39,6 +40,12 @@ botClient.RegisterContainers(x =>
     x.RegisterType<CatService>()
         .As<ICatService>()
         .OwnedByLifetimeScope();
+
+    x.RegisterType<DuplicateDetectorService>()
+       .As<IDuplicateDetectorService>()
+       .WithParameter("expireTime", TimeSpan.FromDays(5))
+       .WithParameter("gain", 0.9)
+       .SingleInstance();
 });
 
 botClient.Build();

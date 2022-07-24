@@ -8,15 +8,14 @@ namespace RudeBot
 {
     public static class Consts
     {
-        public const string BotVersion = "3.25.1";
+        public const string BotVersion = "3.25.2";
         public const string ProjectUrl = "https://awitwicki.github.io/rude_bot/";
+
         public const string GoogleFormForNewbies = "https://forms.gle/pY6EjJhNRosUbd9P9";
         public const string WelcomeToTheClubBuddyVideoUrl = "https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/welcome.mp4";
         public const string CockmanVideoUrl = "https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/sh.mp4";
         public const string SamsungUrl = "https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/samsung.jpg";
         public const string PunishVideoUrl = "https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/punish.mp4";
-        public const string TwitterVideoDownloadUrl = "https://twitter-video-download.com/";
-        public const string ScreenshotInfo = "https://github.com/awitwicki/antiphotobot/blob/main/info.md";
 
         public const string BadWordsReaderService = "BadWordsReaderService";
         public const string BadWordsTxtPath = "Resources/Badwords.txt";

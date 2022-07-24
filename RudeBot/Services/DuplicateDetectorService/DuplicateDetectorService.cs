@@ -25,7 +25,7 @@ namespace RudeBot.Services.DuplicateDetectorService
         {
             List<int> epmtyResult = new List<int>();
 
-            if (text is null || text.Length < 20)
+            if (text is null || text.Length < 20 || text.StartsWith('/'))
             {
                 return epmtyResult;
             }
@@ -73,7 +73,7 @@ namespace RudeBot.Services.DuplicateDetectorService
                 }
                 else
                 {
-                    // Add nerw chat and message descriptor
+                    // Add new chat and message descriptor
                     descriptors = new List<DuplicateDetectorMessageDescriptor>() {
                         new DuplicateDetectorMessageDescriptor
                         {

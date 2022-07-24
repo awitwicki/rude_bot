@@ -245,7 +245,7 @@ namespace RudeBot.Handlers
         }
 
         [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("^/warn")]
+        [MessageHandler("^/warn$")]
         public async Task Warn()
         {
             bool isWarnLegit = await _processWarnRights(Message, Chat, User);

@@ -65,7 +65,7 @@ namespace RudeBot
             }
 
             // Try find dublicates
-            if (Message.Text != null || Message.Caption != null)
+            if ((Message.Text != null || Message.Caption != null) && Message.ForwardFrom != null)
             {
                 string text = Message.Text ?? Message.Caption;
 

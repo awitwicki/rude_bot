@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace RudeBot.Extensions
 {
@@ -21,6 +22,14 @@ namespace RudeBot.Extensions
             {
                 return false;
             }
+        }
+
+        public static bool IsHaveAdminRights(this ChatMember user)
+        {
+            if (user.Status == ChatMemberStatus.Administrator || user.Status == ChatMemberStatus.Creator || user.User.Username == "@GroupAnonymousBot")
+                return true;
+
+            return false;
         }
     }
 }

@@ -109,7 +109,7 @@ namespace RudeBot.Handlers
 
             // Filter for only admins
             ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(chat.Id, user.Id);
-            if (!(usrSenderRights.Status == ChatMemberStatus.Administrator || usrSenderRights.Status == ChatMemberStatus.Creator))
+            if (!(usrSenderRights.IsHaveAdminRights()))
             {
                 msg = await BotClient.SendTextMessageAsync(ChatId, "/warn або /unwarn дозволений тільки для адмінів", replyToMessageId: message.MessageId);
 
@@ -122,7 +122,7 @@ namespace RudeBot.Handlers
 
             // Admin cant warn other admins
             ChatMember usrReceiverRights = await BotClient.GetChatMemberAsync(chat.Id, message.ReplyToMessage.From.Id);
-            if (usrReceiverRights.Status == ChatMemberStatus.Administrator || usrReceiverRights.Status == ChatMemberStatus.Creator)
+            if (usrReceiverRights.IsHaveAdminRights())
             {
                 msg = await BotClient.SendTextMessageAsync(chat.Id, "/warn або /unwarn не діє на адмінів", replyToMessageId: message.MessageId);
 
@@ -141,7 +141,7 @@ namespace RudeBot.Handlers
         {
             // Filter for only admins
             ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, User.Id);
-            if (!(usrSenderRights.Status == ChatMemberStatus.Administrator || usrSenderRights.Status == ChatMemberStatus.Creator))
+            if (!usrSenderRights.IsHaveAdminRights())
             {
                 await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Це кнопка для адмінів", true);
                 return;
@@ -155,7 +155,7 @@ namespace RudeBot.Handlers
         {
             // Filter for only admins
             ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, User.Id);
-            if (!(usrSenderRights.Status == ChatMemberStatus.Administrator || usrSenderRights.Status == ChatMemberStatus.Creator))
+            if (!usrSenderRights.IsHaveAdminRights())
             {
                 await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Це кнопка для адмінів", true);
                 return;
@@ -314,7 +314,7 @@ namespace RudeBot.Handlers
             {
                 // Сheck if user have rights to scan
                 ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From.Id);
-                if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
+                if (!usrSenderRights.IsHaveAdminRights())
                 {
                     replyText = "/scan дозволений тільки для адмінів";
                 }
@@ -345,7 +345,7 @@ namespace RudeBot.Handlers
 
             // If this user is admin then dont pin manage keyboard
             ChatMember usrReceiverRights = await BotClient.GetChatMemberAsync(ChatId, Message.ReplyToMessage.From.Id);
-            if (usrReceiverRights.Status != ChatMemberStatus.Administrator && usrReceiverRights.Status != ChatMemberStatus.Creator)
+            if (!usrReceiverRights.IsHaveAdminRights())
             {
                 // TODO: bug - clicks on this keyboard makes bot change message text like it was /warn command
                 keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(Message.ReplyToMessage.From.Id);

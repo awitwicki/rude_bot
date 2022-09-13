@@ -26,10 +26,10 @@ namespace RudeBot.Extensions
 
         public static bool IsHaveAdminRights(this ChatMember user)
         {
-            if (user.Status == ChatMemberStatus.Administrator || user.Status == ChatMemberStatus.Creator || user.User.Username == "@GroupAnonymousBot")
+            if (user.Status == ChatMemberStatus.Administrator || user.Status == ChatMemberStatus.Creator || (user.User.Username == "GroupAnonymousBot" && user.User.Id == 1087968824))
                 return true;
-
-            return false;
+            else
+                return false;
         }
     }
 }

@@ -16,11 +16,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
+    <PackageReference Include="PowerBot.Lite" Version="1.0.0" />
     <PackageReference Include="YahooFinanceApi" Version="2.1.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\PowerBot.Lite\PowerBot.Lite\PowerBot.Lite.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -33,10 +34,19 @@ namespace RudeBot
             _duplicateDetectorService = duplicateDetectorService;
         }
 
-        public override async Task Invoke()
+        public override async Task Invoke(ITelegramBotClient bot, Update update, Func<Task> func)
         {
+            if (update.Type != UpdateType.Message)
+            {
+                return;   
+            }
+
+            var Message = update.Message;
+            var User = update.Message!.From!;
+            var Chat = update.Message!.Chat;
+
             // Get UserStats
-            UserChatStats userStats = await _userManager.GetUserChatStats(User.Id, ChatId);
+            UserChatStats userStats = await _userManager.GetUserChatStats(User.Id, Chat.Id);
 
             // Register new user stats
             if (userStats == null)
@@ -53,9 +63,10 @@ namespace RudeBot
             userStats.TotalMessages++;
 
             // Count Bad words
-            if (Message.Text != null)
+            string text = Message.Text ?? Message.Caption;
+            if (text != null)
             {
-                string messageText = Message.Text.ToLower();
+                string messageText = text.ToLower();
 
                 var badWords = _badWordsReaderService.GetWords();
                 if (badWords.Any(x => messageText.Contains(x)))
@@ -67,9 +78,7 @@ namespace RudeBot
             // Try find dublicates
             if ((Message.Text != null || Message.Caption != null) && Message.ForwardFrom != null)
             {
-                string text = Message.Text ?? Message.Caption;
-
-                var duplicates = _duplicateDetectorService.FindDuplicates(ChatId, MessageId, text);
+                var duplicates = _duplicateDetectorService.FindDuplicates(Chat.Id, Message.MessageId, text!);
 
                 int duplicateMessageId = duplicates.FirstOrDefault();
 
@@ -77,11 +86,11 @@ namespace RudeBot
                 {
                     string messageText = $"Про це вже писали";
 
-                    string chatId = $"{ChatId}"[3..];
+                    string chatId = $"{Chat.Id}"[3..];
 
                     var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[] { InlineKeyboardButton.WithUrl("Тут", $"https://t.me/c/{chatId}/{duplicateMessageId}") }); 
 
-                    await BotClient.SendTextMessageAsync(ChatId, messageText, ParseMode.Markdown, replyToMessageId: MessageId, replyMarkup: keyboard);
+                    await bot.SendTextMessageAsync(Chat.Id, messageText, ParseMode.Markdown, replyToMessageId: Message.MessageId, replyMarkup: keyboard);
                 }
             }
 

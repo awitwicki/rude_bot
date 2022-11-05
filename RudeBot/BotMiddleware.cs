@@ -45,25 +45,9 @@ namespace RudeBot
             var User = update.Message!.From!;
             var Chat = update.Message!.Chat;
 
-            // Get UserStats
-            UserChatStats userStats = await _userManager.GetUserChatStats(User.Id, Chat.Id);
-
-            // Register new user stats
-            if (userStats == null)
-            {
-                userStats = UserChatStats.FromChat(Chat);
-                userStats.UserId = User.Id;
-                userStats.User = TelegramUser.FromUser(User);
-
-                await _userManager.CreateUserChatStats(userStats);
-            }
-
-            // Update username, nickname and messages counter
-            userStats.User = TelegramUser.FromUser(User);
-            userStats.TotalMessages++;
-
             // Count Bad words
             string text = Message.Text ?? Message.Caption;
+            int messageBadWords = 0;
             if (text != null)
             {
                 string messageText = text.ToLower();
@@ -71,8 +55,35 @@ namespace RudeBot
                 var badWords = _badWordsReaderService.GetWords();
                 if (badWords.Any(x => messageText.Contains(x)))
                 {
-                    userStats.TotalBadWords++;
+                    messageBadWords++;
                 }
+            }
+
+            // Get UserStats
+            UserChatStats userStats = await _userManager.GetUserChatStats(User.Id, Chat.Id);
+
+            // Register new user stats
+            if (userStats is null)
+            {
+                // Create User
+                userStats = UserChatStats.FromChat(Chat);
+                userStats.UserId = User.Id;
+                userStats.TotalMessages = 1;
+                userStats.TotalBadWords = messageBadWords;
+                userStats.User = TelegramUser.FromUser(User);
+
+                await _userManager.CreateUserChatStats(userStats);
+            }
+            else
+            {
+                // Update username, nickname and messages counter
+                var user = TelegramUser.FromUser(User);
+                userStats.User = TelegramUser.FromUser(User);
+                userStats.TotalMessages++;
+                userStats.TotalBadWords += messageBadWords;
+
+                // Save user
+                await _userManager.UpdateUserChatStats(userStats);
             }
 
             // Try find dublicates
@@ -94,8 +105,8 @@ namespace RudeBot
                 }
             }
 
-            // Save user
-            await _userManager.UpdateUserChatStats(userStats);
+            // Invoke handler matched methods
+            await _nextMiddleware.Invoke(bot, update, func);
         }
     }
 }

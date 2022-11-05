@@ -8,7 +8,7 @@ namespace RudeBot
 {
     public static class Consts
     {
-        public const string BotVersion = "3.25.5";
+        public const string BotVersion = "3.25.6";
         public const string ProjectUrl = "https://awitwicki.github.io/rude_bot/";
 
         public const string GoogleFormForNewbies = "https://forms.gle/pY6EjJhNRosUbd9P9";
@@ -21,8 +21,6 @@ namespace RudeBot
         public const string BadWordsTxtPath = "Resources/Badwords.txt";
         public const string AdvicesReaderService = "AdvicesReaderService";
         public const string AdvicesTxtPath = "Resources/Advices.txt";
-
-        public const string DbPath = "data/database.sqlite";
 
         public const string TnxWordsRegex = "(?<=\\B)\\+(?=\\B)|спасибі|спс|сяп|tnx|дяки|дякс|благодарочка|вдячний|спасибо|дякую|благодарю|👍|😁|😂|😄|😆|хаха|хех|дзенькую|вогонь|агонь|агінь|вагінь";
     }

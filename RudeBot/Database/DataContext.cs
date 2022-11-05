@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using RudeBot.Models;
 using System;
 using System.Collections.Generic;
@@ -18,10 +19,8 @@ namespace RudeBot.Database
         {
 
         }
-
-        // The following configures EF to create a Sqlite database file in the
-        // special "local" folder for your platform.
+        
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlite($"Data Source={Consts.DbPath}");
+             => options.UseNpgsql(Environment.GetEnvironmentVariable("RUDEBOT_DB_CONNECTION_STRING")!);
     }
 }

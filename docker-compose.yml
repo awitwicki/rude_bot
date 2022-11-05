@@ -12,3 +12,10 @@ services:
       - ./data:/app/data
     env_file:
       - .env
+    networks:
+      - kodzuverse
+
+networks:
+  kodzuverse:
+    name: kodzuverse_network
+    external: true

@@ -21,10 +21,12 @@ namespace RudeBot.Handlers
     public class ManageHandler : BaseHandler
     {
         private IUserManager _userManager { get; set; }
+        private IChatSettingsService _chatSettingsService{ get; set; }
         
-        public ManageHandler(IUserManager userManager)
+        public ManageHandler(IUserManager userManager, IChatSettingsService chatSettingsService)
         {
             _userManager = userManager;
+            _chatSettingsService = chatSettingsService;
         }
 
         [MessageReaction(ChatAction.Typing)]
@@ -360,6 +362,80 @@ namespace RudeBot.Handlers
         {
             string message = CallbackQuery!.Data!.Replace("print|", "");
             await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, message, true);
+        }
+
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("^/settings$")]
+        public async Task GetSettings()
+        {
+            Message msg = null;
+            string replyText;
+
+            // Сheck if user have rights to scan
+            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From.Id);
+            if (!usrSenderRights.IsHaveAdminRights())
+            {
+                replyText = "Команда дозволенa тільки для адмінів";
+            }
+            else
+            {
+                var chatSetrtings = await _chatSettingsService.GetChatSettings(ChatId);
+                if (chatSetrtings == null)
+                {
+                    replyText = "Помилка, щось робиш не так 🤷🏻‍♂️";
+                }
+                else
+                {
+                    replyText = $"**Настройки чату:**\n\n"
+                        + $"Хейт російської мови в повідомленнях: `{chatSetrtings.HaterussianLang}`\n"
+                        + $"\n"
+                        + $"Включити/виключити хейт російської (тільки для адмінів): /haterusianlang";
+                }
+            }
+
+            msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+         
+            await Task.Delay(30 * 1000);
+
+            await BotClient.TryDeleteMessage(msg);
+            await BotClient.TryDeleteMessage(Message);
+        }
+
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("^/haterusianlang")]
+        public async Task ChangeHaterusianLang()
+        {
+            Message msg = null;
+            string replyText;
+
+            // Сheck if user have rights to change settings
+            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From.Id);
+            if (!usrSenderRights.IsHaveAdminRights())
+            {
+                replyText = "Команда дозволенa тільки для адмінів";
+            }
+            else
+            {
+                var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+                if (chatSettings == null)
+                {
+                    replyText = "Помилка, щось робиш не так 🤷🏻‍♂️";
+                }
+                else
+                {
+                    chatSettings.HaterussianLang = !chatSettings.HaterussianLang;
+                    await _chatSettingsService.AddOrUpdateChatSettings(chatSettings);
+
+                    replyText = chatSettings.HaterussianLang ? "Тепер я хейчу за русняву мову в чаті" : "Тепер я НЕ хейчу за русняву мову в чаті";
+                }
+            }
+
+            msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+            
+            await Task.Delay(30 * 1000);
+
+            await BotClient.TryDeleteMessage(msg);
+            await BotClient.TryDeleteMessage(Message);
         }
     }
 }

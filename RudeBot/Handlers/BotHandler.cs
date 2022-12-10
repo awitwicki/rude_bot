@@ -26,14 +26,18 @@ namespace RudeBot.Handlers
         private ICatService _catService { get; set; }
         private TxtWordsDatasetReader _advicesReaderService { get; set; }
         private static Object _topLocked { get; set; } = new Object();
+        private IChatSettingsService _chatSettingsService { get; set; }
+
         public BotHandler(
             IUserManager userManager,
+            IChatSettingsService chatSettingsService,
             ITickerService tickerService,
             ICatService catService,
             [KeyFilter(Consts.AdvicesReaderService)] TxtWordsDatasetReader advicesReaderService
             )
         {
             _userManager = userManager;
+            _chatSettingsService = chatSettingsService;
             _tickerService = tickerService;
             _catService = catService;
             _advicesReaderService = advicesReaderService;
@@ -57,6 +61,7 @@ namespace RudeBot.Handlers
                 "`/tickets` - випишу всі таски чату,\n" +
                 "`/addticket {купити молочка коту}` - створити таск в чаті,\n" +
                 "`/removeticket {25}` - видалити таск номер 25,\n" +
+                "`/settings` - настройки бота для цього чату,\n" +
                 "А ще я вітаю новеньких у чаті.\n\n" +
                 $"Версія `{Consts.BotVersion}`";
 
@@ -118,8 +123,10 @@ namespace RudeBot.Handlers
         [MessageHandler("ё|ъ|ы|э")]
         public async Task Palanytsa()
         {
+            var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+
             // Ignore message forwards
-            if (Message.ForwardFrom != null || Message.ForwardFromChat != null)
+            if (Message.ForwardFrom != null || Message.ForwardFromChat != null || !chatSettings.HaterussianLang)
                 return;
 
             string replyText = "Ану кажи \"паляниця\" 😡";

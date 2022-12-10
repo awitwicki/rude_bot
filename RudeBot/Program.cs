@@ -15,6 +15,12 @@ string botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
 // Run bot
 CoreBot botClient = new CoreBot(botToken);
 
+// Create database if not exists
+using (DataContext _dbContext = new DataContext())
+{
+    _dbContext.Database.Migrate();
+}
+
 // Register services
 botClient.RegisterContainers(x =>
 {
@@ -46,17 +52,15 @@ botClient.RegisterContainers(x =>
        .WithParameter("expireTime", TimeSpan.FromDays(5))
        .WithParameter("gain", 0.9)
        .SingleInstance();
+
+    x.RegisterType<ChatSettingsService>()
+       .As<IChatSettingsService>()
+       .SingleInstance();
 });
 
 botClient.Build();
 
 botClient.StartReveiving();
-
-// Create database if not exists
-using (DataContext _dbContext = new DataContext())
-{
-    _dbContext.Database.Migrate();
-}
 
 // Wait for eternity
 await Task.Delay(Int32.MaxValue);

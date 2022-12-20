@@ -16,6 +16,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.7" />
+    <PackageReference Include="OpenAI" Version="1.2.0" />
     <PackageReference Include="PowerBot.Lite" Version="1.1.1" />
     <PackageReference Include="YahooFinanceApi" Version="2.1.2" />
   </ItemGroup>

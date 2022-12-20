@@ -16,6 +16,7 @@ using PowerBot.Lite.Utils;
 using RudeBot.Extensions;
 using RudeBot.Keyboards;
 using Autofac.Features.AttributeFilters;
+using OpenAI_API;
 
 namespace RudeBot.Handlers
 {
@@ -62,6 +63,7 @@ namespace RudeBot.Handlers
                 "`/addticket {купити молочка коту}` - створити таск в чаті,\n" +
                 "`/removeticket {25}` - видалити таск номер 25,\n" +
                 "`/settings` - настройки бота для цього чату,\n" +
+                "`кіт {а ти маму мав?}` - задай своє запитання коту, бажано англійською,\n" +
                 "А ще я вітаю новеньких у чаті.\n\n" +
                 $"Версія `{Consts.BotVersion}`";
 
@@ -476,6 +478,34 @@ namespace RudeBot.Handlers
             });
 
             await BotClient.SendPhotoAsync(chatId: ChatId, photo: carUrl, replyToMessageId: Message.MessageId, replyMarkup: keyboard);
+        }
+
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("^кіт ")]
+        public async Task ChatGptAsk()
+        {
+            string inputMessageTest = Message!.Text!.Replace("кіт ", "");
+            string returnMessage = ":)";
+
+            if (String.IsNullOrEmpty(inputMessageTest))
+            {
+                returnMessage = "Пусто, альо";
+            }
+
+            try
+            {
+                OpenAIAPI api = new OpenAIAPI(new APIAuthentication(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!), engine: Engine.Davinci);
+
+                var result = await api.Completions.CreateCompletionAsync(inputMessageTest, max_tokens: 50, temperature: 0.0);
+                returnMessage = result.ToString();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                returnMessage = "Oops! …I Didn't again";
+            }
+
+            Message msg = await BotClient.SendTextMessageAsync(ChatId, returnMessage, replyToMessageId: Message.MessageId);
         }
 
         [MessageTypeFilter(MessageType.Text)]

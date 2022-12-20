@@ -494,7 +494,7 @@ namespace RudeBot.Handlers
 
             try
             {
-                OpenAIAPI api = new OpenAIAPI(new APIAuthentication(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!), engine: Engine.Davinci);
+                OpenAIAPI api = new OpenAIAPI(new APIAuthentication(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!), engine: new Engine("text-davinci-003"));
 
                 var result = await api.Completions.CreateCompletionAsync(inputMessageTest, max_tokens: 50, temperature: 0.0);
                 returnMessage = result.ToString();

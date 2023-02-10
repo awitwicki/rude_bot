@@ -60,7 +60,7 @@ botClient.RegisterContainers(x =>
 
 botClient.Build();
 
-botClient.StartReveiving();
+await botClient.StartReveiving();
 
 // Wait for eternity
 await Task.Delay(Int32.MaxValue);

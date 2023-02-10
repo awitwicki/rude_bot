@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Telegram.Bot;
-using System.Threading.Tasks;
+﻿using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using PowerBot.Lite.Attributes;
 using PowerBot.Lite.Handlers;
@@ -305,17 +300,17 @@ namespace RudeBot.Handlers
         [MessageHandler("^/scan$")]
         public async Task Scan()
         {
-            Message msg = null;
+            Message msg;
             string replyText = null;
 
             // =================Govnocode begin=================
             // Check message is reply, ignore bots
-            if (Message.ReplyToMessage == null || User.IsBot && Message.ReplyToMessage == null || Message.ReplyToMessage.From.Id == User.Id || Message.ReplyToMessage.From.IsBot)
+            if (Message.ReplyToMessage == null || User.IsBot && Message.ReplyToMessage == null || Message.ReplyToMessage.From!.Id == User.Id || Message.ReplyToMessage.From.IsBot)
                 replyText = "/scan має бути відповіддю, на чиєсь повідомлення (боти не рахуються)";
             else
             {
                 // Сheck if user have rights to scan
-                ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From.Id);
+                ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
                 if (!usrSenderRights.IsHaveAdminRights())
                 {
                     replyText = "/scan дозволений тільки для адмінів";
@@ -333,7 +328,7 @@ namespace RudeBot.Handlers
                 return;
             }
 
-            UserChatStats userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+            UserChatStats userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage!.From.Id, ChatId);
 
             // If user not exists in db then ignore
             if (userStats == null)
@@ -353,7 +348,7 @@ namespace RudeBot.Handlers
                 keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(Message.ReplyToMessage.From.Id);
             }
 
-            msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
+            await BotClient.SendTextMessageAsync(ChatId, replyText, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
             await BotClient.TryDeleteMessage(Message);
         }
 

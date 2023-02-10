@@ -7,3 +7,5 @@ obj/
 .env
 
 *.sqlite*
+
+.idea

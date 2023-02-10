@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Telegram.Bot;
-using System.Threading.Tasks;
+﻿using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using PowerBot.Lite.Attributes;
 using PowerBot.Lite.Handlers;
@@ -12,9 +7,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using RudeBot.Managers;
 using RudeBot.Models;
 using RudeBot.Services;
-using PowerBot.Lite.Utils;
 using RudeBot.Extensions;
-using RudeBot.Keyboards;
 using Autofac.Features.AttributeFilters;
 using OpenAI_API;
 
@@ -161,7 +154,7 @@ namespace RudeBot.Handlers
                 return;
 
             // Filter only reply to other user, ignore bots
-            if (Message.ReplyToMessage == null || Message.ReplyToMessage.From.Id == User.Id || Message.ReplyToMessage.From.IsBot)
+            if (Message.ReplyToMessage == null || Message.ReplyToMessage.From!.Id == User.Id || Message.ReplyToMessage.From.IsBot)
                 return;
 
             UserChatStats userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
@@ -240,7 +233,7 @@ namespace RudeBot.Handlers
                             float karmaPercent = 0;
                             if (x.Karma > 0 && x.TotalMessages > 0)
                             {
-                                karmaPercent = x.Karma * 100 / x.TotalMessages;
+                                karmaPercent = (float)x.Karma * 100 / x.TotalMessages;
                             }
 
                             replyText += $"`{x.User.UserName}` - карма `{x.Karma} ({karmaPercent}%)`\n";
@@ -261,7 +254,7 @@ namespace RudeBot.Handlers
                             float karmaPercent = 0;
                             if (x.Karma > 0 && x.TotalMessages > 0)
                             {
-                                karmaPercent = x.Karma * 100 / x.TotalMessages;
+                                karmaPercent = (float)x.Karma * 100 / x.TotalMessages;
                             }
 
                             replyText += $"`{x.User.UserName}` - карма `{x.Karma} ({karmaPercent}%)`\n";
@@ -288,7 +281,7 @@ namespace RudeBot.Handlers
                             float BadWordsPercent = 0;
                             if (x.TotalBadWords > 0 && x.TotalMessages > 0)
                             {
-                                BadWordsPercent = x.TotalBadWords * 100 / x.TotalMessages;
+                                BadWordsPercent = (float)x.TotalBadWords * 100 / x.TotalMessages;
                             }
 
                             replyText += $"`{x.User.UserName}` - матюків `{x.TotalBadWords} ({BadWordsPercent}%)`\n";
@@ -364,7 +357,7 @@ namespace RudeBot.Handlers
             String replyText = "";
 
             // Сheck if user have rights to scan
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From.Id);
+            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
             if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
             {
                 replyText = "Дозволено тільки для адмінів";
@@ -468,13 +461,13 @@ namespace RudeBot.Handlers
             Random rnd = new Random();
 
             //List<string> variants = new List<string>() { "Правильно", "Не правильно :(", "Рофлиш?)", "Уважно подивись :)", "Добре, вгадав", "Даю ще 1 стробу", "Як не вгадаєш з трьох раз то летиш до бану :)" };
-            List<string> variants = new List<string>() { "Правильно", "Не правильно :(", "Рофлиш?)", "Уважно подивись :)", "Добре, вгадав", "Даю ще одну стробу" };
+            List<string> variants = new List<string>() { "Правильно", "Не правильно :(", "Рофлиш?)", "Уважно подивись :)", "Добре, вгадав", "Даю ще одну спробу" };
             variants = variants.PickRandom(2).ToList();
 
             var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[]
             {
-                    InlineKeyboardButton.WithCallbackData("Кіт", $"print|{variants[0]}"),
-                    InlineKeyboardButton.WithCallbackData("Кітесса", $"print|{variants[1]}"),
+                InlineKeyboardButton.WithCallbackData("Кіт", $"print|{variants[0]}"),
+                InlineKeyboardButton.WithCallbackData("Кітесса", $"print|{variants[1]}"),
             });
 
             await BotClient.SendPhotoAsync(chatId: ChatId, photo: carUrl, replyToMessageId: Message.MessageId, replyMarkup: keyboard);
@@ -513,18 +506,16 @@ namespace RudeBot.Handlers
         {
             if (Message.Text != null)
             {
-                string replyText = null;
+                string replyText = "";
                 Random random = new Random();
 
                 if ((Message?.ReplyToMessage?.From?.Id == BotClient.BotId) || (random.Next(1, 1000) > 985))
                 {
-                    string messageText = Message.Text.ToLower();
-
                     var advices = _advicesReaderService.GetWords();
                     replyText = advices.PickRandom();
                 }
 
-                if (replyText != null)
+                if (string.IsNullOrEmpty(replyText))
                 {
                     bool isReply = (random.Next(100) > 50);
                     Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: isReply ? Message.MessageId : null);

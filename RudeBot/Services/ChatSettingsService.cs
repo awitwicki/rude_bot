@@ -1,13 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RudeBot.Database;
 using RudeBot.Models;
-using RudeBot.Services.DuplicateDetectorService;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace RudeBot.Services
 {

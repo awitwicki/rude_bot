@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RudeBot.Services.DuplicateDetectorService
+﻿namespace RudeBot.Services.DuplicateDetectorService
 {
     public class DuplicateDetectorService : IDuplicateDetectorService
     {
@@ -25,7 +18,7 @@ namespace RudeBot.Services.DuplicateDetectorService
         {
             List<int> epmtyResult = new List<int>();
 
-            if (text is null || text.Length < 20 || text.StartsWith('/'))
+            if (text is null || text.Length < 40 || text.StartsWith('/'))
             {
                 return epmtyResult;
             }

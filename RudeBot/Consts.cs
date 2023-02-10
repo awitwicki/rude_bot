@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RudeBot
+﻿namespace RudeBot
 {
     public static class Consts
     {
-        public const string BotVersion = "3.28.2";
+        public const string BotVersion = "3.28.3";
         public const string ProjectUrl = "https://awitwicki.github.io/rude_bot/";
 
         public const string GoogleFormForNewbies = "https://forms.gle/pY6EjJhNRosUbd9P9";

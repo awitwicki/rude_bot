@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="InfoText" xml:space="preserve">
+        <value>Привіт, я Рудекіт!
+
+Я можу дещо зробити, якшо ти скажеш чарівне слово:
+`Карма` - покажу твою карму,
+`Топ` - покажу топ учасників чату,
+`Тесла` - порахую дні без згадування тесли,
+`/cat` або `Кіт` - покажу котика,
+`Шарій` - покажу півника,
+`Зрада` - розпочну процедуру бану,
+`/warn /unwarn` - (admins only) винесу попередження за погану поведінку,
+`/scan` - (admins only) просканую когось,
+`/give {{25}}` - поділитися 25 рудекоїнами,
+`/tickets` - випишу всі таски чату,
+`/addticket {{купити молочка коту}}` - створити таск в чаті,
+`/removeticket {{25}}` - видалити таск номер 25,
+`/settings` - настройки бота для цього чату,
+`кіт {{а ти маму мав?}}` - задай своє запитання коту, бажано англійською,
+А ще я вітаю новеньких у чаті.
+
+Версія `{0}`</value>
+    </data>
+    <data name="Page" xml:space="preserve">
+        <value>Сторінка</value>
+    </data>
+    <data name="ruPropaganda" xml:space="preserve">
+        <value>*Російська пропаганда (.ru .рф .сру і інші) не може вважатися пруфом!*
+
+Вас буде додано до реєстру.</value>
+    </data>
+    <data name="Palanytsia" xml:space="preserve">
+        <value>Ану кажи "паляниця" 😡</value>
+    </data>
+    <data name="TeslaAgain" xml:space="preserve">
+        <value>Днів без згадування тесли: `0`
+🚗🚗🚗
+
+...btw ${0}</value>
+    </data>
+    <data name="KarmaIncrease" xml:space="preserve">
+        <value>Ви збільшили карму {0} до значення {1}! 🥳</value>
+    </data>
+    <data name="KarmaDecrease" xml:space="preserve">
+        <value>Ви зменшили карму {0} до значення {1}!</value>
+    </data>
+    <data name="OnlyAdminsAreAllowed" xml:space="preserve">
+        <value>Дозволено тільки для адмінів</value>
+    </data>
+    <data name="OopsIDidntAgain" xml:space="preserve">
+        <value>Oops! …I Didn't again</value>
+    </data>
+    <data name="GPTModel" xml:space="preserve">
+        <value>text-davinci-003</value>
+    </data>
+    <data name="Empty" xml:space="preserve">
+        <value>Пусто, альо</value>
+    </data>
+    <data name="RandomCatGenders" xml:space="preserve">
+        <value>Правильно|Не правильно :(|Рофлиш?)|Уважно подивись :)|Добре, вгадав|Даю ще одну спробу|За таке можна і забанити|Як не вгадаєш з трьох раз то летиш до бану :)</value>
+    </data>
+    <data name="AreYouThinkImThatDumb" xml:space="preserve">
+        <value>Думаєш я настільки тупий?</value>
+    </data>
+    <data name="TicketDeleted" xml:space="preserve">
+        <value>Тікет номер "{0}" видалено.</value>
+    </data>
+    <data name="HackerInTheChat" xml:space="preserve">
+        <value>Ой у нас тут "хакер" в чаті 😐, такого тікету не існує...</value>
+    </data>
+    <data name="WhereIsTicketNumber" xml:space="preserve">
+        <value>Де, блять, номер тікету після команди?</value>
+    </data>
+    <data name="GoneAway" xml:space="preserve">
+        <value>*Пішов собі далі по своїх справах*</value>
+    </data>
+    <data name="NeedToDefineTicket" xml:space="preserve">
+        <value>Треба вказати текст тікету після команди</value>
+    </data>
+    <data name="TicketAdded" xml:space="preserve">
+        <value>Тікет "{0}" додано до чату.</value>
+    </data>
+    <data name="Karma" xml:space="preserve">
+        <value>карма</value>
+    </data>
+    <data name="TopChatActive" xml:space="preserve">
+        <value>*Топ 5 актив чату:*</value>
+    </data>
+    <data name="AccountsInTheChat" xml:space="preserve">
+        <value>Всього аккаунтів у цьому чаті:</value>
+    </data>
+    <data name="TopChatKarma" xml:space="preserve">
+        <value>*Топ 5 карми чату:*</value>
+    </data>
+    <data name="TopChatNegativeKarma" xml:space="preserve">
+        <value>*Топ -3 карми чату:*</value>
+    </data>
+    <data name="Messages" xml:space="preserve">
+        <value>повідомлень</value>
+    </data>
+    <data name="BadWords" xml:space="preserve">
+        <value>матюків</value>
+    </data>
+    <data name="TopChatWarns" xml:space="preserve">
+        <value>*Топ 5 варни чату:*</value>
+    </data>
+    <data name="Warns" xml:space="preserve">
+        <value>варнів</value>
+    </data>
+    <data name="TopChatEmotionals" xml:space="preserve">
+        <value>*Топ 5 емоціонали чату:*</value>
+    </data>
+</root>

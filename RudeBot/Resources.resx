@@ -138,4 +138,113 @@
     <data name="Klichko" xml:space="preserve">
         <value>Про це вже писали</value>
     </data>
+    <data name="GoogleFormForNewbiesURL" xml:space="preserve">
+        <value>https://forms.gle/pY6EjJhNRosUbd9P9</value>
+    </data>
+    <data name="WelcomeToTheClubBuddyVideoUrl" xml:space="preserve">
+        <value>https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/welcome.mp4</value>
+    </data>
+    <data name="CockmanVideoUrl" xml:space="preserve">
+        <value>https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/sh.mp4</value>
+    </data>
+    <data name="SamsungUrl" xml:space="preserve">
+        <value>https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/samsung.jpg</value>
+    </data>
+    <data name="PunishVideoUrl" xml:space="preserve">
+        <value>https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/punish.mp4</value>
+    </data>
+    <data name="ProjectUrl" xml:space="preserve">
+        <value>https://awitwicki.github.io/rude_bot/</value>
+    </data>
+    <data name="HelloMessage" xml:space="preserve">
+        <value>Вітаємо {0} у нашому чаті!
+Ми не чат, а дружня, толерантна IT спільнота, яка поважає думку кожного, приєднавшись,
+ти згоджуєшся стати чемною частиною спільноти (та полюбити епл).
+
+I якшо не важко, пліз тут анкета на 8 питань</value>
+    </data>
+    <data name="NewbieClicked" xml:space="preserve">
+        <value>Дуже раді вас бачити! Будь ласка, ознайомтеся з Конституцією чату в закріплених повідомленнях.</value>
+    </data>
+    <data name="Form" xml:space="preserve">
+        <value>Анкета</value>
+    </data>
+    <data name="IAmPromise" xml:space="preserve">
+        <value>Я обіцяю!</value>
+    </data>
+    <data name="OnceAgaInAndGetBaned" xml:space="preserve">
+        <value>Ще раз і бан :)</value>
+    </data>
+    <data name="WarnOrUnwarnIsOnlyForAdmins" xml:space="preserve">
+        <value>/warn або /unwarn дозволений тільки для адмінів</value>
+    </data>
+    <data name="WarnOrUnwarnNeedsToBeReplyToMessage" xml:space="preserve">
+        <value>/warn або /unwarn має бути відповіддю, на чиєсь повідомлення</value>
+    </data>
+    <data name="ButtonOnlyForAdmins" xml:space="preserve">
+        <value>Це кнопка для адмінів</value>
+    </data>
+    <data name="CommandIsOnlyForAdmins" xml:space="preserve">
+        <value>Команда дозволенa тільки для адмінів</value>
+    </data>
+    <data name="WarnOrUnwarnNotWorksOnAdmins" xml:space="preserve">
+        <value>/warn або /unwarn не діє на адмінів</value>
+    </data>
+    <data name="NotDone" xml:space="preserve">
+        <value>Не виконано</value>
+    </data>
+    <data name="BannedMedia" xml:space="preserve">
+        <value>Забанено медіа</value>
+    </data>
+    <data name="Done" xml:space="preserve">
+        <value>Виконано</value>
+    </data>
+    <data name="ScanIsOnlyForAdmins" xml:space="preserve">
+        <value>/scan дозволений тільки для адмінів</value>
+    </data>
+    <data name="ScanNeedsToBeReplyToMessage" xml:space="preserve">
+        <value>/scan має бути відповіддю, на чиєсь повідомлення (боти не рахуються)</value>
+    </data>
+    <data name="Muted" xml:space="preserve">
+        <value>Мут на день</value>
+    </data>
+    <data name="Kicked" xml:space="preserve">
+        <value>Викинуто з чату</value>
+    </data>
+    <data name="Banned" xml:space="preserve">
+        <value>Відправився за кораблем</value>
+    </data>
+    <data name="Warned" xml:space="preserve">
+        <value>варн</value>
+    </data>
+    <data name="Amnestied" xml:space="preserve">
+        <value>Амністован</value>
+    </data>
+    <data name="Logs" xml:space="preserve">
+        <value>Логи:</value>
+    </data>
+    <data name="WarnBalance" xml:space="preserve">
+        <value>На балансі ще {0} попередженнь</value>
+    </data>
+    <data name="WarnCancelled" xml:space="preserve">
+        <value>попередження анульовано!</value>
+    </data>
+    <data name="Error" xml:space="preserve">
+        <value>Помилка, щось робиш не так‍</value>
+    </data>
+    <data name="ChatSettings" xml:space="preserve">
+        <value>**Настройки чату:**</value>
+    </data>
+    <data name="russianLangHate" xml:space="preserve">
+        <value>Хейт російської мови в повідомленнях:</value>
+    </data>
+    <data name="russianLangHateCommandDescription" xml:space="preserve">
+        <value>Включити/виключити хейт російської (тільки для адмінів): /haterusianlang</value>
+    </data>
+    <data name="russianLangHateOn" xml:space="preserve">
+        <value>Тепер я хейчу за русняву мову в чаті</value>
+    </data>
+    <data name="russianLangHateOff" xml:space="preserve">
+        <value>Тепер я НЕ хейчу за русняву мову в чаті</value>
+    </data>
 </root>

@@ -44,11 +44,11 @@ namespace RudeBot.Handlers
             var messageText = string.Format(Resources.InfoText, Consts.BotVersion);
 
             var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[]
-                { InlineKeyboardButton.WithUrl(Resources.Page, Consts.ProjectUrl) });
+            {
+                InlineKeyboardButton.WithUrl(Resources.Page, Resources.ProjectUrl)
+            });
 
-            Message msg =
-                await BotClient.SendTextMessageAsync(ChatId, messageText, ParseMode.Markdown,
-                    replyMarkup: keyboard);
+            Message msg = await BotClient.SendTextMessageAsync(ChatId, messageText, ParseMode.Markdown, replyMarkup: keyboard);
 
             await Task.Delay(60 * 1000);
 
@@ -84,7 +84,7 @@ namespace RudeBot.Handlers
         [MessageHandler("шарий|шарій")]
         public async Task CockMan()
         {
-            Message msg = await BotClient.SendVideoAsync(chatId: ChatId, video: Consts.CockmanVideoUrl);
+            Message msg = await BotClient.SendVideoAsync(chatId: ChatId, video: Resources.CockmanVideoUrl);
 
             await Task.Delay(30 * 1000);
             await BotClient.TryDeleteMessage(msg);
@@ -94,7 +94,7 @@ namespace RudeBot.Handlers
         [MessageHandler("samsung|самсунг|сасунг")]
         public async Task Samsung()
         {
-            Message msg = await BotClient.SendPhotoAsync(chatId: ChatId, photo: Consts.SamsungUrl, replyToMessageId: Message.MessageId);
+            Message msg = await BotClient.SendPhotoAsync(chatId: ChatId, photo: Resources.SamsungUrl, replyToMessageId: Message.MessageId);
 
             await Task.Delay(30 * 1000);
             await BotClient.TryDeleteMessage(msg);

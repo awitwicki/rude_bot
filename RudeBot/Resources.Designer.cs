@@ -104,6 +104,15 @@ namespace RudeBot {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Амністован.
+        /// </summary>
+        internal static string Amnestied {
+            get {
+                return ResourceManager.GetString("Amnestied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Думаєш я настільки тупий?.
         /// </summary>
         internal static string AreYouThinkImThatDumb {
@@ -192,6 +201,69 @@ namespace RudeBot {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Відправився за кораблем.
+        /// </summary>
+        internal static string Banned {
+            get {
+                return ResourceManager.GetString("Banned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Забанено медіа.
+        /// </summary>
+        internal static string BannedMedia {
+            get {
+                return ResourceManager.GetString("BannedMedia", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Це кнопка для адмінів.
+        /// </summary>
+        internal static string ButtonOnlyForAdmins {
+            get {
+                return ResourceManager.GetString("ButtonOnlyForAdmins", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to **Настройки чату:**.
+        /// </summary>
+        internal static string ChatSettings {
+            get {
+                return ResourceManager.GetString("ChatSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/sh.mp4.
+        /// </summary>
+        internal static string CockmanVideoUrl {
+            get {
+                return ResourceManager.GetString("CockmanVideoUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Команда дозволенa тільки для адмінів.
+        /// </summary>
+        internal static string CommandIsOnlyForAdmins {
+            get {
+                return ResourceManager.GetString("CommandIsOnlyForAdmins", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Виконано.
+        /// </summary>
+        internal static string Done {
+            get {
+                return ResourceManager.GetString("Done", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Пусто, альо.
         /// </summary>
         internal static string Empty {
@@ -201,11 +273,38 @@ namespace RudeBot {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Помилка, щось робиш не так‍.
+        /// </summary>
+        internal static string Error {
+            get {
+                return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Анкета.
+        /// </summary>
+        internal static string Form {
+            get {
+                return ResourceManager.GetString("Form", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to *Пішов собі далі по своїх справах*.
         /// </summary>
         internal static string GoneAway {
             get {
                 return ResourceManager.GetString("GoneAway", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://forms.gle/pY6EjJhNRosUbd9P9.
+        /// </summary>
+        internal static string GoogleFormForNewbiesURL {
+            get {
+                return ResourceManager.GetString("GoogleFormForNewbiesURL", resourceCulture);
             }
         }
         
@@ -224,6 +323,28 @@ namespace RudeBot {
         internal static string HackerInTheChat {
             get {
                 return ResourceManager.GetString("HackerInTheChat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Вітаємо {0} у нашому чаті!
+        ///Ми не чат, а дружня, толерантна IT спільнота, яка поважає думку кожного, приєднавшись,
+        ///ти згоджуєшся стати чемною частиною спільноти (та полюбити епл).
+        ///
+        ///I якшо не важко, пліз тут анкета на 8 питань.
+        /// </summary>
+        internal static string HelloMessage {
+            get {
+                return ResourceManager.GetString("HelloMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Я обіцяю!.
+        /// </summary>
+        internal static string IAmPromise {
+            get {
+                return ResourceManager.GetString("IAmPromise", resourceCulture);
             }
         }
         
@@ -277,11 +398,29 @@ namespace RudeBot {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Викинуто з чату.
+        /// </summary>
+        internal static string Kicked {
+            get {
+                return ResourceManager.GetString("Kicked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Про це вже писали.
         /// </summary>
         internal static string Klichko {
             get {
                 return ResourceManager.GetString("Klichko", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Логи:.
+        /// </summary>
+        internal static string Logs {
+            get {
+                return ResourceManager.GetString("Logs", resourceCulture);
             }
         }
         
@@ -295,11 +434,47 @@ namespace RudeBot {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Мут на день.
+        /// </summary>
+        internal static string Muted {
+            get {
+                return ResourceManager.GetString("Muted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Треба вказати текст тікету після команди.
         /// </summary>
         internal static string NeedToDefineTicket {
             get {
                 return ResourceManager.GetString("NeedToDefineTicket", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Дуже раді вас бачити! Будь ласка, ознайомтеся з Конституцією чату в закріплених повідомленнях..
+        /// </summary>
+        internal static string NewbieClicked {
+            get {
+                return ResourceManager.GetString("NewbieClicked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Не виконано.
+        /// </summary>
+        internal static string NotDone {
+            get {
+                return ResourceManager.GetString("NotDone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ще раз і бан :).
+        /// </summary>
+        internal static string OnceAgaInAndGetBaned {
+            get {
+                return ResourceManager.GetString("OnceAgaInAndGetBaned", resourceCulture);
             }
         }
         
@@ -340,6 +515,24 @@ namespace RudeBot {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to https://awitwicki.github.io/rude_bot/.
+        /// </summary>
+        internal static string ProjectUrl {
+            get {
+                return ResourceManager.GetString("ProjectUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/punish.mp4.
+        /// </summary>
+        internal static string PunishVideoUrl {
+            get {
+                return ResourceManager.GetString("PunishVideoUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Правильно|Не правильно :(|Рофлиш?)|Уважно подивись :)|Добре, вгадав|Даю ще одну спробу|За таке можна і забанити|Як не вгадаєш з трьох раз то летиш до бану :).
         /// </summary>
         internal static string RandomCatGenders {
@@ -356,6 +549,69 @@ namespace RudeBot {
         internal static string ruPropaganda {
             get {
                 return ResourceManager.GetString("ruPropaganda", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Хейт російської мови в повідомленнях:.
+        /// </summary>
+        internal static string russianLangHate {
+            get {
+                return ResourceManager.GetString("russianLangHate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Включити/виключити хейт російської (тільки для адмінів): /haterusianlang.
+        /// </summary>
+        internal static string russianLangHateCommandDescription {
+            get {
+                return ResourceManager.GetString("russianLangHateCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Тепер я НЕ хейчу за русняву мову в чаті.
+        /// </summary>
+        internal static string russianLangHateOff {
+            get {
+                return ResourceManager.GetString("russianLangHateOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Тепер я хейчу за русняву мову в чаті.
+        /// </summary>
+        internal static string russianLangHateOn {
+            get {
+                return ResourceManager.GetString("russianLangHateOn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/samsung.jpg.
+        /// </summary>
+        internal static string SamsungUrl {
+            get {
+                return ResourceManager.GetString("SamsungUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /scan дозволений тільки для адмінів.
+        /// </summary>
+        internal static string ScanIsOnlyForAdmins {
+            get {
+                return ResourceManager.GetString("ScanIsOnlyForAdmins", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /scan має бути відповіддю, на чиєсь повідомлення (боти не рахуються).
+        /// </summary>
+        internal static string ScanNeedsToBeReplyToMessage {
+            get {
+                return ResourceManager.GetString("ScanNeedsToBeReplyToMessage", resourceCulture);
             }
         }
         
@@ -435,11 +691,74 @@ namespace RudeBot {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to На балансі ще {0} попередженнь.
+        /// </summary>
+        internal static string WarnBalance {
+            get {
+                return ResourceManager.GetString("WarnBalance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to попередження анульовано!.
+        /// </summary>
+        internal static string WarnCancelled {
+            get {
+                return ResourceManager.GetString("WarnCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to варн.
+        /// </summary>
+        internal static string Warned {
+            get {
+                return ResourceManager.GetString("Warned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /warn або /unwarn дозволений тільки для адмінів.
+        /// </summary>
+        internal static string WarnOrUnwarnIsOnlyForAdmins {
+            get {
+                return ResourceManager.GetString("WarnOrUnwarnIsOnlyForAdmins", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /warn або /unwarn має бути відповіддю, на чиєсь повідомлення.
+        /// </summary>
+        internal static string WarnOrUnwarnNeedsToBeReplyToMessage {
+            get {
+                return ResourceManager.GetString("WarnOrUnwarnNeedsToBeReplyToMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /warn або /unwarn не діє на адмінів.
+        /// </summary>
+        internal static string WarnOrUnwarnNotWorksOnAdmins {
+            get {
+                return ResourceManager.GetString("WarnOrUnwarnNotWorksOnAdmins", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to варнів.
         /// </summary>
         internal static string Warns {
             get {
                 return ResourceManager.GetString("Warns", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/welcome.mp4.
+        /// </summary>
+        internal static string WelcomeToTheClubBuddyVideoUrl {
+            get {
+                return ResourceManager.GetString("WelcomeToTheClubBuddyVideoUrl", resourceCulture);
             }
         }
         

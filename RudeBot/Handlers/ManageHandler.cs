@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using System.Text.Json.Serialization;
+using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using PowerBot.Lite.Attributes;
 using PowerBot.Lite.Handlers;
@@ -35,20 +36,17 @@ namespace RudeBot.Handlers
                 {
                     // Process each new user in chat
                     var keyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton[] {
-                        InlineKeyboardButton.WithUrl("Анкета", Consts.GoogleFormForNewbies),
-                        InlineKeyboardButton.WithCallbackData("Я обіцяю!", $"new_user|{newUser.Id}")
+                        InlineKeyboardButton.WithUrl(Resources.Form, Resources.GoogleFormForNewbiesURL),
+                        InlineKeyboardButton.WithCallbackData(Resources.IAmPromise, $"new_user|{newUser.Id}")
                     });
 
-                    string responseText = $"Вітаємо {newUser.GetUserMention()} у нашому чаті! " +
-                        $"Ми не чат, а дружня, толерантна IT спільнота, яка поважає думку кожного, приєднавшись, " +
-                        $"ти згоджуєшся стати чемною частиною спільноти (та полюбити епл)." +
-                        $"\n\nI якшо не важко, пліз тут анкета на 8 питань";
+                    string responseText = string.Format(Resources.HelloMessage, newUser.GetUserMention());
 
                     Message helloMessage = await BotClient.SendAnimationAsync(
                             chatId: ChatId,
                             replyToMessageId: Message.MessageId,
                             caption: responseText,
-                            animation: Consts.WelcomeToTheClubBuddyVideoUrl,
+                            animation: Resources.WelcomeToTheClubBuddyVideoUrl,
                             parseMode: ParseMode.Markdown,
                             replyMarkup: keyboardMarkup);
 
@@ -73,12 +71,12 @@ namespace RudeBot.Handlers
             // Wrong user clicked
             if (User.Id != newbieUserId)
             {
-                await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Ще раз і бан :)", true);
+                await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.OnceAgaInAndGetBaned, true);
                 return;
             }
 
             // Newbie clicked
-            await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Дуже раді вас бачити! Будь ласка, ознайомтеся з Конституцією чату в закріплених повідомленнях.", true);
+            await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.NewbieClicked, true);
 
             // Delete captcha message
             await BotClient.DeleteMessageAsync(ChatId, Message.MessageId);
@@ -93,9 +91,9 @@ namespace RudeBot.Handlers
             Message msg = null;
 
             // Filter only reply to other user, ignore bots
-            if (message.ReplyToMessage == null || message.ReplyToMessage.From.Id == user.Id || message.ReplyToMessage.From.IsBot)
+            if (message.ReplyToMessage == null || message.ReplyToMessage.From!.Id == user.Id || message.ReplyToMessage.From.IsBot)
             {
-                msg = await BotClient.SendTextMessageAsync(chat.Id, "/warn або /unwarn має бути відповіддю, на чиєсь повідомлення", replyToMessageId: message.MessageId);
+                msg = await BotClient.SendTextMessageAsync(chat.Id, Resources.WarnOrUnwarnNeedsToBeReplyToMessage, replyToMessageId: message.MessageId);
 
                 await Task.Delay(30 * 1000);
 
@@ -108,7 +106,7 @@ namespace RudeBot.Handlers
             ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(chat.Id, user.Id);
             if (!(usrSenderRights.IsHaveAdminRights()))
             {
-                msg = await BotClient.SendTextMessageAsync(ChatId, "/warn або /unwarn дозволений тільки для адмінів", replyToMessageId: message.MessageId);
+                msg = await BotClient.SendTextMessageAsync(ChatId, Resources.WarnOrUnwarnIsOnlyForAdmins, replyToMessageId: message.MessageId);
 
                 await Task.Delay(30 * 1000);
 
@@ -121,7 +119,7 @@ namespace RudeBot.Handlers
             ChatMember usrReceiverRights = await BotClient.GetChatMemberAsync(chat.Id, message.ReplyToMessage.From.Id);
             if (usrReceiverRights.IsHaveAdminRights())
             {
-                msg = await BotClient.SendTextMessageAsync(chat.Id, "/warn або /unwarn не діє на адмінів", replyToMessageId: message.MessageId);
+                msg = await BotClient.SendTextMessageAsync(chat.Id, Resources.WarnOrUnwarnNotWorksOnAdmins, replyToMessageId: message.MessageId);
 
                 await Task.Delay(30 * 1000);
 
@@ -140,7 +138,7 @@ namespace RudeBot.Handlers
             ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, User.Id);
             if (!usrSenderRights.IsHaveAdminRights())
             {
-                await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Це кнопка для адмінів", true);
+                await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.ButtonOnlyForAdmins, true);
                 return;
             }
 
@@ -154,7 +152,7 @@ namespace RudeBot.Handlers
             ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, User.Id);
             if (!usrSenderRights.IsHaveAdminRights())
             {
-                await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Це кнопка для адмінів", true);
+                await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.ButtonOnlyForAdmins, true);
                 return;
             }
 
@@ -173,7 +171,7 @@ namespace RudeBot.Handlers
             // If user not exists in db then ignore
             if (userStats == null)
             {
-                await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Не виконано", true);
+                await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.NotDone, true);
                 return;
             }
 
@@ -183,24 +181,24 @@ namespace RudeBot.Handlers
             {
                 case "ban_media":
                     await BotClient.RestrictChatMemberAsync(ChatId, userId, new ChatPermissions() { CanSendMessages = true, CanSendMediaMessages = false }, DateTime.UtcNow.AddDays(1));
-                    actionResult = "\nЗабанено медіа";
+                    actionResult = $"\n{Resources.BannedMedia}";
                     break;
                 case "mute_day":
                     await BotClient.RestrictChatMemberAsync(ChatId, userId, new ChatPermissions() { CanSendMessages = false }, DateTime.UtcNow.AddDays(1));
-                    actionResult = "\nМут на день";
+                    actionResult = $"\n{Resources.Muted}";
                     break;
                 case "kick":
                     await BotClient.KickChatMemberAsync(ChatId, userId, DateTime.UtcNow.AddMinutes(1));
-                    actionResult = "\nВикинуто з чату";
+                    actionResult = $"\n{Resources.Kicked}";
                     break;
                 case "ban":
                     await BotClient.KickChatMemberAsync(ChatId, userId, DateTime.UtcNow.AddYears(1000));
-                    actionResult = "\nВідправився за кораблем";
+                    actionResult = $"\n{Resources.Banned}";
                     break;
                 case "add_warn":
                     userStats.Warns++;
                     await _userManager.UpdateUserChatStats(userStats);
-                    actionResult = $"\n+1 варн ({userStats.Warns})";
+                    actionResult = $"\n+1 {Resources.Warned} ({userStats.Warns})";
                     break;
                 case "amnesty":
                     // Unban all restrictions
@@ -219,7 +217,7 @@ namespace RudeBot.Handlers
 
                     userStats.Warns = 0;
                     await _userManager.UpdateUserChatStats(userStats);
-                    actionResult = "\nАмністован";
+                    actionResult = $"\n{Resources.Amnestied}";
                     break;
             }
 
@@ -228,8 +226,8 @@ namespace RudeBot.Handlers
 
             string replyText = userStats.BuildWarnMessage();
 
-            string logs = "\n\nЛоги:" + CallbackQuery.Message.Text
-                .Split("\n\nЛоги:")
+            string logs = $"\n\n{Resources.Logs}" + CallbackQuery.Message.Text
+                .Split($"\n\n{Resources.Logs}")
                 .Skip(1)
                 .FirstOrDefault();
 
@@ -238,7 +236,7 @@ namespace RudeBot.Handlers
             var keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(userId);
             await BotClient.EditMessageTextAsync(ChatId, CallbackQuery.Message.MessageId, replyText + logs, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
 
-            await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, "Виконано", true);
+            await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.Done, true);
         }
 
         [MessageReaction(ChatAction.Typing)]
@@ -250,7 +248,7 @@ namespace RudeBot.Handlers
             if (!isWarnLegit)
                 return;
 
-            UserChatStats userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+            UserChatStats userStats = await _userManager.GetUserChatStats(Message!.ReplyToMessage!.From!.Id, ChatId);
 
             // If user not exists in db then ignore
             if (userStats == null)
@@ -285,11 +283,11 @@ namespace RudeBot.Handlers
             userStats.Warns--;
             await _userManager.UpdateUserChatStats(userStats);
 
-            string replyText = $"{userStats.User.UserMention}, попередження анульовано!";
+            string replyText = $"{userStats.User.UserMention}, {Resources.WarnCancelled}";
 
             if (userStats.Warns > 0)
             {
-                replyText += $"\n\n На балансі ще {userStats.Warns} попередженнь";
+                replyText += $"\n\n " + string.Format(Resources.WarnBalance, userStats.Warns);
             }
 
             Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.ReplyToMessage.MessageId, parseMode: ParseMode.Markdown);
@@ -306,14 +304,14 @@ namespace RudeBot.Handlers
             // =================Govnocode begin=================
             // Check message is reply, ignore bots
             if (Message.ReplyToMessage == null || User.IsBot && Message.ReplyToMessage == null || Message.ReplyToMessage.From!.Id == User.Id || Message.ReplyToMessage.From.IsBot)
-                replyText = "/scan має бути відповіддю, на чиєсь повідомлення (боти не рахуються)";
+                replyText = Resources.ScanNeedsToBeReplyToMessage;
             else
             {
                 // Сheck if user have rights to scan
                 ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
                 if (!usrSenderRights.IsHaveAdminRights())
                 {
-                    replyText = "/scan дозволений тільки для адмінів";
+                    replyText = Resources.ScanIsOnlyForAdmins;
                 }
             }
 
@@ -367,24 +365,24 @@ namespace RudeBot.Handlers
             string replyText;
 
             // Сheck if user have rights to scan
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From.Id);
+            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
             if (!usrSenderRights.IsHaveAdminRights())
             {
-                replyText = "Команда дозволенa тільки для адмінів";
+                replyText = Resources.CommandIsOnlyForAdmins;
             }
             else
             {
                 var chatSetrtings = await _chatSettingsService.GetChatSettings(ChatId);
                 if (chatSetrtings == null)
                 {
-                    replyText = "Помилка, щось робиш не так 🤷🏻‍♂️";
+                    replyText =$"{Resources.Error} 🤷🏻‍♂️";
                 }
                 else
                 {
-                    replyText = $"**Настройки чату:**\n\n"
-                        + $"Хейт російської мови в повідомленнях: `{chatSetrtings.HaterussianLang}`\n"
+                    replyText = $"{Resources.ChatSettings}\n\n"
+                        + $"{Resources.russianLangHate} `{chatSetrtings.HaterussianLang}`\n"
                         + $"\n"
-                        + $"Включити/виключити хейт російської (тільки для адмінів): /haterusianlang";
+                        + $"{Resources.russianLangHateCommandDescription}";
                 }
             }
 
@@ -404,24 +402,24 @@ namespace RudeBot.Handlers
             string replyText;
 
             // Сheck if user have rights to change settings
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From.Id);
+            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
             if (!usrSenderRights.IsHaveAdminRights())
             {
-                replyText = "Команда дозволенa тільки для адмінів";
+                replyText = Resources.CommandIsOnlyForAdmins;
             }
             else
             {
                 var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
                 if (chatSettings == null)
                 {
-                    replyText = "Помилка, щось робиш не так 🤷🏻‍♂️";
+                    replyText = $"{Resources.Error} 🤷🏻‍♂️";
                 }
                 else
                 {
                     chatSettings.HaterussianLang = !chatSettings.HaterussianLang;
                     await _chatSettingsService.AddOrUpdateChatSettings(chatSettings);
 
-                    replyText = chatSettings.HaterussianLang ? "Тепер я хейчу за русняву мову в чаті" : "Тепер я НЕ хейчу за русняву мову в чаті";
+                    replyText = chatSettings.HaterussianLang ? Resources.russianLangHateOn : Resources.russianLangHateOff;
                 }
             }
 

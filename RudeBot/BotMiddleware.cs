@@ -13,18 +13,18 @@ namespace RudeBot
 {
     public class BotMiddleware : BaseMiddleware
     {
-        private IUserManager _userManager { get; set; }
-        private TxtWordsDatasetReader _badWordsReaderService { get; set; }
-        private IDuplicateDetectorService _duplicateDetectorService { get; set; }
+        private readonly IUserManager _userManager;
+        private readonly TxtWordsDataset _badWordsService;
+        private readonly IDuplicateDetectorService _duplicateDetectorService;
 
         public BotMiddleware(
             IUserManager userManager,
-            [KeyFilter(Consts.BadWordsReaderService)] TxtWordsDatasetReader badWordsReaderService,
+            [KeyFilter(Consts.BadWordsService)] TxtWordsDataset badWordsService,
             IDuplicateDetectorService duplicateDetectorService
         )
         {
             _userManager = userManager;
-            _badWordsReaderService = badWordsReaderService;
+            _badWordsService = badWordsService;
             _duplicateDetectorService = duplicateDetectorService;
         }
 
@@ -43,7 +43,7 @@ namespace RudeBot
                 {
                     string messageText = text.ToLower();
 
-                    var badWords = _badWordsReaderService.GetWords();
+                    var badWords = _badWordsService.GetWords();
                     if (badWords.Any(x => messageText.Contains(x)))
                     {
                         messageBadWords++;
@@ -86,7 +86,7 @@ namespace RudeBot
 
                     if (duplicateMessageId > 0)
                     {
-                        string messageText = $"Про це вже писали";
+                        string messageText = Resources.Klichko;
 
                         string chatId = $"{Chat.Id}"[3..];
 

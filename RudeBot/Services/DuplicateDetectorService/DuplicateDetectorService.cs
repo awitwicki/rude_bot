@@ -2,9 +2,9 @@
 {
     public class DuplicateDetectorService : IDuplicateDetectorService
     {
-        private TimeSpan _expireTime;
-        private float _gain;
-        private Dictionary<long, List<DuplicateDetectorMessageDescriptor>> _cache;
+        private readonly TimeSpan _expireTime;
+        private readonly float _gain;
+        private readonly Dictionary<long, List<DuplicateDetectorMessageDescriptor>> _cache;
 
         public DuplicateDetectorService(TimeSpan expireTime, float gain)
         {
@@ -14,13 +14,13 @@
             _cache = new Dictionary<long, List<DuplicateDetectorMessageDescriptor>>();
         }
 
-        public List<int> FindDuplicates(long chatId, int messageId, string text)
+        public List<int> FindDuplicates(long chatId, int messageId, string? text)
         {
-            List<int> epmtyResult = new List<int>();
+            List<int> emptyResult = new List<int>();
 
             if (text is null || text.Length < 40 || text.StartsWith('/'))
             {
-                return epmtyResult;
+                return emptyResult;
             }
 
             // Lock for 1 running instance per time
@@ -53,8 +53,9 @@
                                 Text = text,
                                 MessageId = messageId,
                                 Expires = DateTime.UtcNow + _expireTime
-                            });
-                        };
+                            }
+                        );
+                    };
 
                     _cache[chatId] = descriptors;
 
@@ -80,7 +81,7 @@
                 }
             }
 
-            return epmtyResult;
+            return emptyResult;
         }
     }
 }

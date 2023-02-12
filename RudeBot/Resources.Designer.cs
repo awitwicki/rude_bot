@@ -69,6 +69,41 @@ namespace RudeBot {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Краще б чимось корисним зайнялись.
+        ///Краще б нічого не робили.
+        ///Краще б нормальний сайт собі зробили
+        ///Краще б Діму полайкали.
+        ///Краще б Працювали
+        ///Краще б запиталися експертів
+        ///Краще б пруф знайшли
+        ///Краще б рудебота поробили
+        ///Краще б рудекоїнів купили
+        ///Я спати
+        ///Доброго ранку чат!
+        ///Добрий ранок
+        ///Краще б тікет спочатку зробили
+        ///Буду чекати
+        ///вогонь
+        ///Відпочивай
+        ///я все думаю
+        ///то точно:)
+        ///також помітив
+        ///тим паче у львові
+        ///ахаха))))
+        ///Фааак)))
+        ///Чорно)
+        ///Це сильно)
+        ///Ахахахах
+        ///я довго думав, а потім усмінувся
+        ///я довго д [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string Advices {
+            get {
+                return ResourceManager.GetString("Advices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Думаєш я настільки тупий?.
         /// </summary>
         internal static string AreYouThinkImThatDumb {
@@ -83,6 +118,76 @@ namespace RudeBot {
         internal static string BadWords {
             get {
                 return ResourceManager.GetString("BadWords", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to cunt
+        ///Cyка
+        ///kurwa
+        ///nahui
+        ///pidar
+        ///pizd
+        ///бля
+        ///Бляд
+        ///Блядство
+        ///Блядь
+        ///Блят
+        ///Вхуюжить
+        ///Выебать
+        ///Выеби
+        ///Выебон
+        ///Гандон
+        ///говн
+        ///говно
+        ///Гомосек
+        ///д@ун
+        ///Далбоёб
+        ///даун
+        ///Долбоёб
+        ///Ебать
+        ///Еби
+        ///Ебическая
+        ///Еблан
+        ///Еблище
+        ///Ебло
+        ///Ёбнуть
+        ///Ёболызнуть
+        ///Ебош
+        ///Ебунок
+        ///Заёб
+        ///Заебал
+        ///Заебатый
+        ///залупа
+        ///засран
+        ///засранец
+        ///засрать
+        ///Злаебучий
+        ///Иди на хуй
+        ///Їбати
+        ///Їбатися
+        ///їбать
+        ///Колдоебина
+        ///курва
+        ///Манда
+        ///Мандовошка
+        ///Мокрощелка
+        ///Мудак
+        ///Наебал
+        ///Наебаловка
+        ///Наебка
+        ///Напиздеть
+        ///Опизденеть
+        ///Отебукать
+        ///Отхуевертить
+        ///Отъебись
+        ///Охуевший
+        ///Охуеть
+        ///п [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string BadWordsDataset {
+            get {
+                return ResourceManager.GetString("BadWordsDataset", resourceCulture);
             }
         }
         
@@ -168,6 +273,15 @@ namespace RudeBot {
         internal static string KarmaIncrease {
             get {
                 return ResourceManager.GetString("KarmaIncrease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Про це вже писали.
+        /// </summary>
+        internal static string Klichko {
+            get {
+                return ResourceManager.GetString("Klichko", resourceCulture);
             }
         }
         

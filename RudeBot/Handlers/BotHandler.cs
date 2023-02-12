@@ -18,7 +18,7 @@ namespace RudeBot.Handlers
         private IUserManager _userManager { get; set; }
         private ITickerService _tickerService { get; set; }
         private ICatService _catService { get; set; }
-        private TxtWordsDatasetReader _advicesReaderService { get; set; }
+        private TxtWordsDataset AdvicesService { get; set; }
         private static Object _topLocked { get; set; } = new Object();
         private IChatSettingsService _chatSettingsService { get; set; }
 
@@ -27,14 +27,14 @@ namespace RudeBot.Handlers
             IChatSettingsService chatSettingsService,
             ITickerService tickerService,
             ICatService catService,
-            [KeyFilter(Consts.AdvicesReaderService)] TxtWordsDatasetReader advicesReaderService
+            [KeyFilter(Consts.AdvicesService)] TxtWordsDataset advicesService
             )
         {
             _userManager = userManager;
             _chatSettingsService = chatSettingsService;
             _tickerService = tickerService;
             _catService = catService;
-            _advicesReaderService = advicesReaderService;
+            AdvicesService = advicesService;
         }
 
         [MessageReaction(ChatAction.Typing)]
@@ -495,11 +495,11 @@ namespace RudeBot.Handlers
 
                 if ((Message?.ReplyToMessage?.From?.Id == BotClient.BotId) || (random.Next(1, 1000) > 985))
                 {
-                    var advices = _advicesReaderService.GetWords();
+                    var advices = AdvicesService.GetWords();
                     replyText = advices.PickRandom();
                 }
 
-                if (string.IsNullOrEmpty(replyText))
+                if (!string.IsNullOrEmpty(replyText))
                 {
                     bool isReply = (random.Next(100) > 50);
                     await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: isReply ? Message!.MessageId : null);

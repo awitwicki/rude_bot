@@ -129,4 +129,13 @@
     <data name="TopChatEmotionals" xml:space="preserve">
         <value>*Топ 5 емоціонали чату:*</value>
     </data>
+    <data name="Advices" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>FileResources\Advices.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    </data>
+    <data name="BadWordsDataset" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>FileResources\Badwords.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    </data>
+    <data name="Klichko" xml:space="preserve">
+        <value>Про це вже писали</value>
+    </data>
 </root>

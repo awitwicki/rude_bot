@@ -16,9 +16,10 @@ string botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
 CoreBot botClient = new CoreBot(botToken);
 
 // Create database if not exists
-using (DataContext _dbContext = new DataContext())
+await using (DataContext dbContext = new DataContext())
 {
-    _dbContext.Database.Migrate();
+    dbContext.Database.Migrate();
+    Console.WriteLine("Database is synchronized");
 }
 
 // Register services
@@ -28,19 +29,23 @@ botClient.RegisterContainers(x =>
         .As<ITickerService>()
         .SingleInstance();
 
-    x.RegisterType<TxtWordsDatasetReader>()
-        .WithParameter("path", Consts.BadWordsTxtPath)
-        .Keyed<TxtWordsDatasetReader>(Consts.BadWordsReaderService)
+    x.RegisterType<TxtWordsDataset>()
+        .WithParameter("data", Resources.BadWordsDataset
+            .Split("\n")
+            .Select(x => x.Replace("\r", "").ToLower())
+        )
+        .Keyed<TxtWordsDataset>(Consts.BadWordsService)
         .SingleInstance();
 
-    x.RegisterType<TxtWordsDatasetReader>()
-        .WithParameter("path", Consts.AdvicesTxtPath)
-        .Keyed<TxtWordsDatasetReader>(Consts.AdvicesReaderService)
+    x.RegisterType<TxtWordsDataset>()
+        .WithParameter("data", Resources.Advices
+            .Split("\n")
+        )
+        .Keyed<TxtWordsDataset>(Consts.AdvicesService)
         .SingleInstance();
 
     x.RegisterType<UserManager>()
        .As<IUserManager>()
-       .WithParameter("path", Consts.AdvicesTxtPath)
        .InstancePerLifetimeScope();
 
     x.RegisterType<CatService>()
@@ -63,4 +68,4 @@ botClient.Build();
 await botClient.StartReveiving();
 
 // Wait for eternity
-await Task.Delay(Int32.MaxValue);
+await Task.Delay(-1);

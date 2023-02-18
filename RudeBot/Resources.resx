@@ -247,4 +247,16 @@ I якшо не важко, пліз тут анкета на 8 питань</va
     <data name="russianLangHateOff" xml:space="preserve">
         <value>Тепер я НЕ хейчу за русняву мову в чаті</value>
     </data>
+    <data name="UseChatGPT" xml:space="preserve">
+        <value>ChatGPT:</value>
+    </data>
+    <data name="UseChatGPTCommandDescription" xml:space="preserve">
+        <value>Включити/виключити режим ChatGPT (тільки для адмінів): /usechatgpt</value>
+    </data>
+    <data name="UseChatGPTOn" xml:space="preserve">
+        <value>Тепер я буду відповідати як ChatGPT</value>
+    </data>
+    <data name="UseChatGPTOff" xml:space="preserve">
+        <value>Тепер я НЕ буду відповідати як ChatGPT</value>
+    </data>
 </root>

@@ -461,6 +461,12 @@ namespace RudeBot.Handlers
         [MessageHandler("^кіт ")]
         public async Task ChatGptAsk()
         {
+            var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+            if (chatSettings == null || !chatSettings!.UseChatGpt)
+            {
+                return;
+            }
+            
             string inputMessageTest = Message!.Text!.Replace("кіт ", "").Replace("Кіт ", "");
             string returnMessage = ":)";
 

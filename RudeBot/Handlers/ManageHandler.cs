@@ -381,8 +381,10 @@ namespace RudeBot.Handlers
                 {
                     replyText = $"{Resources.ChatSettings}\n\n"
                         + $"{Resources.russianLangHate} `{chatSetrtings.HaterussianLang}`\n"
+                        + $"{Resources.UseChatGPT} `{chatSetrtings.UseChatGpt}`\n"
                         + $"\n"
-                        + $"{Resources.russianLangHateCommandDescription}";
+                        + $"{Resources.russianLangHateCommandDescription}\n"
+                        + $"{Resources.UseChatGPTCommandDescription}";
                 }
             }
 
@@ -420,6 +422,43 @@ namespace RudeBot.Handlers
                     await _chatSettingsService.AddOrUpdateChatSettings(chatSettings);
 
                     replyText = chatSettings.HaterussianLang ? Resources.russianLangHateOn : Resources.russianLangHateOff;
+                }
+            }
+
+            msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+            
+            await Task.Delay(30 * 1000);
+
+            await BotClient.TryDeleteMessage(msg);
+            await BotClient.TryDeleteMessage(Message);
+        }
+        
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("^/usechatgpt")]
+        public async Task ChangeUseChatGpt()
+        {
+            Message msg = null;
+            string replyText;
+
+            // Сheck if user have rights to change settings
+            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+            if (!usrSenderRights.IsHaveAdminRights())
+            {
+                replyText = Resources.CommandIsOnlyForAdmins;
+            }
+            else
+            {
+                var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+                if (chatSettings == null)
+                {
+                    replyText = $"{Resources.Error} 🤷🏻‍♂️";
+                }
+                else
+                {
+                    chatSettings.UseChatGpt = !chatSettings.UseChatGpt;
+                    await _chatSettingsService.AddOrUpdateChatSettings(chatSettings);
+
+                    replyText = chatSettings.UseChatGpt ? Resources.UseChatGPTOn : Resources.UseChatGPTOff;
                 }
             }
 

@@ -691,6 +691,42 @@ namespace RudeBot {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ChatGPT:.
+        /// </summary>
+        internal static string UseChatGPT {
+            get {
+                return ResourceManager.GetString("UseChatGPT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Включити/виключити режим ChatGPT (тільки для адмінів): /usechatgpt.
+        /// </summary>
+        internal static string UseChatGPTCommandDescription {
+            get {
+                return ResourceManager.GetString("UseChatGPTCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Тепер я НЕ буду відповідати як ChatGPT.
+        /// </summary>
+        internal static string UseChatGPTOff {
+            get {
+                return ResourceManager.GetString("UseChatGPTOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Тепер я буду відповідати як ChatGPT.
+        /// </summary>
+        internal static string UseChatGPTOn {
+            get {
+                return ResourceManager.GetString("UseChatGPTOn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to На балансі ще {0} попередженнь.
         /// </summary>
         internal static string WarnBalance {

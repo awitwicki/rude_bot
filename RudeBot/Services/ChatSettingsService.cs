@@ -15,6 +15,7 @@ namespace RudeBot.Services
 
             Task.Run(async () => { await LoadAllChatSettings(); }).Wait();
         }
+        
         public async Task LoadAllChatSettings()
         {
             _chatSettingsCache = new Dictionary<long, ChatSettings>();

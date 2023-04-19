@@ -16,13 +16,13 @@ namespace RudeBot.Handlers
 {
     public class ManageHandler : BaseHandler
     {
-        private IUserManager _userManager { get; set; }
-        private IChatSettingsService _chatSettingsService{ get; set; }
+        private IUserManager UserManager { get; set; }
+        private IChatSettingsService ChatSettingsService{ get; set; }
         
         public ManageHandler(IUserManager userManager, IChatSettingsService chatSettingsService)
         {
-            _userManager = userManager;
-            _chatSettingsService = chatSettingsService;
+            UserManager = userManager;
+            ChatSettingsService = chatSettingsService;
         }
 
         [MessageReaction(ChatAction.Typing)]
@@ -166,7 +166,7 @@ namespace RudeBot.Handlers
                 .Replace("manage_", "")
                 .Replace("_user", "");
 
-            UserChatStats userStats = await _userManager.GetUserChatStats(userId, ChatId);
+            UserChatStats userStats = await UserManager.GetUserChatStats(userId, ChatId);
 
             // If user not exists in db then ignore
             if (userStats == null)
@@ -197,7 +197,7 @@ namespace RudeBot.Handlers
                     break;
                 case "add_warn":
                     userStats.Warns++;
-                    await _userManager.UpdateUserChatStats(userStats);
+                    await UserManager.UpdateUserChatStats(userStats);
                     actionResult = $"\n+1 {Resources.Warned} ({userStats.Warns})";
                     break;
                 case "amnesty":
@@ -216,7 +216,7 @@ namespace RudeBot.Handlers
                     await BotClient.RestrictChatMemberAsync(ChatId, userId, permissions);
 
                     userStats.Warns = 0;
-                    await _userManager.UpdateUserChatStats(userStats);
+                    await UserManager.UpdateUserChatStats(userStats);
                     actionResult = $"\n{Resources.Amnestied}";
                     break;
             }
@@ -248,14 +248,14 @@ namespace RudeBot.Handlers
             if (!isWarnLegit)
                 return;
 
-            UserChatStats userStats = await _userManager.GetUserChatStats(Message!.ReplyToMessage!.From!.Id, ChatId);
+            UserChatStats userStats = await UserManager.GetUserChatStats(Message!.ReplyToMessage!.From!.Id, ChatId);
 
             // If user not exists in db then ignore
             if (userStats == null)
                 return;
 
             userStats.Warns++;
-            await _userManager.UpdateUserChatStats(userStats);
+            await UserManager.UpdateUserChatStats(userStats);
 
             string replyText = userStats.BuildWarnMessage();
 
@@ -274,14 +274,14 @@ namespace RudeBot.Handlers
             if (!isWarnLegit)
                 return;
 
-            UserChatStats userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+            UserChatStats userStats = await UserManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
 
             // If user not exists in db then ignore
             if (userStats == null)
                 return;
 
             userStats.Warns--;
-            await _userManager.UpdateUserChatStats(userStats);
+            await UserManager.UpdateUserChatStats(userStats);
 
             string replyText = $"{userStats.User.UserMention}, {Resources.WarnCancelled}";
 
@@ -326,7 +326,7 @@ namespace RudeBot.Handlers
                 return;
             }
 
-            UserChatStats userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage!.From.Id, ChatId);
+            UserChatStats userStats = await UserManager.GetUserChatStats(Message.ReplyToMessage!.From.Id, ChatId);
 
             // If user not exists in db then ignore
             if (userStats == null)
@@ -372,16 +372,16 @@ namespace RudeBot.Handlers
             }
             else
             {
-                var chatSetrtings = await _chatSettingsService.GetChatSettings(ChatId);
-                if (chatSetrtings == null)
+                var chatSettings = await ChatSettingsService.GetChatSettings(ChatId);
+                if (chatSettings == null)
                 {
                     replyText =$"{Resources.Error} 🤷🏻‍♂️";
                 }
                 else
                 {
                     replyText = $"{Resources.ChatSettings}\n\n"
-                        + $"{Resources.russianLangHate} `{chatSetrtings.HaterussianLang}`\n"
-                        + $"{Resources.UseChatGPT} `{chatSetrtings.UseChatGpt}`\n"
+                        + $"{Resources.russianLangHate} `{chatSettings.HaterussianLang}`\n"
+                        + $"{Resources.UseChatGPT} `{chatSettings.UseChatGpt}`\n"
                         + $"\n"
                         + $"{Resources.russianLangHateCommandDescription}\n"
                         + $"{Resources.UseChatGPTCommandDescription}";
@@ -411,7 +411,7 @@ namespace RudeBot.Handlers
             }
             else
             {
-                var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+                var chatSettings = await ChatSettingsService.GetChatSettings(ChatId);
                 if (chatSettings == null)
                 {
                     replyText = $"{Resources.Error} 🤷🏻‍♂️";
@@ -419,7 +419,7 @@ namespace RudeBot.Handlers
                 else
                 {
                     chatSettings.HaterussianLang = !chatSettings.HaterussianLang;
-                    await _chatSettingsService.AddOrUpdateChatSettings(chatSettings);
+                    await ChatSettingsService.AddOrUpdateChatSettings(chatSettings);
 
                     replyText = chatSettings.HaterussianLang ? Resources.russianLangHateOn : Resources.russianLangHateOff;
                 }
@@ -448,7 +448,7 @@ namespace RudeBot.Handlers
             }
             else
             {
-                var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+                var chatSettings = await ChatSettingsService.GetChatSettings(ChatId);
                 if (chatSettings == null)
                 {
                     replyText = $"{Resources.Error} 🤷🏻‍♂️";
@@ -456,7 +456,7 @@ namespace RudeBot.Handlers
                 else
                 {
                     chatSettings.UseChatGpt = !chatSettings.UseChatGpt;
-                    await _chatSettingsService.AddOrUpdateChatSettings(chatSettings);
+                    await ChatSettingsService.AddOrUpdateChatSettings(chatSettings);
 
                     replyText = chatSettings.UseChatGpt ? Resources.UseChatGPTOn : Resources.UseChatGPTOff;
                 }

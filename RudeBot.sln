@@ -9,6 +9,8 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseChatMigrator", "DatabaseChatMigrator\DatabaseChatMigrator.csproj", "{2A8F53C5-5470-4DC3-89B7-055AE45EED08}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RudeBot.Tests", "RudeBot.Tests\RudeBot.Tests.csproj", "{AE0834C0-1C17-403E-AFE8-44636B49E79B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{2A8F53C5-5470-4DC3-89B7-055AE45EED08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A8F53C5-5470-4DC3-89B7-055AE45EED08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A8F53C5-5470-4DC3-89B7-055AE45EED08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE0834C0-1C17-403E-AFE8-44636B49E79B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE0834C0-1C17-403E-AFE8-44636B49E79B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE0834C0-1C17-403E-AFE8-44636B49E79B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE0834C0-1C17-403E-AFE8-44636B49E79B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

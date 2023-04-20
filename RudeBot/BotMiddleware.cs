@@ -77,8 +77,8 @@ namespace RudeBot
                     await _userManager.UpdateUserChatStats(userStats);
                 }
 
-                // Try find dublicates
-                if ((Message.Text != null || Message.Caption != null) && Message.ForwardFrom != null)
+                // Try find duplicates
+                if (!string.IsNullOrEmpty(Message.Text) || !string.IsNullOrEmpty(Message.Caption))
                 {
                     var duplicates = _duplicateDetectorService.FindDuplicates(Chat.Id, Message.MessageId, text!);
 

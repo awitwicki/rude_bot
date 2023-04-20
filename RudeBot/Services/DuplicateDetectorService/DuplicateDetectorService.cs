@@ -3,14 +3,13 @@
     public class DuplicateDetectorService : IDuplicateDetectorService
     {
         private readonly TimeSpan _expireTime;
-        private readonly float _gain;
         private readonly Dictionary<long, List<DuplicateDetectorMessageDescriptor>> _cache;
+        
+        private readonly object _lock = new object();
 
-        public DuplicateDetectorService(TimeSpan expireTime, float gain)
+        public DuplicateDetectorService(TimeSpan expireTime)
         {
             _expireTime = expireTime;
-            _gain = gain;
-
             _cache = new Dictionary<long, List<DuplicateDetectorMessageDescriptor>>();
         }
 
@@ -24,7 +23,7 @@
             }
 
             // Lock for 1 running instance per time
-            lock (this)
+            lock (_lock)
             {
                 if (_cache.TryGetValue(chatId, out var descriptors))
                 {
@@ -35,9 +34,8 @@
 
                     // Try find similar messages
                     var similarPosts = descriptors
-                        .Where(x => x.Equals(text, _gain))
+                        .Where(x => x.IsEquals(text))
                         .ToList();
-
 
                     List<int> similarMessagesIds = similarPosts
                         .Select(x => x.MessageId)
@@ -45,8 +43,7 @@
 
                     if (!similarMessagesIds.Any())
                     {
-                        // Add new message descriptor
-                        // Add nerw chat and message descriptor
+                        // Add new chat and message descriptor
                         descriptors.Add(
                             new DuplicateDetectorMessageDescriptor
                             {
@@ -55,7 +52,7 @@
                                 Expires = DateTime.UtcNow + _expireTime
                             }
                         );
-                    };
+                    }
 
                     _cache[chatId] = descriptors;
 
@@ -65,20 +62,19 @@
 
                     return similarMessagesIds;
                 }
-                else
-                {
-                    // Add new chat and message descriptor
-                    descriptors = new List<DuplicateDetectorMessageDescriptor>() {
-                        new DuplicateDetectorMessageDescriptor
-                        {
-                            Text = text,
-                            MessageId = messageId,
-                            Expires = DateTime.UtcNow + _expireTime
-                        }
-                    };
 
-                    _cache[chatId] = descriptors;
-                }
+                // Add new chat and message descriptor
+                descriptors = new List<DuplicateDetectorMessageDescriptor>()
+                {
+                    new()
+                    {
+                        Text = text,
+                        MessageId = messageId,
+                        Expires = DateTime.UtcNow + _expireTime
+                    }
+                };
+
+                _cache[chatId] = descriptors;
             }
 
             return emptyResult;

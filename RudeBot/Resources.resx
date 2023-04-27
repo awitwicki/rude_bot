@@ -259,4 +259,16 @@ I якшо не важко, пліз тут анкета на 8 питань</va
     <data name="UseChatGPTOff" xml:space="preserve">
         <value>Тепер я НЕ буду відповідати як ChatGPT</value>
     </data>
+    <data name="SendRandomMessages" xml:space="preserve">
+        <value>Час від часу писати повідомлення</value>
+    </data>
+    <data name="SendRandomMessagesOn" xml:space="preserve">
+        <value>Тепер я буду писати час від часу в чаті</value>
+    </data>
+    <data name="SendRandomMessagesOff" xml:space="preserve">
+        <value>Тепер я не буду писати час від часу в чаті</value>
+    </data>
+    <data name="SendRandomMessagesDescription" xml:space="preserve">
+        <value>Час від часу писати повідомлення в чат (тільки для адмінів) /sendrandommessages</value>
+    </data>
 </root>

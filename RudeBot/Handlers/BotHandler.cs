@@ -498,8 +498,13 @@ namespace RudeBot.Handlers
             {
                 string replyText = "";
                 Random random = new Random();
-
-                if ((Message?.ReplyToMessage?.From?.Id == BotClient.BotId) || (random.Next(1, 1000) > 985))
+                var sendRandomMessage = (random.Next(1, 1000) > 985);
+                
+                var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+                
+                if (!Message.IsCommand() && 
+                    (Message?.ReplyToMessage?.From?.Id == BotClient.BotId ||
+                     (sendRandomMessage && chatSettings.SendRandomMessages)))
                 {
                     var advices = AdvicesService.GetWords();
                     replyText = advices.PickRandom();

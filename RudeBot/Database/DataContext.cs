@@ -17,5 +17,12 @@ namespace RudeBot.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseNpgsql(Environment.GetEnvironmentVariable("RUDEBOT_DB_CONNECTION_STRING")!);
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ChatSettings>()
+                .Property(p => p.SendRandomMessages)
+                .HasDefaultValue(true);
+        }
     }
 }

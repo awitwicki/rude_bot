@@ -616,6 +616,42 @@ namespace RudeBot {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Час від часу писати повідомлення.
+        /// </summary>
+        internal static string SendRandomMessages {
+            get {
+                return ResourceManager.GetString("SendRandomMessages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Час від часу писати повідомлення в чат (тільки для адмінів) /sendrandommessages.
+        /// </summary>
+        internal static string SendRandomMessagesDescription {
+            get {
+                return ResourceManager.GetString("SendRandomMessagesDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Тепер я не буду писати час від часу в чаті.
+        /// </summary>
+        internal static string SendRandomMessagesOff {
+            get {
+                return ResourceManager.GetString("SendRandomMessagesOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Тепер я буду писати час від часу в чаті.
+        /// </summary>
+        internal static string SendRandomMessagesOn {
+            get {
+                return ResourceManager.GetString("SendRandomMessagesOn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Днів без згадування тесли: `0`
         ///🚗🚗🚗
         ///

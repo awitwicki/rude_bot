@@ -26,5 +26,7 @@ namespace RudeBot.Extensions
             else
                 return false;
         }
+        
+        public static bool IsCommand(this Message message) => message.Text?.StartsWith("/") ?? false;
     }
 }

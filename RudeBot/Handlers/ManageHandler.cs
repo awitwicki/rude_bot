@@ -382,9 +382,11 @@ namespace RudeBot.Handlers
                     replyText = $"{Resources.ChatSettings}\n\n"
                         + $"{Resources.russianLangHate} `{chatSettings.HaterussianLang}`\n"
                         + $"{Resources.UseChatGPT} `{chatSettings.UseChatGpt}`\n"
+                        + $"{Resources.SendRandomMessages} `{chatSettings.SendRandomMessages}`\n"
                         + $"\n"
                         + $"{Resources.russianLangHateCommandDescription}\n"
-                        + $"{Resources.UseChatGPTCommandDescription}";
+                        + $"{Resources.UseChatGPTCommandDescription}\n"
+                        + $"{Resources.SendRandomMessagesDescription}\n";
                 }
             }
 
@@ -422,6 +424,43 @@ namespace RudeBot.Handlers
                     await ChatSettingsService.AddOrUpdateChatSettings(chatSettings);
 
                     replyText = chatSettings.HaterussianLang ? Resources.russianLangHateOn : Resources.russianLangHateOff;
+                }
+            }
+
+            msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+            
+            await Task.Delay(30 * 1000);
+
+            await BotClient.TryDeleteMessage(msg);
+            await BotClient.TryDeleteMessage(Message);
+        }
+        
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("^/sendrandommessages")]
+        public async Task ChangeSendRandomMessages()
+        {
+            Message msg = null;
+            string replyText;
+
+            // Check if user have rights to change settings
+            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+            if (!usrSenderRights.IsHaveAdminRights())
+            {
+                replyText = Resources.CommandIsOnlyForAdmins;
+            }
+            else
+            {
+                var chatSettings = await ChatSettingsService.GetChatSettings(ChatId);
+                if (chatSettings == null)
+                {
+                    replyText = $"{Resources.Error} 🤷🏻‍♂️";
+                }
+                else
+                {
+                    chatSettings.SendRandomMessages = !chatSettings.SendRandomMessages;
+                    await ChatSettingsService.AddOrUpdateChatSettings(chatSettings);
+
+                    replyText = chatSettings.SendRandomMessages ? Resources.SendRandomMessagesOn : Resources.SendRandomMessagesOff;
                 }
             }
 

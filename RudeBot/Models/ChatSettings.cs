@@ -6,5 +6,6 @@
         public long ChatId { get; set; }
         public bool HaterussianLang { get; set; }
         public bool UseChatGpt { get; set; }
+        public bool SendRandomMessages { get; set; }
     }
 }

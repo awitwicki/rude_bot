@@ -55,7 +55,6 @@ botClient.RegisterContainers(x =>
     x.RegisterType<DuplicateDetectorService>()
        .As<IDuplicateDetectorService>()
        .WithParameter("expireTime", TimeSpan.FromDays(5))
-       .WithParameter("gain", 0.9)
        .SingleInstance();
 
     x.RegisterType<ChatSettingsService>()

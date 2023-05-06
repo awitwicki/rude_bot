@@ -371,6 +371,15 @@ namespace RudeBot {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/itsuachat.mp4.
+        /// </summary>
+        internal static string ItsUaChatVideoUrl {
+            get {
+                return ResourceManager.GetString("ItsUaChatVideoUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to карма.
         /// </summary>
         internal static string Karma {

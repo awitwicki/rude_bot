@@ -271,4 +271,7 @@ I якшо не важко, пліз тут анкета на 8 питань</va
     <data name="SendRandomMessagesDescription" xml:space="preserve">
         <value>Час від часу писати повідомлення в чат (тільки для адмінів) /sendrandommessages</value>
     </data>
+    <data name="ItsUaChatVideoUrl" xml:space="preserve">
+        <value>https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/itsuachat.mp4</value>
+    </data>
 </root>

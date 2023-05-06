@@ -112,7 +112,12 @@ namespace RudeBot.Handlers
 
             string replyText = Resources.Palanytsia;
 
-            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+            Message msg = await BotClient.SendAnimationAsync(
+                chatId: ChatId,
+                replyToMessageId: Message.MessageId,
+                caption: replyText,
+                animation: Resources.ItsUaChatVideoUrl,
+                parseMode: ParseMode.Markdown);
 
             await Task.Delay(30 * 1000);
             await BotClient.TryDeleteMessage(msg);

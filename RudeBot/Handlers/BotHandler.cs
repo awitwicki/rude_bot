@@ -145,8 +145,6 @@ namespace RudeBot.Handlers
             }
             else
             {
-                lastTeslaInChat.Date = DateTimeOffset.UtcNow;
-
                 var timeFromLastTesla = (DateTimeOffset.UtcNow - lastTeslaInChat.Date).ToString("dd\\.hh\\:mm\\:ss");
                 var replyText = String.Format(Resources.TeslaAgain, timeFromLastTesla, tickerPrice);
 
@@ -154,15 +152,8 @@ namespace RudeBot.Handlers
                     replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
             }
 
-            try
-            {
-                await _teslaChatCounterService.AddOrUpdateTeslaInChatDate(lastTeslaInChat);
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            lastTeslaInChat.Date = DateTimeOffset.UtcNow;
+            await _teslaChatCounterService.AddOrUpdateTeslaInChatDate(lastTeslaInChat);
         }
 
         [MessageReaction(ChatAction.Typing)]

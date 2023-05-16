@@ -21,10 +21,13 @@ namespace RudeBot.Handlers
         private TxtWordsDataset AdvicesService { get; set; }
         private static Object _topLocked { get; set; } = new Object();
         private IChatSettingsService _chatSettingsService { get; set; }
+        
+        private ITeslaChatCounterService _teslaChatCounterService { get; set; }
 
         public BotHandler(
             IUserManager userManager,
             IChatSettingsService chatSettingsService,
+            ITeslaChatCounterService teslaChatCounterService,
             ITickerService tickerService,
             ICatService catService,
             [KeyFilter(Consts.AdvicesService)] TxtWordsDataset advicesService
@@ -32,6 +35,7 @@ namespace RudeBot.Handlers
         {
             _userManager = userManager;
             _chatSettingsService = chatSettingsService;
+            _teslaChatCounterService = teslaChatCounterService;
             _tickerService = tickerService;
             _catService = catService;
             AdvicesService = advicesService;
@@ -127,12 +131,38 @@ namespace RudeBot.Handlers
         [MessageHandler("tesl|тесл")]
         public async Task Tesla()
         {
+            var tickerPrice = await _tickerService.GetTickerPrice("TSLA");
+            
+            var lastTeslaInChat = await _teslaChatCounterService.GetTeslaInChatDate(ChatId);
 
-            double tickerPrice = await _tickerService.GetTickerPrice("TSLA");
+            if (lastTeslaInChat == null)
+            {
+                lastTeslaInChat = new TeslaChatCounter
+                {
+                    ChatId = ChatId,
+                    Date = DateTimeOffset.UtcNow
+                };
+            }
+            else
+            {
+                lastTeslaInChat.Date = DateTimeOffset.UtcNow;
 
-            string replyText = String.Format(Resources.TeslaAgain, tickerPrice);
+                var timeFromLastTesla = (DateTimeOffset.UtcNow - lastTeslaInChat.Date).ToString("dd\\.hh\\:mm\\:ss");
+                var replyText = String.Format(Resources.TeslaAgain, timeFromLastTesla, tickerPrice);
 
-            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+                await BotClient.SendTextMessageAsync(ChatId, replyText,
+                    replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+            }
+
+            try
+            {
+                await _teslaChatCounterService.AddOrUpdateTeslaInChatDate(lastTeslaInChat);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         [MessageReaction(ChatAction.Typing)]

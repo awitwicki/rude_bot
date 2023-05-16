@@ -58,8 +58,12 @@ botClient.RegisterContainers(x =>
        .SingleInstance();
 
     x.RegisterType<ChatSettingsService>()
-       .As<IChatSettingsService>()
-       .SingleInstance();
+        .As<IChatSettingsService>()
+        .SingleInstance();
+    
+    x.RegisterType<TeslaChatCounterService>()
+        .As<ITeslaChatCounterService>()
+        .SingleInstance();
 });
 
 botClient.Build();

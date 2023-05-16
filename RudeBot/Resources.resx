@@ -52,10 +52,10 @@
         <value>Ану кажи "паляниця" 😡</value>
     </data>
     <data name="TeslaAgain" xml:space="preserve">
-        <value>Днів без згадування тесли: `0`
+        <value>Днів без згадування тесли: `{0} -&gt; 0`.
 🚗🚗🚗
 
-...btw ${0}</value>
+...btw ${1}</value>
     </data>
     <data name="KarmaIncrease" xml:space="preserve">
         <value>Ви збільшили карму {0} до значення {1}! 🥳</value>

@@ -9,6 +9,7 @@ namespace RudeBot.Database
         public DbSet<UserChatStats> UserStats { get; set; }
         public DbSet<ChatTicket> Tickets { get; set; }
         public DbSet<ChatSettings> ChatSettings { get; set; }
+        public DbSet<TeslaChatCounter> TeslaChatCounters { get; set; }
 
         public DataContext()
         {

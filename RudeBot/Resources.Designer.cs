@@ -661,10 +661,10 @@ namespace RudeBot {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Днів без згадування тесли: `0`
+        ///   Looks up a localized string similar to Днів без згадування тесли: `{0} -&gt; 0`.
         ///🚗🚗🚗
         ///
-        ///...btw ${0}.
+        ///...btw ${1}.
         /// </summary>
         internal static string TeslaAgain {
             get {

@@ -102,7 +102,7 @@ namespace RudeBot
             }
 
             // Invoke handler matched methods
-            await _nextMiddleware.Invoke(bot, update, func);
+            await NextMiddleware.Invoke(bot, update, func);
         }
     }
 }

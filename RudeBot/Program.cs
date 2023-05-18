@@ -4,16 +4,17 @@ using Microsoft.EntityFrameworkCore;
 using PowerBot.Lite;
 using RudeBot;
 using RudeBot.Database;
+using RudeBot.Handlers;
 using RudeBot.Managers;
 using RudeBot.Services;
 using RudeBot.Services.DuplicateDetectorService;
 
 Console.WriteLine("Starting RudeBot");
 
-string botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
+var botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
 
 // Run bot
-CoreBot botClient = new CoreBot(botToken);
+var botClient = new CoreBot(botToken);
 
 // Create database if not exists
 await using (DataContext dbContext = new DataContext())
@@ -21,6 +22,11 @@ await using (DataContext dbContext = new DataContext())
     dbContext.Database.Migrate();
     Console.WriteLine("Database is synchronized");
 }
+
+// Register middlewares and handlers
+botClient.RegisterMiddleware<BotMiddleware>()
+    .RegisterHandler<BotHandler>()
+    .RegisterHandler<ManageHandler>();
 
 // Register services
 botClient.RegisterContainers(x =>
@@ -68,7 +74,7 @@ botClient.RegisterContainers(x =>
 
 botClient.Build();
 
-await botClient.StartReveiving();
+await botClient.StartReceiving();
 
 // Wait for eternity
 await Task.Delay(-1);

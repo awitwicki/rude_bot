@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using System.Globalization;
+using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using PowerBot.Lite.Attributes;
 using PowerBot.Lite.Handlers;
@@ -231,7 +232,7 @@ namespace RudeBot.Handlers
                 if (lockTaken)
                 {
                     // Get all users
-                    var users = _userManager.GetAllUsersChatStats(ChatId).Result;
+                    var users = await _userManager.GetAllUsersChatStats(ChatId);
 
                     String replyText = $"*{Resources.AccountsInTheChat} {users.Count()}*\n\n";
                     replyText += $"{Resources.TopChatKarma}\n";
@@ -241,10 +242,11 @@ namespace RudeBot.Handlers
                         .ToList()
                         .ForEach(x =>
                         {
-                            float karmaPercent = 0;
+                            var karmaPercent = "0";
                             if (x.Karma > 0 && x.TotalMessages > 0)
                             {
-                                karmaPercent = (float)x.Karma * 100 / x.TotalMessages;
+                                karmaPercent = ((float)x.Karma * 100 / x.TotalMessages).ToString("0.00",
+                                    new NumberFormatInfo{NumberDecimalSeparator = "."});
                             }
 
                             replyText += $"`{x.User.UserName}` - {Resources.Karma} `{x.Karma} ({karmaPercent}%)`\n";
@@ -262,12 +264,13 @@ namespace RudeBot.Handlers
 
                         topMinus3Users.ForEach(x =>
                         {
-                            float karmaPercent = 0;
+                            var karmaPercent = "0";
                             if (x.Karma > 0 && x.TotalMessages > 0)
                             {
-                                karmaPercent = (float)x.Karma * 100 / x.TotalMessages;
+                                karmaPercent = ((float)x.Karma * 100 / x.TotalMessages).ToString("0.00",
+                                    new NumberFormatInfo{NumberDecimalSeparator = "."});
                             }
-
+                            
                             replyText += $"`{x.User.UserName}` - {Resources.Karma} `{x.Karma} ({karmaPercent}%)`\n";
                         });
                     }
@@ -289,10 +292,11 @@ namespace RudeBot.Handlers
                         .ToList()
                         .ForEach(x =>
                         {
-                            float BadWordsPercent = 0;
+                            var BadWordsPercent = "0";
                             if (x.TotalBadWords > 0 && x.TotalMessages > 0)
                             {
-                                BadWordsPercent = (float)x.TotalBadWords * 100 / x.TotalMessages;
+                                BadWordsPercent = ((float)x.TotalBadWords * 100 / x.TotalMessages).ToString("0.00",
+                                    new NumberFormatInfo{NumberDecimalSeparator = "."});
                             }
 
                             replyText += $"`{x.User.UserName}` - {Resources.BadWords} `{x.TotalBadWords} ({BadWordsPercent}%)`\n";
@@ -315,7 +319,7 @@ namespace RudeBot.Handlers
 
                     Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
-                    Task.Delay(30 * 1000).Wait();
+                    Task.Delay(300 * 1000).Wait();
 
                     BotClient.TryDeleteMessage(msg).Wait();
                     BotClient.TryDeleteMessage(Message).Wait();

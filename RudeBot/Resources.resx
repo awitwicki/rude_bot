@@ -121,7 +121,7 @@
         <value>матюків</value>
     </data>
     <data name="TopChatWarns" xml:space="preserve">
-        <value>*Топ 5 варни чату:*</value>
+        <value>*Топ 5 кандидатів на бан:*</value>
     </data>
     <data name="Warns" xml:space="preserve">
         <value>варнів</value>

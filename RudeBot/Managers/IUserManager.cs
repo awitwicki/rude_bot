@@ -9,5 +9,6 @@ namespace RudeBot.Managers
         Task<TelegramUser> CreateUser(TelegramUser user);
         Task<UserChatStats> CreateUserChatStats(UserChatStats userChatStats);
         Task<UserChatStats> UpdateUserChatStats(UserChatStats user);
+        Task<string> RudeCoinsTransaction(UserChatStats userSender, UserChatStats userReceiver, int amount);
     }
 }

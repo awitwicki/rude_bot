@@ -1,0 +1,392 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="InfoText" xml:space="preserve">
+    <value>Привіт, я Рудекіт!
+
+Я можу дещо зробити, якшо ти скажеш чарівне слово:
+`Карма` - покажу твою карму,
+`Топ` - покажу топ учасників чату,
+`Тесла` - порахую дні без згадування тесли,
+`/cat` або `Кіт` - покажу котика,
+`Шарій` - покажу півника,
+`Зрада` - розпочну процедуру бану,
+`/warn /unwarn` - (admins only) винесу попередження за погану поведінку,
+`/scan` - (admins only) просканую когось,
+`/give {{25}}` - поділитися 25 рудекоїнами,
+`/tickets` - випишу всі таски чату,
+`/addticket {{купити молочка коту}}` - створити таск в чаті,
+`/removeticket {{25}}` - видалити таск номер 25,
+`/settings` - настройки бота для цього чату,
+`кіт {{а ти маму мав?}}` - задай своє запитання коту, бажано англійською,
+А ще я вітаю новеньких у чаті.
+
+Версія `{0}`</value>
+  </data>
+  <data name="Page" xml:space="preserve">
+    <value>Сторінка</value>
+  </data>
+  <data name="ruPropaganda" xml:space="preserve">
+    <value>*Російська пропаганда (.ru .рф .сру і інші) не може вважатися пруфом!*
+
+Вас буде додано до реєстру.</value>
+  </data>
+  <data name="Palanytsia" xml:space="preserve">
+    <value>Ану кажи "паляниця" 😡</value>
+  </data>
+  <data name="TeslaAgain" xml:space="preserve">
+    <value>Днів без згадування тесли: `{0} -&gt; 0`.
+🚗🚗🚗
+
+...btw ${1}</value>
+  </data>
+  <data name="KarmaIncrease" xml:space="preserve">
+    <value>Ви збільшили карму {0} до значення {1}! 🥳</value>
+  </data>
+  <data name="KarmaDecrease" xml:space="preserve">
+    <value>Ви зменшили карму {0} до значення {1}!</value>
+  </data>
+  <data name="OnlyAdminsAreAllowed" xml:space="preserve">
+    <value>Дозволено тільки для адмінів</value>
+  </data>
+  <data name="OopsIDidntAgain" xml:space="preserve">
+    <value>Oops! …I Didn't again</value>
+  </data>
+  <data name="GPTModel" xml:space="preserve">
+    <value>text-davinci-003</value>
+  </data>
+  <data name="Empty" xml:space="preserve">
+    <value>Пусто, альо</value>
+  </data>
+  <data name="RandomCatGenders" xml:space="preserve">
+    <value>Правильно|Не правильно :(|Рофлиш?)|Уважно подивись :)|Добре, вгадав|Даю ще одну спробу|За таке можна і забанити|Як не вгадаєш з трьох раз то летиш до бану :)</value>
+  </data>
+  <data name="AreYouThinkImThatDumb" xml:space="preserve">
+    <value>Думаєш я настільки тупий?</value>
+  </data>
+  <data name="TicketDeleted" xml:space="preserve">
+    <value>Тікет номер "{0}" видалено.</value>
+  </data>
+  <data name="HackerInTheChat" xml:space="preserve">
+    <value>Ой у нас тут "хакер" в чаті 😐, такого тікету не існує...</value>
+  </data>
+  <data name="WhereIsTicketNumber" xml:space="preserve">
+    <value>Де, блять, номер тікету після команди?</value>
+  </data>
+  <data name="GoneAway" xml:space="preserve">
+    <value>*Пішов собі далі по своїх справах*</value>
+  </data>
+  <data name="NeedToDefineTicket" xml:space="preserve">
+    <value>Треба вказати текст тікету після команди</value>
+  </data>
+  <data name="TicketAdded" xml:space="preserve">
+    <value>Тікет "{0}" додано до чату.</value>
+  </data>
+  <data name="Karma" xml:space="preserve">
+    <value>карма</value>
+  </data>
+  <data name="TopChatActive" xml:space="preserve">
+    <value>*Топ 5 актив чату:*</value>
+  </data>
+  <data name="AccountsInTheChat" xml:space="preserve">
+    <value>Всього аккаунтів у цьому чаті:</value>
+  </data>
+  <data name="TopChatKarma" xml:space="preserve">
+    <value>*Топ 5 карми чату:*</value>
+  </data>
+  <data name="TopChatNegativeKarma" xml:space="preserve">
+    <value>*Топ -3 карми чату:*</value>
+  </data>
+  <data name="Messages" xml:space="preserve">
+    <value>повідомлень</value>
+  </data>
+  <data name="BadWords" xml:space="preserve">
+    <value>матюків</value>
+  </data>
+  <data name="TopChatWarns" xml:space="preserve">
+    <value>*Топ 5 кандидатів на бан:*</value>
+  </data>
+  <data name="Warns" xml:space="preserve">
+    <value>варнів</value>
+  </data>
+  <data name="TopChatEmotionals" xml:space="preserve">
+    <value>*Топ 5 емоціонали чату:*</value>
+  </data>
+  <data name="Klichko" xml:space="preserve">
+    <value>Про це вже писали</value>
+  </data>
+  <data name="GoogleFormForNewbiesURL" xml:space="preserve">
+    <value>https://forms.gle/pY6EjJhNRosUbd9P9</value>
+  </data>
+  <data name="WelcomeToTheClubBuddyVideoUrl" xml:space="preserve">
+    <value>https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/welcome.mp4</value>
+  </data>
+  <data name="CockmanVideoUrl" xml:space="preserve">
+    <value>https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/sh.mp4</value>
+  </data>
+  <data name="SamsungUrl" xml:space="preserve">
+    <value>https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/samsung.jpg</value>
+  </data>
+  <data name="PunishVideoUrl" xml:space="preserve">
+    <value>https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/punish.mp4</value>
+  </data>
+  <data name="ProjectUrl" xml:space="preserve">
+    <value>https://awitwicki.github.io/rude_bot/</value>
+  </data>
+  <data name="HelloMessage" xml:space="preserve">
+    <value>Вітаємо {0} у нашому чаті!
+Ми не чат, а дружня, толерантна IT спільнота, яка поважає думку кожного, приєднавшись,
+ти згоджуєшся стати чемною частиною спільноти (та полюбити епл).
+
+I якшо не важко, пліз тут анкета на 8 питань</value>
+  </data>
+  <data name="NewbieClicked" xml:space="preserve">
+    <value>Дуже раді вас бачити! Будь ласка, ознайомтеся з Конституцією чату в закріплених повідомленнях.</value>
+  </data>
+  <data name="Form" xml:space="preserve">
+    <value>Анкета</value>
+  </data>
+  <data name="IAmPromise" xml:space="preserve">
+    <value>Я обіцяю!</value>
+  </data>
+  <data name="OnceAgaInAndGetBaned" xml:space="preserve">
+    <value>Ще раз і бан :)</value>
+  </data>
+  <data name="WarnOrUnwarnIsOnlyForAdmins" xml:space="preserve">
+    <value>/warn або /unwarn дозволений тільки для адмінів</value>
+  </data>
+  <data name="ShouldBeReplyToMessage" xml:space="preserve">
+    <value>Дія має бути відповіддю, на чиєсь повідомлення</value>
+  </data>
+  <data name="ButtonOnlyForAdmins" xml:space="preserve">
+    <value>Це кнопка для адмінів</value>
+  </data>
+  <data name="CommandIsOnlyForAdmins" xml:space="preserve">
+    <value>Команда дозволенa тільки для адмінів</value>
+  </data>
+  <data name="WarnOrUnwarnNotWorksOnAdmins" xml:space="preserve">
+    <value>/warn або /unwarn не діє на адмінів</value>
+  </data>
+  <data name="NotDone" xml:space="preserve">
+    <value>Не виконано</value>
+  </data>
+  <data name="BannedMedia" xml:space="preserve">
+    <value>Забанено медіа</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Виконано</value>
+  </data>
+  <data name="ScanIsOnlyForAdmins" xml:space="preserve">
+    <value>/scan дозволений тільки для адмінів</value>
+  </data>
+  <data name="ScanNeedsToBeReplyToMessage" xml:space="preserve">
+    <value>/scan має бути відповіддю, на чиєсь повідомлення (боти не рахуються)</value>
+  </data>
+  <data name="Muted" xml:space="preserve">
+    <value>Мут на день</value>
+  </data>
+  <data name="Kicked" xml:space="preserve">
+    <value>Викинуто з чату</value>
+  </data>
+  <data name="Banned" xml:space="preserve">
+    <value>Відправився за кораблем</value>
+  </data>
+  <data name="Warned" xml:space="preserve">
+    <value>варн</value>
+  </data>
+  <data name="Amnestied" xml:space="preserve">
+    <value>Амністован</value>
+  </data>
+  <data name="Logs" xml:space="preserve">
+    <value>Логи:</value>
+  </data>
+  <data name="WarnBalance" xml:space="preserve">
+    <value>На балансі ще {0} попередженнь</value>
+  </data>
+  <data name="WarnCancelled" xml:space="preserve">
+    <value>попередження анульовано!</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Помилка, щось робиш не так‍</value>
+  </data>
+  <data name="ChatSettings" xml:space="preserve">
+    <value>**Настройки чату:**</value>
+  </data>
+  <data name="russianLangHate" xml:space="preserve">
+    <value>Хейт російської мови в повідомленнях:</value>
+  </data>
+  <data name="russianLangHateCommandDescription" xml:space="preserve">
+    <value>Включити/виключити хейт російської (тільки для адмінів): /haterusianlang</value>
+  </data>
+  <data name="russianLangHateOn" xml:space="preserve">
+    <value>Тепер я хейчу за русняву мову в чаті</value>
+  </data>
+  <data name="russianLangHateOff" xml:space="preserve">
+    <value>Тепер я НЕ хейчу за русняву мову в чаті</value>
+  </data>
+  <data name="UseChatGPT" xml:space="preserve">
+    <value>ChatGPT:</value>
+  </data>
+  <data name="UseChatGPTCommandDescription" xml:space="preserve">
+    <value>Включити/виключити режим ChatGPT (тільки для адмінів): /usechatgpt</value>
+  </data>
+  <data name="UseChatGPTOn" xml:space="preserve">
+    <value>Тепер я буду відповідати як ChatGPT</value>
+  </data>
+  <data name="UseChatGPTOff" xml:space="preserve">
+    <value>Тепер я НЕ буду відповідати як ChatGPT</value>
+  </data>
+  <data name="SendRandomMessages" xml:space="preserve">
+    <value>Час від часу писати повідомлення</value>
+  </data>
+  <data name="SendRandomMessagesOn" xml:space="preserve">
+    <value>Тепер я буду писати час від часу в чаті</value>
+  </data>
+  <data name="SendRandomMessagesOff" xml:space="preserve">
+    <value>Тепер я не буду писати час від часу в чаті</value>
+  </data>
+  <data name="SendRandomMessagesDescription" xml:space="preserve">
+    <value>Час від часу писати повідомлення в чат (тільки для адмінів) /sendrandommessages</value>
+  </data>
+  <data name="ItsUaChatVideoUrl" xml:space="preserve">
+    <value>https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/itsuachat.mp4</value>
+  </data>
+  <data name="NotEnoughRudeCoins" xml:space="preserve">
+    <value>Недостатньо рудкоїнів</value>
+  </data>
+  <data name="RudeCoinsTransactionSuccess" xml:space="preserve">
+    <value>Транзакція зарахована 👌🏻✅</value>
+  </data>
+  <data name="CantSendToYourself" xml:space="preserve">
+    <value>Собі не можна!</value>
+  </data>
+  <data name="CantSendToBots" xml:space="preserve">
+    <value>Ботам не можна!</value>
+  </data>
+  <data name="CanGiveOnlyNumbersArg" xml:space="preserve">
+    <value>В аргументах може бути тільки число (int)</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="Advices" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\FileResources\Advices.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="BadWordsDataset" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\FileResources\Badwords.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+</root>

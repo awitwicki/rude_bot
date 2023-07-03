@@ -1,9 +1,4 @@
-using System;
-using System.Linq;
-using System.Net.Mime;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.Resources;
 using RudeBot.Services.DuplicateDetectorService;
-using Xunit;
 
 namespace RudeBot.Tests 
 {

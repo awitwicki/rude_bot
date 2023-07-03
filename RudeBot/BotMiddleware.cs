@@ -1,5 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using PowerBot.Lite.Middlewares;
+using RudeBot.Domain;
+using RudeBot.Domain.Resources;
 using RudeBot.Managers;
 using RudeBot.Models;
 using RudeBot.Services;

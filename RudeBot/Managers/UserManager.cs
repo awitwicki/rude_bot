@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RudeBot.Database;
+using RudeBot.Domain.Resources;
 using RudeBot.Models;
 
 namespace RudeBot.Managers
@@ -7,8 +8,6 @@ namespace RudeBot.Managers
     public class UserManager : IUserManager
     {
         private DataContext _dbContext;
-
-        private UserChatStats? _telegramUserStats { get; set; }
 
         public UserManager()
         {
@@ -24,24 +23,13 @@ namespace RudeBot.Managers
         }
 
         // TODO: Make GetUser() result cache for scoped DI container?
-        public async Task<UserChatStats> GetUserChatStats(long userId, long chatId)
+        public Task<UserChatStats> GetUserChatStats(long userId, long chatId)
         {
-            if (_telegramUserStats != null)
-            {
-                return _telegramUserStats;
-            }
-            else
-            {
-                UserChatStats userStats = await _dbContext
-                    .UserStats
-                    .Include(x => x.User)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.UserId == userId && x.ChatId == chatId);
-
-                _telegramUserStats = userStats;
-
-                return userStats;
-            }
+            return _dbContext
+                .UserStats
+                .Include(x => x.User)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.ChatId == chatId)!;
         }
 
         public async Task<IEnumerable<UserChatStats>> GetAllUsersChatStats(long chatId)
@@ -71,7 +59,25 @@ namespace RudeBot.Managers
 
             return user;
         }
+        
+        public async Task<string> RudeCoinsTransaction(UserChatStats userSender, UserChatStats userReceiver, int amount)
+        {
+            if (userSender.RudeCoins < amount)
+            {
+                return Resources.NotEnoughRudeCoins;
+            }
+            
+            userSender.RudeCoins -= amount;
+            userReceiver.RudeCoins += amount;
+            
+            _dbContext.UserStats.Update(userSender);
+            _dbContext.UserStats.Update(userReceiver);
 
+            await _dbContext.SaveChangesAsync();
+            
+            return string.Format(Resources.RudeCoinsTransactionSuccess, amount);
+        }
+        
         public async Task<UserChatStats> CreateUserChatStats(UserChatStats userChatStats)
         {
             // If user exists then remove object to prevent crating new existing user

@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using Telegram.Bot;
+﻿using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using PowerBot.Lite.Attributes;
 using PowerBot.Lite.Handlers;
@@ -11,6 +10,7 @@ using RudeBot.Services;
 using PowerBot.Lite.Utils;
 using RudeBot.Extensions;
 using RudeBot.Keyboards;
+using RudeBot.Domain.Resources;
 
 namespace RudeBot.Handlers
 {
@@ -93,7 +93,7 @@ namespace RudeBot.Handlers
             // Filter only reply to other user, ignore bots
             if (message.ReplyToMessage == null || message.ReplyToMessage.From!.Id == user.Id || message.ReplyToMessage.From.IsBot)
             {
-                msg = await BotClient.SendTextMessageAsync(chat.Id, Resources.WarnOrUnwarnNeedsToBeReplyToMessage, replyToMessageId: message.MessageId);
+                msg = await BotClient.SendTextMessageAsync(chat.Id, Resources.ShouldBeReplyToMessage, replyToMessageId: message.MessageId);
 
                 await Task.Delay(30 * 1000);
 

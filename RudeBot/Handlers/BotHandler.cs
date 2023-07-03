@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using PowerBot.Lite.Attributes;
@@ -11,6 +11,9 @@ using RudeBot.Services;
 using RudeBot.Extensions;
 using Autofac.Features.AttributeFilters;
 using OpenAI_API;
+using RudeBot.Common.TransactionHelpers;
+using RudeBot.Domain;
+using RudeBot.Domain.Resources;
 
 namespace RudeBot.Handlers
 {
@@ -521,6 +524,38 @@ namespace RudeBot.Handlers
             await BotClient.SendTextMessageAsync(ChatId, returnMessage, replyToMessageId: Message.MessageId);
         }
 
+        [MessageReaction(ChatAction.Typing)]
+        [MessageHandler("^/give")]
+        public async Task Give()
+        {
+            var replyText = "";
+            
+            var transactionRequestError = TransactionArgsValidator.CheckTransactionRequestMessage(Message, User);
+           
+            if (!string.IsNullOrWhiteSpace(transactionRequestError))
+            {
+                replyText = transactionRequestError;
+            }
+            else
+            {
+                // Parse args
+                var amountStr = Message!.Text!.Split(" ").Last();
+                var amount = int.Parse(amountStr);
+
+                var userSender = await _userManager.GetUserChatStats(User.Id, ChatId);
+                var userReceiver = await _userManager.GetUserChatStats(Message.ReplyToMessage!.From!.Id, ChatId);
+
+                replyText = await _userManager.RudeCoinsTransaction(userSender, userReceiver, amount);
+            }
+
+            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
+
+            await Task.Delay(30 * 1000);
+
+            await BotClient.TryDeleteMessage(Message);
+            await BotClient.TryDeleteMessage(msg);
+        }
+        
         [MessageTypeFilter(MessageType.Text)]
         public async Task MessageTrigger()
         {

@@ -75,7 +75,7 @@ namespace RudeBot.Managers
 
             await _dbContext.SaveChangesAsync();
             
-            return string.Format(Resources.RudeCoinsTransactionSuccess, amount);
+            return string.Format(Resources.RudeCoinsTransactionSuccess, amount, userSender.RudeCoins);
         }
         
         public async Task<UserChatStats> CreateUserChatStats(UserChatStats userChatStats)

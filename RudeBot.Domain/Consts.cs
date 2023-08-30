@@ -2,7 +2,7 @@
 {
     public static class Consts
     {
-        public const string BotVersion = "3.36";
+        public const string BotVersion = "3.36.1";
 
         public const string BadWordsService = "BadWordsService";
         public const string AdvicesService = "AdvicesService";

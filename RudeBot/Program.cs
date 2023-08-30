@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using PowerBot.Lite;
 using RudeBot;
 using RudeBot.Database;
+using RudeBot.Domain;
+using RudeBot.Domain.Resources;
 using RudeBot.Handlers;
 using RudeBot.Managers;
 using RudeBot.Services;

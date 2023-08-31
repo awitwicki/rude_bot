@@ -2,63 +2,62 @@
 using RudeBot.Database;
 using RudeBot.Models;
 
-namespace RudeBot.Services
+namespace RudeBot.Services;
+
+public class ChatSettingsService : IChatSettingsService
 {
-    public class ChatSettingsService : IChatSettingsService
+    private Dictionary<long, ChatSettings> _chatSettingsCache;
+    private DataContext _dbContext;
+
+    public ChatSettingsService()
     {
-        private Dictionary<long, ChatSettings> _chatSettingsCache;
-        private DataContext _dbContext;
+        _dbContext = new DataContext();
 
-        public ChatSettingsService()
-        {
-            _dbContext = new DataContext();
-
-            Task.Run(async () => { await LoadAllChatSettings(); }).Wait();
-        }
+        Task.Run(async () => { await LoadAllChatSettings(); }).Wait();
+    }
         
-        public async Task LoadAllChatSettings()
-        {
-            _chatSettingsCache = new Dictionary<long, ChatSettings>();
+    public async Task LoadAllChatSettings()
+    {
+        _chatSettingsCache = new Dictionary<long, ChatSettings>();
 
-            _chatSettingsCache = await _dbContext.ChatSettings.AsNoTracking()
-                .ToDictionaryAsync(k => k.ChatId, v => v);
+        _chatSettingsCache = await _dbContext.ChatSettings.AsNoTracking()
+            .ToDictionaryAsync(k => k.ChatId, v => v);
+    }
+
+    public async Task<ChatSettings> AddOrUpdateChatSettings(ChatSettings settings)
+    {
+        // Add or update in db
+        if (_dbContext.ChatSettings.Any(e => e.ChatId == settings.ChatId))
+        {
+            _dbContext.ChatSettings.Update(settings);
+        }
+        else
+        {
+            _dbContext.ChatSettings.Add(settings);
         }
 
-        public async Task<ChatSettings> AddOrUpdateChatSettings(ChatSettings settings)
+        await _dbContext.SaveChangesAsync();
+
+        // Add or update in cache
+        _chatSettingsCache[settings.ChatId] = settings;
+
+        return settings;
+    }
+
+    public async Task<ChatSettings> GetChatSettings(long chatId)
+    {
+        _chatSettingsCache.TryGetValue(chatId, out var settings);
+
+        if (settings == null)
         {
-            // Add or update in db
-            if (_dbContext.ChatSettings.Any(e => e.ChatId == settings.ChatId))
+            settings = new ChatSettings
             {
-                _dbContext.ChatSettings.Update(settings);
-            }
-            else
-            {
-                _dbContext.ChatSettings.Add(settings);
-            }
+                ChatId = chatId
+            };
 
-            await _dbContext.SaveChangesAsync();
-
-            // Add or update in cache
-            _chatSettingsCache[settings.ChatId] = settings;
-
-            return settings;
+            settings = await AddOrUpdateChatSettings(settings);
         }
-
-        public async Task<ChatSettings> GetChatSettings(long chatId)
-        {
-            _chatSettingsCache.TryGetValue(chatId, out var settings);
-
-            if (settings == null)
-            {
-                settings = new ChatSettings
-                {
-                    ChatId = chatId
-                };
-
-                settings = await AddOrUpdateChatSettings(settings);
-            }
             
-            return settings;
-        }
+        return settings;
     }
 }

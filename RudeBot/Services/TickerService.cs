@@ -1,35 +1,34 @@
 ﻿using YahooFinanceApi;
 
-namespace RudeBot.Services
+namespace RudeBot.Services;
+
+internal class TickerService : ITickerService
 {
-    internal class TickerService : ITickerService
+    private DateTime _lastRequest { get; set; } = DateTime.MinValue;
+    private double _lastValue { get; set; }
+
+    public async Task<double> GetTickerPrice(string tickerName)
     {
-        private DateTime _lastRequest { get; set; } = DateTime.MinValue;
-        private double _lastValue { get; set; }
-
-        public async Task<double> GetTickerPrice(string tickerName)
+        if ((DateTime.UtcNow - _lastRequest).TotalMinutes >= 5)
         {
-            if ((DateTime.UtcNow - _lastRequest).TotalMinutes >= 5)
+            try
             {
-                try
-                {
-                    var securities = await Yahoo.Symbols(tickerName)
-                        .Fields(Field.Symbol, Field.RegularMarketPrice)
-                        .QueryAsync();
+                var securities = await Yahoo.Symbols(tickerName)
+                    .Fields(Field.Symbol, Field.RegularMarketPrice)
+                    .QueryAsync();
 
-                    var ticker = securities[tickerName];
-                    var price = ticker.RegularMarketPrice;
+                var ticker = securities[tickerName];
+                var price = ticker.RegularMarketPrice;
 
-                    _lastValue = price;
-                    _lastRequest = DateTime.UtcNow;
-                }
-                catch (Exception ex)
-                {
-                    _lastValue = 0;
-                }
+                _lastValue = price;
+                _lastRequest = DateTime.UtcNow;
             }
-         
-            return _lastValue;
+            catch (Exception ex)
+            {
+                _lastValue = 0;
+            }
         }
+         
+        return _lastValue;
     }
 }

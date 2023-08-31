@@ -1,7 +1,6 @@
-﻿namespace RudeBot.Managers
+﻿namespace RudeBot.Managers;
+
+public interface ICatService
 {
-    public interface ICatService
-    {
-        Task<string> GetRandomCatImageUrl();
-    }
+    Task<string> GetRandomCatImageUrl();
 }

@@ -1,9 +1,8 @@
-﻿namespace RudeBot.Managers
+﻿namespace RudeBot.Managers;
+
+public interface ITicketManager
 {
-    public interface ITicketManager
-    {
-        Task<string> GetChatTickets(long chatId);
-        Task AddTicket(long chatId, string text);
-        Task<bool> RemoveTicket(long requestChatId, long ticketId);
-    }
+    Task<string> GetChatTickets(long chatId);
+    Task AddTicket(long chatId, string text);
+    Task<bool> RemoveTicket(long requestChatId, long ticketId);
 }

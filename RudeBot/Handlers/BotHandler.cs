@@ -15,571 +15,570 @@ using RudeBot.Common.TransactionHelpers;
 using RudeBot.Domain;
 using RudeBot.Domain.Resources;
 
-namespace RudeBot.Handlers
+namespace RudeBot.Handlers;
+
+public class BotHandler : BaseHandler
 {
-    public class BotHandler : BaseHandler
-    {
-        private IUserManager _userManager { get; set; }
-        private ITickerService _tickerService { get; set; }
-        private ICatService _catService { get; set; }
-        private TxtWordsDataset AdvicesService { get; set; }
-        private static Object _topLocked { get; set; } = new Object();
-        private IChatSettingsService _chatSettingsService { get; set; }
+    private IUserManager _userManager { get; set; }
+    private ITickerService _tickerService { get; set; }
+    private ICatService _catService { get; set; }
+    private TxtWordsDataset AdvicesService { get; set; }
+    private static Object _topLocked { get; set; } = new Object();
+    private IChatSettingsService _chatSettingsService { get; set; }
         
-        private ITeslaChatCounterService _teslaChatCounterService { get; set; }
+    private ITeslaChatCounterService _teslaChatCounterService { get; set; }
 
-        public BotHandler(
-            IUserManager userManager,
-            IChatSettingsService chatSettingsService,
-            ITeslaChatCounterService teslaChatCounterService,
-            ITickerService tickerService,
-            ICatService catService,
-            [KeyFilter(Consts.AdvicesService)] TxtWordsDataset advicesService
-            )
+    public BotHandler(
+        IUserManager userManager,
+        IChatSettingsService chatSettingsService,
+        ITeslaChatCounterService teslaChatCounterService,
+        ITickerService tickerService,
+        ICatService catService,
+        [KeyFilter(Consts.AdvicesService)] TxtWordsDataset advicesService
+    )
+    {
+        _userManager = userManager;
+        _chatSettingsService = chatSettingsService;
+        _teslaChatCounterService = teslaChatCounterService;
+        _tickerService = tickerService;
+        _catService = catService;
+        AdvicesService = advicesService;
+    }
+
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("(^/start|^/help)")]
+    public async Task Start()
+    {
+        var messageText = string.Format(Resources.InfoText, Consts.BotVersion);
+
+        var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[]
         {
-            _userManager = userManager;
-            _chatSettingsService = chatSettingsService;
-            _teslaChatCounterService = teslaChatCounterService;
-            _tickerService = tickerService;
-            _catService = catService;
-            AdvicesService = advicesService;
-        }
+            InlineKeyboardButton.WithUrl(Resources.Page, Resources.ProjectUrl)
+        });
 
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("(^/start|^/help)")]
-        public async Task Start()
-        {
-            var messageText = string.Format(Resources.InfoText, Consts.BotVersion);
+        var msg = await BotClient.SendTextMessageAsync(ChatId, messageText, ParseMode.Markdown, replyMarkup: keyboard);
 
-            var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[]
-            {
-                InlineKeyboardButton.WithUrl(Resources.Page, Resources.ProjectUrl)
-            });
+        await Task.Delay(60 * 1000);
 
-            var msg = await BotClient.SendTextMessageAsync(ChatId, messageText, ParseMode.Markdown, replyMarkup: keyboard);
+        await BotClient.TryDeleteMessage(msg);
+        await BotClient.TryDeleteMessage(Message);
+    }
 
-            await Task.Delay(60 * 1000);
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("[\\w\\-]+\\.ru")]
+    public async Task DotRu()
+    {
+        var messageText = Resources.ruPropaganda;
+        var msg = await BotClient.SendTextMessageAsync(ChatId, messageText, replyToMessageId: Message.MessageId);
+    }
 
-            await BotClient.TryDeleteMessage(msg);
-            await BotClient.TryDeleteMessage(Message);
-        }
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("(^карма$|^karma$)")]
+    public async Task Karma()
+    {
+        var userStats = await _userManager.GetUserChatStats(User.Id, ChatId);
 
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("[\\w\\-]+\\.ru")]
-        public async Task DotRu()
-        {
-            var messageText = Resources.ruPropaganda;
-            var msg = await BotClient.SendTextMessageAsync(ChatId, messageText, replyToMessageId: Message.MessageId);
-        }
+        var replyText = userStats.BuildInfoString();
 
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("(^карма$|^karma$)")]
-        public async Task Karma()
-        {
-            var userStats = await _userManager.GetUserChatStats(User.Id, ChatId);
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
-            var replyText = userStats.BuildInfoString();
+        await Task.Delay(30 * 1000);
 
-            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+        await BotClient.TryDeleteMessage(msg);
+        await BotClient.TryDeleteMessage(Message);
+    }
 
-            await Task.Delay(30 * 1000);
+    [MessageReaction(ChatAction.UploadVideo)]
+    [MessageHandler("шарий|шарій")]
+    public async Task CockMan()
+    {
+        var msg = await BotClient.SendVideoAsync(chatId: ChatId, video: Resources.CockmanVideoUrl);
 
-            await BotClient.TryDeleteMessage(msg);
-            await BotClient.TryDeleteMessage(Message);
-        }
+        await Task.Delay(30 * 1000);
+        await BotClient.TryDeleteMessage(msg);
+    }
 
-        [MessageReaction(ChatAction.UploadVideo)]
-        [MessageHandler("шарий|шарій")]
-        public async Task CockMan()
-        {
-            var msg = await BotClient.SendVideoAsync(chatId: ChatId, video: Resources.CockmanVideoUrl);
+    [MessageReaction(ChatAction.UploadPhoto)]
+    [MessageHandler("samsung|самсунг|сасунг")]
+    public async Task Samsung()
+    {
+        var msg = await BotClient.SendPhotoAsync(chatId: ChatId, photo: Resources.SamsungUrl, replyToMessageId: Message.MessageId);
 
-            await Task.Delay(30 * 1000);
-            await BotClient.TryDeleteMessage(msg);
-        }
+        await Task.Delay(30 * 1000);
+        await BotClient.TryDeleteMessage(msg);
+    }
 
-        [MessageReaction(ChatAction.UploadPhoto)]
-        [MessageHandler("samsung|самсунг|сасунг")]
-        public async Task Samsung()
-        {
-            var msg = await BotClient.SendPhotoAsync(chatId: ChatId, photo: Resources.SamsungUrl, replyToMessageId: Message.MessageId);
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("ё|ъ|ы|э")]
+    public async Task Palanytsa()
+    {
+        var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
 
-            await Task.Delay(30 * 1000);
-            await BotClient.TryDeleteMessage(msg);
-        }
+        // Ignore message forwards
+        if (Message.ForwardFrom != null || Message.ForwardFromChat != null || !chatSettings.HaterussianLang)
+            return;
 
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("ё|ъ|ы|э")]
-        public async Task Palanytsa()
-        {
-            var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+        var replyText = Resources.Palanytsia;
 
-            // Ignore message forwards
-            if (Message.ForwardFrom != null || Message.ForwardFromChat != null || !chatSettings.HaterussianLang)
-                return;
+        var msg = await BotClient.SendAnimationAsync(
+            chatId: ChatId,
+            replyToMessageId: Message.MessageId,
+            caption: replyText,
+            animation: Resources.ItsUaChatVideoUrl,
+            parseMode: ParseMode.Markdown);
 
-            var replyText = Resources.Palanytsia;
+        await Task.Delay(30 * 1000);
+        await BotClient.TryDeleteMessage(msg);
+    }
 
-            var msg = await BotClient.SendAnimationAsync(
-                chatId: ChatId,
-                replyToMessageId: Message.MessageId,
-                caption: replyText,
-                animation: Resources.ItsUaChatVideoUrl,
-                parseMode: ParseMode.Markdown);
-
-            await Task.Delay(30 * 1000);
-            await BotClient.TryDeleteMessage(msg);
-        }
-
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("tesl|тесл")]
-        public async Task Tesla()
-        {
-            var tickerPrice = await _tickerService.GetTickerPrice("TSLA");
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("tesl|тесл")]
+    public async Task Tesla()
+    {
+        var tickerPrice = await _tickerService.GetTickerPrice("TSLA");
             
-            var lastTeslaInChat = await _teslaChatCounterService.GetTeslaInChatDate(ChatId);
+        var lastTeslaInChat = await _teslaChatCounterService.GetTeslaInChatDate(ChatId);
 
-            if (lastTeslaInChat == null)
+        if (lastTeslaInChat == null)
+        {
+            lastTeslaInChat = new TeslaChatCounter
             {
-                lastTeslaInChat = new TeslaChatCounter
-                {
-                    ChatId = ChatId,
-                    Date = DateTimeOffset.UtcNow
-                };
-            }
-            else
-            {
-                var timeFromLastTesla = (DateTimeOffset.UtcNow - lastTeslaInChat.Date).ToString("dd\\.hh\\:mm\\:ss");
-                var replyText = String.Format(Resources.TeslaAgain, timeFromLastTesla, tickerPrice);
+                ChatId = ChatId,
+                Date = DateTimeOffset.UtcNow
+            };
+        }
+        else
+        {
+            var timeFromLastTesla = (DateTimeOffset.UtcNow - lastTeslaInChat.Date).ToString("dd\\.hh\\:mm\\:ss");
+            var replyText = String.Format(Resources.TeslaAgain, timeFromLastTesla, tickerPrice);
 
-                await BotClient.SendTextMessageAsync(ChatId, replyText,
-                    replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
-            }
-
-            lastTeslaInChat.Date = DateTimeOffset.UtcNow;
-            await _teslaChatCounterService.AddOrUpdateTeslaInChatDate(lastTeslaInChat);
+            await BotClient.SendTextMessageAsync(ChatId, replyText,
+                replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
         }
 
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler(Consts.TnxWordsRegex)]
-        public async Task IncreaseKarma()
+        lastTeslaInChat.Date = DateTimeOffset.UtcNow;
+        await _teslaChatCounterService.AddOrUpdateTeslaInChatDate(lastTeslaInChat);
+    }
+
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler(Consts.TnxWordsRegex)]
+    public async Task IncreaseKarma()
+    {
+        // Ignore message forwards
+        if (Message.ForwardFrom != null || Message.ForwardFromChat != null)
+            return;
+
+        // Filter only reply to other user, ignore bots
+        if (Message.ReplyToMessage == null || Message.ReplyToMessage.From!.Id == User.Id || Message.ReplyToMessage.From.IsBot)
+            return;
+
+        var userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+
+        // If user not exists in db then ignore
+        if (userStats == null)
+            return;
+
+        userStats.Karma++;
+        await _userManager.UpdateUserChatStats(userStats);
+
+        var replyText = string.Format(Resources.KarmaIncrease, userStats.User.UserMention, userStats.Karma);
+
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+
+        await Task.Delay(30 * 1000);
+
+        await BotClient.TryDeleteMessage(msg);
+    }
+
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^-$")]
+    public async Task DecreaseKarma()
+    {
+        // OOh, look at here, is this code dUpLiCatIOn???
+        // Ignore message forwards
+        if (Message.ForwardFrom != null || Message.ForwardFromChat != null)
+            return;
+
+        // Filter only reply to other user, ignore bots
+        if (Message.ReplyToMessage == null || Message.ReplyToMessage.From!.Id == User.Id || Message.ReplyToMessage.From.IsBot)
+            return;
+
+        var userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+
+        // If user not exists in db then ignore
+        if (userStats == null)
+            return;
+
+        userStats.Karma--;
+        await _userManager.UpdateUserChatStats(userStats);
+
+        var replyText = string.Format(Resources.KarmaDecrease, userStats.User.UserMention, userStats.Karma);
+
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+
+        await Task.Delay(30 * 1000);
+
+        await BotClient.TryDeleteMessage(msg);
+    }
+
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("(^топ$|^top$)")]
+    public async Task Top()
+    {
+        // Prevent for top spamming (1 top message per all chats, needs to rework)
+        var timeout = TimeSpan.FromMilliseconds(50);
+        var lockTaken = false;
+
+        try
         {
-            // Ignore message forwards
-            if (Message.ForwardFrom != null || Message.ForwardFromChat != null)
-                return;
-
-            // Filter only reply to other user, ignore bots
-            if (Message.ReplyToMessage == null || Message.ReplyToMessage.From!.Id == User.Id || Message.ReplyToMessage.From.IsBot)
-                return;
-
-            var userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
-
-            // If user not exists in db then ignore
-            if (userStats == null)
-                return;
-
-            userStats.Karma++;
-            await _userManager.UpdateUserChatStats(userStats);
-
-            var replyText = string.Format(Resources.KarmaIncrease, userStats.User.UserMention, userStats.Karma);
-
-            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
-
-            await Task.Delay(30 * 1000);
-
-            await BotClient.TryDeleteMessage(msg);
-        }
-
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("^-$")]
-        public async Task DecreaseKarma()
-        {
-            // OOh, look at here, is this code dUpLiCatIOn???
-            // Ignore message forwards
-            if (Message.ForwardFrom != null || Message.ForwardFromChat != null)
-                return;
-
-            // Filter only reply to other user, ignore bots
-            if (Message.ReplyToMessage == null || Message.ReplyToMessage.From!.Id == User.Id || Message.ReplyToMessage.From.IsBot)
-                return;
-
-            var userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
-
-            // If user not exists in db then ignore
-            if (userStats == null)
-                return;
-
-            userStats.Karma--;
-            await _userManager.UpdateUserChatStats(userStats);
-
-            var replyText = string.Format(Resources.KarmaDecrease, userStats.User.UserMention, userStats.Karma);
-
-            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
-
-            await Task.Delay(30 * 1000);
-
-            await BotClient.TryDeleteMessage(msg);
-        }
-
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("(^топ$|^top$)")]
-        public async Task Top()
-        {
-            // Prevent for top spamming (1 top message per all chats, needs to rework)
-            var timeout = TimeSpan.FromMilliseconds(50);
-            var lockTaken = false;
-
-            try
+            Monitor.TryEnter(_topLocked, timeout, ref lockTaken);
+            if (lockTaken)
             {
-                Monitor.TryEnter(_topLocked, timeout, ref lockTaken);
-                if (lockTaken)
-                {
-                    // Get all users
-                    var users = await _userManager.GetAllUsersChatStats(ChatId);
+                // Get all users
+                var users = await _userManager.GetAllUsersChatStats(ChatId);
 
-                    var replyText = $"*{Resources.AccountsInTheChat} {users.Count()}*\n\n";
-                    replyText += $"{Resources.TopChatKarma}\n";
+                var replyText = $"*{Resources.AccountsInTheChat} {users.Count()}*\n\n";
+                replyText += $"{Resources.TopChatKarma}\n";
 
-                    users.OrderByDescending(x => x.Karma)
-                        .Take(5)
-                        .ToList()
-                        .ForEach(x =>
-                        {
-                            var karmaPercent = "0";
-                            if (x.Karma > 0 && x.TotalMessages > 0)
-                            {
-                                karmaPercent = ((float)x.Karma * 100 / x.TotalMessages).ToString("0.00",
-                                    new NumberFormatInfo{NumberDecimalSeparator = "."});
-                            }
-
-                            replyText += $"`{x.User.UserName}` - {Resources.Karma} `{x.Karma} ({karmaPercent}%)`\n";
-                        });
-
-                    var topMinus3Users = users.OrderBy(x => x.Karma)
-                        .Where(x => x.Karma < 0)
-                        .Take(3)
-                        .OrderByDescending(x => x.Karma)
-                        .ToList();
-
-                    if (topMinus3Users.Any())
+                users.OrderByDescending(x => x.Karma)
+                    .Take(5)
+                    .ToList()
+                    .ForEach(x =>
                     {
-                        replyText += $"\n{Resources.TopChatNegativeKarma}\n";
-
-                        topMinus3Users.ForEach(x =>
+                        var karmaPercent = "0";
+                        if (x.Karma > 0 && x.TotalMessages > 0)
                         {
-                            var karmaPercent = "0";
-                            if (x.Karma > 0 && x.TotalMessages > 0)
-                            {
-                                karmaPercent = ((float)x.Karma * 100 / x.TotalMessages).ToString("0.00",
-                                    new NumberFormatInfo{NumberDecimalSeparator = "."});
-                            }
+                            karmaPercent = ((float)x.Karma * 100 / x.TotalMessages).ToString("0.00",
+                                new NumberFormatInfo{NumberDecimalSeparator = "."});
+                        }
+
+                        replyText += $"`{x.User.UserName}` - {Resources.Karma} `{x.Karma} ({karmaPercent}%)`\n";
+                    });
+
+                var topMinus3Users = users.OrderBy(x => x.Karma)
+                    .Where(x => x.Karma < 0)
+                    .Take(3)
+                    .OrderByDescending(x => x.Karma)
+                    .ToList();
+
+                if (topMinus3Users.Any())
+                {
+                    replyText += $"\n{Resources.TopChatNegativeKarma}\n";
+
+                    topMinus3Users.ForEach(x =>
+                    {
+                        var karmaPercent = "0";
+                        if (x.Karma > 0 && x.TotalMessages > 0)
+                        {
+                            karmaPercent = ((float)x.Karma * 100 / x.TotalMessages).ToString("0.00",
+                                new NumberFormatInfo{NumberDecimalSeparator = "."});
+                        }
                             
-                            replyText += $"`{x.User.UserName}` - {Resources.Karma} `{x.Karma} ({karmaPercent}%)`\n";
-                        });
-                    }
+                        replyText += $"`{x.User.UserName}` - {Resources.Karma} `{x.Karma} ({karmaPercent}%)`\n";
+                    });
+                }
 
-                    replyText += $"\n{Resources.TopChatActive}\n";
+                replyText += $"\n{Resources.TopChatActive}\n";
 
-                    users.OrderByDescending(x => x.TotalMessages)
-                        .Take(5)
-                        .ToList()
-                        .ForEach(x =>
-                        {
-                            replyText += $"`{x.User.UserName}` - {Resources.Messages} `{x.TotalMessages}`\n";
-                        });
-
-                    replyText += $"\n{Resources.TopChatEmotionals}\n";
-
-                    users.OrderByDescending(x => x.TotalBadWords)
-                        .Take(5)
-                        .ToList()
-                        .ForEach(x =>
-                        {
-                            var BadWordsPercent = "0";
-                            if (x.TotalBadWords > 0 && x.TotalMessages > 0)
-                            {
-                                BadWordsPercent = ((float)x.TotalBadWords * 100 / x.TotalMessages).ToString("0.00",
-                                    new NumberFormatInfo{NumberDecimalSeparator = "."});
-                            }
-
-                            replyText += $"`{x.User.UserName}` - {Resources.BadWords} `{x.TotalBadWords} ({BadWordsPercent}%)`\n";
-                        });
-
-                    var topWarnsUsers = users.OrderByDescending(x => x.Warns)
-                        .Where(x => x.Warns > 0)
-                        .Take(5)
-                        .ToList();
-
-                    if (topWarnsUsers.Any())
+                users.OrderByDescending(x => x.TotalMessages)
+                    .Take(5)
+                    .ToList()
+                    .ForEach(x =>
                     {
-                        replyText += $"\n{Resources.TopChatWarns}\n";
+                        replyText += $"`{x.User.UserName}` - {Resources.Messages} `{x.TotalMessages}`\n";
+                    });
 
-                        topWarnsUsers.ForEach(x =>
+                replyText += $"\n{Resources.TopChatEmotionals}\n";
+
+                users.OrderByDescending(x => x.TotalBadWords)
+                    .Take(5)
+                    .ToList()
+                    .ForEach(x =>
+                    {
+                        var BadWordsPercent = "0";
+                        if (x.TotalBadWords > 0 && x.TotalMessages > 0)
                         {
-                            replyText += $"`{x.User.UserName}` - {Resources.Warns} `{x.Warns}`\n";
-                        });
-                    }
+                            BadWordsPercent = ((float)x.TotalBadWords * 100 / x.TotalMessages).ToString("0.00",
+                                new NumberFormatInfo{NumberDecimalSeparator = "."});
+                        }
 
-                    var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+                        replyText += $"`{x.User.UserName}` - {Resources.BadWords} `{x.TotalBadWords} ({BadWordsPercent}%)`\n";
+                    });
 
-                    Task.Delay(300 * 1000).Wait();
+                var topWarnsUsers = users.OrderByDescending(x => x.Warns)
+                    .Where(x => x.Warns > 0)
+                    .Take(5)
+                    .ToList();
 
-                    BotClient.TryDeleteMessage(msg).Wait();
-                    BotClient.TryDeleteMessage(Message).Wait();
-                }
-                else // Top list is already exists, just remove top command message
+                if (topWarnsUsers.Any())
                 {
-                    await BotClient.TryDeleteMessage(Message);
+                    replyText += $"\n{Resources.TopChatWarns}\n";
+
+                    topWarnsUsers.ForEach(x =>
+                    {
+                        replyText += $"`{x.User.UserName}` - {Resources.Warns} `{x.Warns}`\n";
+                    });
                 }
+
+                var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+
+                Task.Delay(300 * 1000).Wait();
+
+                BotClient.TryDeleteMessage(msg).Wait();
+                BotClient.TryDeleteMessage(Message).Wait();
             }
-            finally
+            else // Top list is already exists, just remove top command message
             {
-                // Ensure that the lock is released.
-                if (lockTaken)
-                {
-                    Monitor.Exit(_topLocked);
-                }
+                await BotClient.TryDeleteMessage(Message);
             }
         }
-
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("^/tickets$")]
-        public async Task TicketList()
+        finally
         {
-            var replyText = "";
-
-            // Сheck if user have rights to scan
-            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
-            if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
+            // Ensure that the lock is released.
+            if (lockTaken)
             {
-                replyText = Resources.OnlyAdminsAreAllowed;
+                Monitor.Exit(_topLocked);
             }
-            else
+        }
+    }
+
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^/tickets$")]
+    public async Task TicketList()
+    {
+        var replyText = "";
+
+        // Сheck if user have rights to scan
+        var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+        if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
+        {
+            replyText = Resources.OnlyAdminsAreAllowed;
+        }
+        else
+        {
+            var ticketManager = new TicketManager();
+            replyText = await ticketManager.GetChatTickets(ChatId);
+        }
+
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
+        await BotClient.TryDeleteMessage(Message);
+
+        await Task.Delay(30 * 1000);
+
+        await BotClient.TryDeleteMessage(msg);
+    }
+
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^/addticket")]
+    public async Task AddTicket()
+    {
+        var replyText = "";
+
+        // Сheck if user have rights to scan
+        var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+        if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
+        {
+            replyText = Resources.OnlyAdminsAreAllowed;
+        }
+        else
+        {
+            // Parse message
+            var ticketDescription = Message!.Text!
+                .Replace("/addticket", "")
+                .Trim();
+
+            if (ticketDescription != "")
             {
                 var ticketManager = new TicketManager();
-                replyText = await ticketManager.GetChatTickets(ChatId);
-            }
-
-            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
-            await BotClient.TryDeleteMessage(Message);
-
-            await Task.Delay(30 * 1000);
-
-            await BotClient.TryDeleteMessage(msg);
-        }
-
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("^/addticket")]
-        public async Task AddTicket()
-        {
-            var replyText = "";
-
-            // Сheck if user have rights to scan
-            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
-            if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
-            {
-                replyText = Resources.OnlyAdminsAreAllowed;
+                await ticketManager.AddTicket(ChatId, ticketDescription);
+                replyText = string.Format(Resources.TicketAdded, ticketDescription);
             }
             else
             {
-                // Parse message
-                var ticketDescription = Message!.Text!
-                    .Replace("/addticket", "")
-                    .Trim();
+                replyText = Resources.NeedToDefineTicket;
+            }
+        }
 
-                if (ticketDescription != "")
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
+
+        await Task.Delay(30 * 1000);
+
+        await BotClient.TryDeleteMessage(Message);
+        await BotClient.TryDeleteMessage(msg);
+    }
+
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^/removeticket")]
+    public async Task RemoveTicket()
+    {
+        var replyText = "";
+
+        // Сheck if user have rights to scan
+        var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+        if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
+        {
+            replyText = Resources.OnlyAdminsAreAllowed;
+        }
+        else
+        {
+            // Parse message
+            var ticketIdString = Message!.Text!
+                .Replace("/removeticket", "")
+                .Trim();
+
+            if (ticketIdString == "")
+            {
+                replyText = Resources.WhereIsTicketNumber;
+            }
+            else
+            {
+                if (long.TryParse(ticketIdString, out var ticketId))
                 {
                     var ticketManager = new TicketManager();
-                    await ticketManager.AddTicket(ChatId, ticketDescription);
-                    replyText = string.Format(Resources.TicketAdded, ticketDescription);
-                }
-                else
-                {
-                    replyText = Resources.NeedToDefineTicket;
-                }
-            }
 
-            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
+                    var removeResult = await ticketManager.RemoveTicket(ChatId, ticketId);
 
-            await Task.Delay(30 * 1000);
-
-            await BotClient.TryDeleteMessage(Message);
-            await BotClient.TryDeleteMessage(msg);
-        }
-
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("^/removeticket")]
-        public async Task RemoveTicket()
-        {
-            var replyText = "";
-
-            // Сheck if user have rights to scan
-            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
-            if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
-            {
-                replyText = Resources.OnlyAdminsAreAllowed;
-            }
-            else
-            {
-                // Parse message
-                var ticketIdString = Message!.Text!
-                    .Replace("/removeticket", "")
-                    .Trim();
-
-                if (ticketIdString == "")
-                {
-                    replyText = Resources.WhereIsTicketNumber;
-                }
-                else
-                {
-                    if (long.TryParse(ticketIdString, out var ticketId))
-                    {
-                        var ticketManager = new TicketManager();
-
-                        var removeResult = await ticketManager.RemoveTicket(ChatId, ticketId);
-
-                        if (removeResult)
-                            replyText = string.Format(Resources.TicketDeleted, ticketId);
-                        else
-                            replyText = Resources.HackerInTheChat;
-                    }
+                    if (removeResult)
+                        replyText = string.Format(Resources.TicketDeleted, ticketId);
                     else
-                    {
-                        replyText = Resources.AreYouThinkImThatDumb;
-                    }
+                        replyText = Resources.HackerInTheChat;
+                }
+                else
+                {
+                    replyText = Resources.AreYouThinkImThatDumb;
                 }
             }
+        }
 
-            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
+
+        await Task.Delay(30 * 1000);
+
+        await BotClient.TryDeleteMessage(Message);
+        await BotClient.TryDeleteMessage(msg);
+    }
+
+    [MessageReaction(ChatAction.UploadPhoto)]
+    [MessageHandler("(^/cat$|^cat$|^кіт$|^кицька$)")]
+    public async Task Cat()
+    {
+        var carUrl = await _catService.GetRandomCatImageUrl();
+
+        if (carUrl == null)
+        {
+            var msg = await BotClient.SendTextMessageAsync(chatId: ChatId, text: Resources.GoneAway, replyToMessageId: Message.MessageId);
 
             await Task.Delay(30 * 1000);
-
-            await BotClient.TryDeleteMessage(Message);
             await BotClient.TryDeleteMessage(msg);
+            await BotClient.TryDeleteMessage(Message);
+
+            return;
         }
 
-        [MessageReaction(ChatAction.UploadPhoto)]
-        [MessageHandler("(^/cat$|^cat$|^кіт$|^кицька$)")]
-        public async Task Cat()
+        // Random cat gender
+        List<string> variants = Resources.RandomCatGenders
+            .Split("|")
+            .PickRandom(2)
+            .ToList();
+
+        var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[]
         {
-            var carUrl = await _catService.GetRandomCatImageUrl();
+            InlineKeyboardButton.WithCallbackData("Кіт", $"print|{variants[0]}"),
+            InlineKeyboardButton.WithCallbackData("Кітесса", $"print|{variants[1]}"),
+        });
 
-            if (carUrl == null)
-            {
-                var msg = await BotClient.SendTextMessageAsync(chatId: ChatId, text: Resources.GoneAway, replyToMessageId: Message.MessageId);
+        await BotClient.SendPhotoAsync(chatId: ChatId, photo: carUrl, replyToMessageId: Message.MessageId, replyMarkup: keyboard);
+    }
 
-                await Task.Delay(30 * 1000);
-                await BotClient.TryDeleteMessage(msg);
-                await BotClient.TryDeleteMessage(Message);
-
-                return;
-            }
-
-            // Random cat gender
-            List<string> variants = Resources.RandomCatGenders
-                .Split("|")
-                .PickRandom(2)
-                .ToList();
-
-            var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[]
-            {
-                InlineKeyboardButton.WithCallbackData("Кіт", $"print|{variants[0]}"),
-                InlineKeyboardButton.WithCallbackData("Кітесса", $"print|{variants[1]}"),
-            });
-
-            await BotClient.SendPhotoAsync(chatId: ChatId, photo: carUrl, replyToMessageId: Message.MessageId, replyMarkup: keyboard);
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^кіт ")]
+    public async Task ChatGptAsk()
+    {
+        var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+        if (chatSettings == null || !chatSettings!.UseChatGpt)
+        {
+            return;
         }
-
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("^кіт ")]
-        public async Task ChatGptAsk()
-        {
-            var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
-            if (chatSettings == null || !chatSettings!.UseChatGpt)
-            {
-                return;
-            }
             
-            var inputMessageTest = Message!.Text!.Replace("кіт ", "").Replace("Кіт ", "");
-            var returnMessage = ":)";
+        var inputMessageTest = Message!.Text!.Replace("кіт ", "").Replace("Кіт ", "");
+        var returnMessage = ":)";
 
-            if (String.IsNullOrEmpty(inputMessageTest))
-            {
-                returnMessage = Resources.Empty;
-            }
-
-            try
-            {
-                var api = new OpenAIAPI(new APIAuthentication(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!), engine: new Engine(Resources.GPTModel));
-
-                var result = await api.Completions.CreateCompletionAsync(inputMessageTest, max_tokens: 50, temperature: 0.0);
-                returnMessage = result.ToString();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                returnMessage = Resources.OopsIDidntAgain;
-            }
-
-            await BotClient.SendTextMessageAsync(ChatId, returnMessage, replyToMessageId: Message.MessageId);
+        if (String.IsNullOrEmpty(inputMessageTest))
+        {
+            returnMessage = Resources.Empty;
         }
 
-        [MessageReaction(ChatAction.Typing)]
-        [MessageHandler("^/give")]
-        public async Task Give()
+        try
+        {
+            var api = new OpenAIAPI(new APIAuthentication(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!), engine: new Engine(Resources.GPTModel));
+
+            var result = await api.Completions.CreateCompletionAsync(inputMessageTest, max_tokens: 50, temperature: 0.0);
+            returnMessage = result.ToString();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            returnMessage = Resources.OopsIDidntAgain;
+        }
+
+        await BotClient.SendTextMessageAsync(ChatId, returnMessage, replyToMessageId: Message.MessageId);
+    }
+
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^/give")]
+    public async Task Give()
+    {
+        var replyText = "";
+            
+        var transactionRequestError = TransactionArgsValidator.CheckTransactionRequestMessage(Message, User);
+           
+        if (!string.IsNullOrWhiteSpace(transactionRequestError))
+        {
+            replyText = transactionRequestError;
+        }
+        else
+        {
+            // Parse args
+            var amountStr = Message!.Text!.Split(" ").Last();
+            var amount = int.Parse(amountStr);
+
+            var userSender = await _userManager.GetUserChatStats(User.Id, ChatId);
+            var userReceiver = await _userManager.GetUserChatStats(Message.ReplyToMessage!.From!.Id, ChatId);
+
+            replyText = await _userManager.RudeCoinsTransaction(userSender, userReceiver, amount);
+        }
+
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
+
+        await Task.Delay(30 * 1000);
+
+        await BotClient.TryDeleteMessage(Message);
+        await BotClient.TryDeleteMessage(msg);
+    }
+        
+    [MessageTypeFilter(MessageType.Text)]
+    public async Task MessageTrigger()
+    {
+        if (Message.Text != null)
         {
             var replyText = "";
-            
-            var transactionRequestError = TransactionArgsValidator.CheckTransactionRequestMessage(Message, User);
-           
-            if (!string.IsNullOrWhiteSpace(transactionRequestError))
+            var random = new Random();
+            var sendRandomMessage = (random.Next(1, 1000) > 985);
+                
+            var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+                
+            if (!Message.IsCommand() && 
+                (Message?.ReplyToMessage?.From?.Id == BotClient.BotId ||
+                 (sendRandomMessage && chatSettings.SendRandomMessages)))
             {
-                replyText = transactionRequestError;
-            }
-            else
-            {
-                // Parse args
-                var amountStr = Message!.Text!.Split(" ").Last();
-                var amount = int.Parse(amountStr);
-
-                var userSender = await _userManager.GetUserChatStats(User.Id, ChatId);
-                var userReceiver = await _userManager.GetUserChatStats(Message.ReplyToMessage!.From!.Id, ChatId);
-
-                replyText = await _userManager.RudeCoinsTransaction(userSender, userReceiver, amount);
+                var advices = AdvicesService.GetWords();
+                replyText = advices.PickRandom();
             }
 
-            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
-
-            await Task.Delay(30 * 1000);
-
-            await BotClient.TryDeleteMessage(Message);
-            await BotClient.TryDeleteMessage(msg);
-        }
-        
-        [MessageTypeFilter(MessageType.Text)]
-        public async Task MessageTrigger()
-        {
-            if (Message.Text != null)
+            if (!string.IsNullOrEmpty(replyText))
             {
-                var replyText = "";
-                var random = new Random();
-                var sendRandomMessage = (random.Next(1, 1000) > 985);
-                
-                var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
-                
-                if (!Message.IsCommand() && 
-                    (Message?.ReplyToMessage?.From?.Id == BotClient.BotId ||
-                     (sendRandomMessage && chatSettings.SendRandomMessages)))
-                {
-                    var advices = AdvicesService.GetWords();
-                    replyText = advices.PickRandom();
-                }
-
-                if (!string.IsNullOrEmpty(replyText))
-                {
-                    var isReply = (random.Next(100) > 50);
-                    await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: isReply ? Message!.MessageId : null);
-                }
+                var isReply = (random.Next(100) > 50);
+                await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: isReply ? Message!.MessageId : null);
             }
         }
     }

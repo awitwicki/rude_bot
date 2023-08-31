@@ -1,7 +1,6 @@
-﻿namespace RudeBot.Services.DuplicateDetectorService
+﻿namespace RudeBot.Services.DuplicateDetectorService;
+
+public interface IDuplicateDetectorService
 {
-    public interface IDuplicateDetectorService
-    {
-        List<int> FindDuplicates(long chatId, int messageId, string text);
-    }
+    List<int> FindDuplicates(long chatId, int messageId, string text);
 }

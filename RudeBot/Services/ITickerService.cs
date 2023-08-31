@@ -1,7 +1,6 @@
-﻿namespace RudeBot.Services
+﻿namespace RudeBot.Services;
+
+public interface ITickerService
 {
-    public interface ITickerService
-    {
-        Task<double> GetTickerPrice(string tickerName);
-    }
+    Task<double> GetTickerPrice(string tickerName);
 }

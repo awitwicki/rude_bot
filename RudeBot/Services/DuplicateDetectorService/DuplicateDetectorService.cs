@@ -15,7 +15,7 @@
 
         public List<int> FindDuplicates(long chatId, int messageId, string? text)
         {
-            List<int> emptyResult = new List<int>();
+            var emptyResult = new List<int>();
 
             if (text is null || text.Length < 40 || text.StartsWith('/'))
             {
@@ -37,7 +37,7 @@
                         .Where(x => x.IsEquals(text))
                         .ToList();
 
-                    List<int> similarMessagesIds = similarPosts
+                    var similarMessagesIds = similarPosts
                         .Select(x => x.MessageId)
                         .ToList();
 

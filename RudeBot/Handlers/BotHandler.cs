@@ -56,7 +56,7 @@ namespace RudeBot.Handlers
                 InlineKeyboardButton.WithUrl(Resources.Page, Resources.ProjectUrl)
             });
 
-            Message msg = await BotClient.SendTextMessageAsync(ChatId, messageText, ParseMode.Markdown, replyMarkup: keyboard);
+            var msg = await BotClient.SendTextMessageAsync(ChatId, messageText, ParseMode.Markdown, replyMarkup: keyboard);
 
             await Task.Delay(60 * 1000);
 
@@ -68,19 +68,19 @@ namespace RudeBot.Handlers
         [MessageHandler("[\\w\\-]+\\.ru")]
         public async Task DotRu()
         {
-            string messageText = Resources.ruPropaganda;
-            Message msg = await BotClient.SendTextMessageAsync(ChatId, messageText, replyToMessageId: Message.MessageId);
+            var messageText = Resources.ruPropaganda;
+            var msg = await BotClient.SendTextMessageAsync(ChatId, messageText, replyToMessageId: Message.MessageId);
         }
 
         [MessageReaction(ChatAction.Typing)]
         [MessageHandler("(^карма$|^karma$)")]
         public async Task Karma()
         {
-            UserChatStats userStats = await _userManager.GetUserChatStats(User.Id, ChatId);
+            var userStats = await _userManager.GetUserChatStats(User.Id, ChatId);
 
-            string replyText = userStats.BuildInfoString();
+            var replyText = userStats.BuildInfoString();
 
-            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
             await Task.Delay(30 * 1000);
 
@@ -92,7 +92,7 @@ namespace RudeBot.Handlers
         [MessageHandler("шарий|шарій")]
         public async Task CockMan()
         {
-            Message msg = await BotClient.SendVideoAsync(chatId: ChatId, video: Resources.CockmanVideoUrl);
+            var msg = await BotClient.SendVideoAsync(chatId: ChatId, video: Resources.CockmanVideoUrl);
 
             await Task.Delay(30 * 1000);
             await BotClient.TryDeleteMessage(msg);
@@ -102,7 +102,7 @@ namespace RudeBot.Handlers
         [MessageHandler("samsung|самсунг|сасунг")]
         public async Task Samsung()
         {
-            Message msg = await BotClient.SendPhotoAsync(chatId: ChatId, photo: Resources.SamsungUrl, replyToMessageId: Message.MessageId);
+            var msg = await BotClient.SendPhotoAsync(chatId: ChatId, photo: Resources.SamsungUrl, replyToMessageId: Message.MessageId);
 
             await Task.Delay(30 * 1000);
             await BotClient.TryDeleteMessage(msg);
@@ -118,9 +118,9 @@ namespace RudeBot.Handlers
             if (Message.ForwardFrom != null || Message.ForwardFromChat != null || !chatSettings.HaterussianLang)
                 return;
 
-            string replyText = Resources.Palanytsia;
+            var replyText = Resources.Palanytsia;
 
-            Message msg = await BotClient.SendAnimationAsync(
+            var msg = await BotClient.SendAnimationAsync(
                 chatId: ChatId,
                 replyToMessageId: Message.MessageId,
                 caption: replyText,
@@ -172,7 +172,7 @@ namespace RudeBot.Handlers
             if (Message.ReplyToMessage == null || Message.ReplyToMessage.From!.Id == User.Id || Message.ReplyToMessage.From.IsBot)
                 return;
 
-            UserChatStats userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+            var userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
 
             // If user not exists in db then ignore
             if (userStats == null)
@@ -181,9 +181,9 @@ namespace RudeBot.Handlers
             userStats.Karma++;
             await _userManager.UpdateUserChatStats(userStats);
 
-            string replyText = string.Format(Resources.KarmaIncrease, userStats.User.UserMention, userStats.Karma);
+            var replyText = string.Format(Resources.KarmaIncrease, userStats.User.UserMention, userStats.Karma);
 
-            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
             await Task.Delay(30 * 1000);
 
@@ -203,7 +203,7 @@ namespace RudeBot.Handlers
             if (Message.ReplyToMessage == null || Message.ReplyToMessage.From!.Id == User.Id || Message.ReplyToMessage.From.IsBot)
                 return;
 
-            UserChatStats userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+            var userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
 
             // If user not exists in db then ignore
             if (userStats == null)
@@ -212,9 +212,9 @@ namespace RudeBot.Handlers
             userStats.Karma--;
             await _userManager.UpdateUserChatStats(userStats);
 
-            string replyText = string.Format(Resources.KarmaDecrease, userStats.User.UserMention, userStats.Karma);
+            var replyText = string.Format(Resources.KarmaDecrease, userStats.User.UserMention, userStats.Karma);
 
-            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
             await Task.Delay(30 * 1000);
 
@@ -227,7 +227,7 @@ namespace RudeBot.Handlers
         {
             // Prevent for top spamming (1 top message per all chats, needs to rework)
             var timeout = TimeSpan.FromMilliseconds(50);
-            bool lockTaken = false;
+            var lockTaken = false;
 
             try
             {
@@ -237,7 +237,7 @@ namespace RudeBot.Handlers
                     // Get all users
                     var users = await _userManager.GetAllUsersChatStats(ChatId);
 
-                    String replyText = $"*{Resources.AccountsInTheChat} {users.Count()}*\n\n";
+                    var replyText = $"*{Resources.AccountsInTheChat} {users.Count()}*\n\n";
                     replyText += $"{Resources.TopChatKarma}\n";
 
                     users.OrderByDescending(x => x.Karma)
@@ -320,7 +320,7 @@ namespace RudeBot.Handlers
                         });
                     }
 
-                    Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+                    var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
                     Task.Delay(300 * 1000).Wait();
 
@@ -346,21 +346,21 @@ namespace RudeBot.Handlers
         [MessageHandler("^/tickets$")]
         public async Task TicketList()
         {
-            String replyText = "";
+            var replyText = "";
 
             // Сheck if user have rights to scan
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
             if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
             {
                 replyText = Resources.OnlyAdminsAreAllowed;
             }
             else
             {
-                TicketManager ticketManager = new TicketManager();
+                var ticketManager = new TicketManager();
                 replyText = await ticketManager.GetChatTickets(ChatId);
             }
 
-            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
+            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
             await BotClient.TryDeleteMessage(Message);
 
             await Task.Delay(30 * 1000);
@@ -372,10 +372,10 @@ namespace RudeBot.Handlers
         [MessageHandler("^/addticket")]
         public async Task AddTicket()
         {
-            String replyText = "";
+            var replyText = "";
 
             // Сheck if user have rights to scan
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
             if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
             {
                 replyText = Resources.OnlyAdminsAreAllowed;
@@ -383,13 +383,13 @@ namespace RudeBot.Handlers
             else
             {
                 // Parse message
-                string ticketDescription = Message!.Text!
+                var ticketDescription = Message!.Text!
                     .Replace("/addticket", "")
                     .Trim();
 
                 if (ticketDescription != "")
                 {
-                    TicketManager ticketManager = new TicketManager();
+                    var ticketManager = new TicketManager();
                     await ticketManager.AddTicket(ChatId, ticketDescription);
                     replyText = string.Format(Resources.TicketAdded, ticketDescription);
                 }
@@ -399,7 +399,7 @@ namespace RudeBot.Handlers
                 }
             }
 
-            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
+            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
 
             await Task.Delay(30 * 1000);
 
@@ -411,10 +411,10 @@ namespace RudeBot.Handlers
         [MessageHandler("^/removeticket")]
         public async Task RemoveTicket()
         {
-            String replyText = "";
+            var replyText = "";
 
             // Сheck if user have rights to scan
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
             if (usrSenderRights.Status != ChatMemberStatus.Administrator && usrSenderRights.Status != ChatMemberStatus.Creator)
             {
                 replyText = Resources.OnlyAdminsAreAllowed;
@@ -422,7 +422,7 @@ namespace RudeBot.Handlers
             else
             {
                 // Parse message
-                string ticketIdString = Message!.Text!
+                var ticketIdString = Message!.Text!
                     .Replace("/removeticket", "")
                     .Trim();
 
@@ -432,11 +432,11 @@ namespace RudeBot.Handlers
                 }
                 else
                 {
-                    if (long.TryParse(ticketIdString, out long ticketId))
+                    if (long.TryParse(ticketIdString, out var ticketId))
                     {
-                        TicketManager ticketManager = new TicketManager();
+                        var ticketManager = new TicketManager();
 
-                        bool removeResult = await ticketManager.RemoveTicket(ChatId, ticketId);
+                        var removeResult = await ticketManager.RemoveTicket(ChatId, ticketId);
 
                         if (removeResult)
                             replyText = string.Format(Resources.TicketDeleted, ticketId);
@@ -450,7 +450,7 @@ namespace RudeBot.Handlers
                 }
             }
 
-            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
+            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
 
             await Task.Delay(30 * 1000);
 
@@ -462,11 +462,11 @@ namespace RudeBot.Handlers
         [MessageHandler("(^/cat$|^cat$|^кіт$|^кицька$)")]
         public async Task Cat()
         {
-            string carUrl = await _catService.GetRandomCatImageUrl();
+            var carUrl = await _catService.GetRandomCatImageUrl();
 
             if (carUrl == null)
             {
-                Message msg = await BotClient.SendTextMessageAsync(chatId: ChatId, text: Resources.GoneAway, replyToMessageId: Message.MessageId);
+                var msg = await BotClient.SendTextMessageAsync(chatId: ChatId, text: Resources.GoneAway, replyToMessageId: Message.MessageId);
 
                 await Task.Delay(30 * 1000);
                 await BotClient.TryDeleteMessage(msg);
@@ -500,8 +500,8 @@ namespace RudeBot.Handlers
                 return;
             }
             
-            string inputMessageTest = Message!.Text!.Replace("кіт ", "").Replace("Кіт ", "");
-            string returnMessage = ":)";
+            var inputMessageTest = Message!.Text!.Replace("кіт ", "").Replace("Кіт ", "");
+            var returnMessage = ":)";
 
             if (String.IsNullOrEmpty(inputMessageTest))
             {
@@ -510,7 +510,7 @@ namespace RudeBot.Handlers
 
             try
             {
-                OpenAIAPI api = new OpenAIAPI(new APIAuthentication(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!), engine: new Engine(Resources.GPTModel));
+                var api = new OpenAIAPI(new APIAuthentication(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!), engine: new Engine(Resources.GPTModel));
 
                 var result = await api.Completions.CreateCompletionAsync(inputMessageTest, max_tokens: 50, temperature: 0.0);
                 returnMessage = result.ToString();
@@ -561,8 +561,8 @@ namespace RudeBot.Handlers
         {
             if (Message.Text != null)
             {
-                string replyText = "";
-                Random random = new Random();
+                var replyText = "";
+                var random = new Random();
                 var sendRandomMessage = (random.Next(1, 1000) > 985);
                 
                 var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
@@ -577,7 +577,7 @@ namespace RudeBot.Handlers
 
                 if (!string.IsNullOrEmpty(replyText))
                 {
-                    bool isReply = (random.Next(100) > 50);
+                    var isReply = (random.Next(100) > 50);
                     await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: isReply ? Message!.MessageId : null);
                 }
             }

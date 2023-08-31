@@ -31,7 +31,7 @@ namespace RudeBot.Managers
 
         public async Task<string> GetChatTickets(long chatId)
         {
-            String tasksString = "Тікетів не знайдено";
+            var tasksString = "Тікетів не знайдено";
 
             using (var _dbContext = new DataContext())
             {

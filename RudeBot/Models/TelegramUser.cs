@@ -58,7 +58,7 @@ namespace RudeBot.Models
             var orientationTypes = new List<string>() { "Латентний", "Гендерфлюід", "Straight", "" };
             var orientationNames = new List<string>() { "Samsung", "Apple", "Android", "Nokia" };
 
-            (int, int) orientationValues = Orientation(Id,
+            var orientationValues = Orientation(Id,
                 orientationTypes.Count,
                 orientationNames.Count);
 
@@ -82,13 +82,13 @@ namespace RudeBot.Models
         // TODO: move to other class
         public string BuildWarnMessage()
         {
-            string result = $"{User.UserMention}, вам винесено попередження адміна!\n" +
-                $"Треба думати що ви пишете, \n" +
-                $"ви маєте вже {Warns} попередження!\n\n" +
-                $"1 попередження - будь-який адмін може заборонити медіа/стікери/ввести ліміт повідомлень!\n" +
-                $"2 попередження - мют на день (або тиждень, на розсуд адміна)!\n" +
-                $"3 попередження - бан!\n\n" +
-                $"Адміни вирішать твою долю:";
+            var result = $"{User.UserMention}, вам винесено попередження адміна!\n" +
+                         $"Треба думати що ви пишете, \n" +
+                         $"ви маєте вже {Warns} попередження!\n\n" +
+                         $"1 попередження - будь-який адмін може заборонити медіа/стікери/ввести ліміт повідомлень!\n" +
+                         $"2 попередження - мют на день (або тиждень, на розсуд адміна)!\n" +
+                         $"3 попередження - бан!\n\n" +
+                         $"Адміни вирішать твою долю:";
 
             return result;
         }
@@ -101,7 +101,7 @@ namespace RudeBot.Models
 
         public static TelegramUser FromUser(User user)
         {
-            string username = user.FirstName;
+            var username = user.FirstName;
             if (user.LastName != null)
                 username += " " + user.LastName;
 

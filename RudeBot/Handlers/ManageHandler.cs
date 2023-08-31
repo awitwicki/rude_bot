@@ -40,9 +40,9 @@ namespace RudeBot.Handlers
                         InlineKeyboardButton.WithCallbackData(Resources.IAmPromise, $"new_user|{newUser.Id}")
                     });
 
-                    string responseText = string.Format(Resources.HelloMessage, newUser.GetUserMention());
+                    var responseText = string.Format(Resources.HelloMessage, newUser.GetUserMention());
 
-                    Message helloMessage = await BotClient.SendAnimationAsync(
+                    var helloMessage = await BotClient.SendAnimationAsync(
                             chatId: ChatId,
                             replyToMessageId: Message.MessageId,
                             caption: responseText,
@@ -66,7 +66,7 @@ namespace RudeBot.Handlers
         [CallbackQueryHandler("new_user")]
         public async Task OnUserAuthorized()
         {
-            long newbieUserId = long.Parse(CallbackQuery.Data!.Split('|').Last());
+            var newbieUserId = long.Parse(CallbackQuery.Data!.Split('|').Last());
 
             // Wrong user clicked
             if (User.Id != newbieUserId)
@@ -103,7 +103,7 @@ namespace RudeBot.Handlers
             }
 
             // Filter for only admins
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(chat.Id, user.Id);
+            var usrSenderRights = await BotClient.GetChatMemberAsync(chat.Id, user.Id);
             if (!(usrSenderRights.IsHaveAdminRights()))
             {
                 msg = await BotClient.SendTextMessageAsync(ChatId, Resources.WarnOrUnwarnIsOnlyForAdmins, replyToMessageId: message.MessageId);
@@ -116,7 +116,7 @@ namespace RudeBot.Handlers
             }
 
             // Admin cant warn other admins
-            ChatMember usrReceiverRights = await BotClient.GetChatMemberAsync(chat.Id, message.ReplyToMessage.From.Id);
+            var usrReceiverRights = await BotClient.GetChatMemberAsync(chat.Id, message.ReplyToMessage.From.Id);
             if (usrReceiverRights.IsHaveAdminRights())
             {
                 msg = await BotClient.SendTextMessageAsync(chat.Id, Resources.WarnOrUnwarnNotWorksOnAdmins, replyToMessageId: message.MessageId);
@@ -135,7 +135,7 @@ namespace RudeBot.Handlers
         public async Task ManageHideKeyboard()
         {
             // Filter for only admins
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, User.Id);
+            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, User.Id);
             if (!usrSenderRights.IsHaveAdminRights())
             {
                 await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.ButtonOnlyForAdmins, true);
@@ -149,7 +149,7 @@ namespace RudeBot.Handlers
         public async Task ManageUserRights()
         {
             // Filter for only admins
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, User.Id);
+            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, User.Id);
             if (!usrSenderRights.IsHaveAdminRights())
             {
                 await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.ButtonOnlyForAdmins, true);
@@ -157,16 +157,16 @@ namespace RudeBot.Handlers
             }
 
             // Parse user id
-            long userId = long.Parse(CallbackQuery.Data!.Split('|').Last());
+            var userId = long.Parse(CallbackQuery.Data!.Split('|').Last());
 
             // Parse command
-            string command = CallbackQuery.Data
+            var command = CallbackQuery.Data
                 .Split('|')
                 .First()
                 .Replace("manage_", "")
                 .Replace("_user", "");
 
-            UserChatStats userStats = await UserManager.GetUserChatStats(userId, ChatId);
+            var userStats = await UserManager.GetUserChatStats(userId, ChatId);
 
             // If user not exists in db then ignore
             if (userStats == null)
@@ -202,7 +202,7 @@ namespace RudeBot.Handlers
                     break;
                 case "amnesty":
                     // Unban all restrictions
-                    ChatPermissions permissions = new ChatPermissions
+                    var permissions = new ChatPermissions
                     {
                         CanSendMessages = true,
                         CanSendMediaMessages = true,
@@ -224,9 +224,9 @@ namespace RudeBot.Handlers
             if (actionResult == null)
                 actionResult = "\n Error :(";
 
-            string replyText = userStats.BuildWarnMessage();
+            var replyText = userStats.BuildWarnMessage();
 
-            string logs = $"\n\n{Resources.Logs}" + CallbackQuery.Message.Text
+            var logs = $"\n\n{Resources.Logs}" + CallbackQuery.Message.Text
                 .Split($"\n\n{Resources.Logs}")
                 .Skip(1)
                 .FirstOrDefault();
@@ -243,12 +243,12 @@ namespace RudeBot.Handlers
         [MessageHandler("^/warn$")]
         public async Task Warn()
         {
-            bool isWarnLegit = await _processWarnRights(Message, Chat, User);
+            var isWarnLegit = await _processWarnRights(Message, Chat, User);
 
             if (!isWarnLegit)
                 return;
 
-            UserChatStats userStats = await UserManager.GetUserChatStats(Message!.ReplyToMessage!.From!.Id, ChatId);
+            var userStats = await UserManager.GetUserChatStats(Message!.ReplyToMessage!.From!.Id, ChatId);
 
             // If user not exists in db then ignore
             if (userStats == null)
@@ -257,11 +257,11 @@ namespace RudeBot.Handlers
             userStats.Warns++;
             await UserManager.UpdateUserChatStats(userStats);
 
-            string replyText = userStats.BuildWarnMessage();
+            var replyText = userStats.BuildWarnMessage();
 
             var keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(Message.ReplyToMessage.From.Id);
 
-            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.ReplyToMessage.MessageId, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
+            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.ReplyToMessage.MessageId, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
             await BotClient.TryDeleteMessage(Message);
         }
 
@@ -269,12 +269,12 @@ namespace RudeBot.Handlers
         [MessageHandler("^/unwarn")]
         public async Task Unwarn()
         {
-            bool isWarnLegit = await _processWarnRights(Message, Chat, User);
+            var isWarnLegit = await _processWarnRights(Message, Chat, User);
 
             if (!isWarnLegit)
                 return;
 
-            UserChatStats userStats = await UserManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+            var userStats = await UserManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
 
             // If user not exists in db then ignore
             if (userStats == null)
@@ -283,14 +283,14 @@ namespace RudeBot.Handlers
             userStats.Warns--;
             await UserManager.UpdateUserChatStats(userStats);
 
-            string replyText = $"{userStats.User.UserMention}, {Resources.WarnCancelled}";
+            var replyText = $"{userStats.User.UserMention}, {Resources.WarnCancelled}";
 
             if (userStats.Warns > 0)
             {
                 replyText += $"\n\n " + string.Format(Resources.WarnBalance, userStats.Warns);
             }
 
-            Message msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.ReplyToMessage.MessageId, parseMode: ParseMode.Markdown);
+            var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.ReplyToMessage.MessageId, parseMode: ParseMode.Markdown);
             await BotClient.TryDeleteMessage(Message);
         }
 
@@ -308,7 +308,7 @@ namespace RudeBot.Handlers
             else
             {
                 // Сheck if user have rights to scan
-                ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+                var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
                 if (!usrSenderRights.IsHaveAdminRights())
                 {
                     replyText = Resources.ScanIsOnlyForAdmins;
@@ -326,7 +326,7 @@ namespace RudeBot.Handlers
                 return;
             }
 
-            UserChatStats userStats = await UserManager.GetUserChatStats(Message.ReplyToMessage!.From.Id, ChatId);
+            var userStats = await UserManager.GetUserChatStats(Message.ReplyToMessage!.From.Id, ChatId);
 
             // If user not exists in db then ignore
             if (userStats == null)
@@ -339,7 +339,7 @@ namespace RudeBot.Handlers
             InlineKeyboardMarkup keyboardMarkup = null;
 
             // If this user is admin then dont pin manage keyboard
-            ChatMember usrReceiverRights = await BotClient.GetChatMemberAsync(ChatId, Message.ReplyToMessage.From.Id);
+            var usrReceiverRights = await BotClient.GetChatMemberAsync(ChatId, Message.ReplyToMessage.From.Id);
             if (!usrReceiverRights.IsHaveAdminRights())
             {
                 // TODO: bug - clicks on this keyboard makes bot change message text like it was /warn command
@@ -353,7 +353,7 @@ namespace RudeBot.Handlers
         [CallbackQueryHandler("^print|")]
         public async Task PrintMessageCallback()
         {
-            string message = CallbackQuery!.Data!.Replace("print|", "");
+            var message = CallbackQuery!.Data!.Replace("print|", "");
             await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, message, true);
         }
 
@@ -365,7 +365,7 @@ namespace RudeBot.Handlers
             string replyText;
 
             // Сheck if user have rights to scan
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
             if (!usrSenderRights.IsHaveAdminRights())
             {
                 replyText = Resources.CommandIsOnlyForAdmins;
@@ -406,7 +406,7 @@ namespace RudeBot.Handlers
             string replyText;
 
             // Сheck if user have rights to change settings
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
             if (!usrSenderRights.IsHaveAdminRights())
             {
                 replyText = Resources.CommandIsOnlyForAdmins;
@@ -443,7 +443,7 @@ namespace RudeBot.Handlers
             string replyText;
 
             // Check if user have rights to change settings
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
             if (!usrSenderRights.IsHaveAdminRights())
             {
                 replyText = Resources.CommandIsOnlyForAdmins;
@@ -480,7 +480,7 @@ namespace RudeBot.Handlers
             string replyText;
 
             // Сheck if user have rights to change settings
-            ChatMember usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
             if (!usrSenderRights.IsHaveAdminRights())
             {
                 replyText = Resources.CommandIsOnlyForAdmins;

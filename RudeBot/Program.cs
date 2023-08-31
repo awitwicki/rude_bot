@@ -19,7 +19,7 @@ var botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
 var botClient = new CoreBot(botToken);
 
 // Create database if not exists
-await using (DataContext dbContext = new DataContext())
+await using (var dbContext = new DataContext())
 {
     dbContext.Database.Migrate();
     Console.WriteLine("Database is synchronized");

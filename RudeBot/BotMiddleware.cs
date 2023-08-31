@@ -39,11 +39,11 @@ namespace RudeBot
                 var Chat = update.Message!.Chat;
 
                 // Count Bad words
-                string text = Message.Text ?? Message.Caption;
-                int messageBadWords = 0;
+                var text = Message.Text ?? Message.Caption;
+                var messageBadWords = 0;
                 if (text != null)
                 {
-                    string messageText = text.ToLower();
+                    var messageText = text.ToLower();
 
                     var badWords = _badWordsService.GetWords();
                     if (badWords.Any(x => messageText.Contains(x)))
@@ -53,7 +53,7 @@ namespace RudeBot
                 }
 
                 // Get UserStats
-                UserChatStats userStats = await _userManager.GetUserChatStats(User.Id, Chat.Id);
+                var userStats = await _userManager.GetUserChatStats(User.Id, Chat.Id);
 
                 // Register new user stats
                 if (userStats is null)
@@ -84,13 +84,13 @@ namespace RudeBot
                 {
                     var duplicates = _duplicateDetectorService.FindDuplicates(Chat.Id, Message.MessageId, text!);
 
-                    int duplicateMessageId = duplicates.FirstOrDefault();
+                    var duplicateMessageId = duplicates.FirstOrDefault();
 
                     if (duplicateMessageId > 0)
                     {
-                        string messageText = Resources.Klichko;
+                        var messageText = Resources.Klichko;
 
-                        string chatId = $"{Chat.Id}"[3..];
+                        var chatId = $"{Chat.Id}"[3..];
 
                         var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[]
                         {

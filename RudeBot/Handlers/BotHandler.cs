@@ -135,8 +135,6 @@ public class BotHandler : BaseHandler
     [MessageHandler("tesl|тесл")]
     public async Task Tesla()
     {
-        var tickerPrice = await _tickerService.GetTickerPrice("TSLA");
-            
         var lastTeslaInChat = await _teslaChatCounterService.GetTeslaInChatDate(ChatId);
 
         if (lastTeslaInChat == null)
@@ -150,10 +148,10 @@ public class BotHandler : BaseHandler
         else
         {
             var timeFromLastTesla = (DateTimeOffset.UtcNow - lastTeslaInChat.Date).ToString("dd\\.hh\\:mm\\:ss");
-            var replyText = String.Format(Resources.TeslaAgain, timeFromLastTesla, tickerPrice);
+            var replyText = string.Format(Resources.TeslaAgain, timeFromLastTesla);
 
             await BotClient.SendTextMessageAsync(ChatId, replyText,
-                replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+                replyToMessageId: Message.MessageId, parseMode: ParseMode.Html);
         }
 
         lastTeslaInChat.Date = DateTimeOffset.UtcNow;

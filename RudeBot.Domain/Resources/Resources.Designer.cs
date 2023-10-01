@@ -336,7 +336,7 @@ namespace RudeBot.Domain.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://forms.gle/pY6EjJhNRosUbd9P9.
+        ///   Looks up a localized string similar to https://forms.gle/U58EFWf4LHb7UUg28.
         /// </summary>
         public static string GoogleFormForNewbiesURL {
             get {

@@ -13,6 +13,7 @@ using Autofac.Features.AttributeFilters;
 using OpenAI_API;
 using RudeBot.Common.TransactionHelpers;
 using RudeBot.Domain;
+using RudeBot.Domain.Interfaces;
 using RudeBot.Domain.Resources;
 
 namespace RudeBot.Handlers;
@@ -22,9 +23,10 @@ public class BotHandler : BaseHandler
     private IUserManager _userManager { get; set; }
     private ITickerService _tickerService { get; set; }
     private ICatService _catService { get; set; }
-    private TxtWordsDataset AdvicesService { get; set; }
+    private ITxtWordsDataset AdvicesService { get; set; }
     private static Object _topLocked { get; set; } = new Object();
     private IChatSettingsService _chatSettingsService { get; set; }
+    private readonly IDelayService _delayService;
         
     private ITeslaChatCounterService _teslaChatCounterService { get; set; }
 
@@ -34,7 +36,8 @@ public class BotHandler : BaseHandler
         ITeslaChatCounterService teslaChatCounterService,
         ITickerService tickerService,
         ICatService catService,
-        [KeyFilter(Consts.AdvicesService)] TxtWordsDataset advicesService
+        [KeyFilter(Consts.AdvicesService)] ITxtWordsDataset advicesService,
+        IDelayService delayService
     )
     {
         _userManager = userManager;
@@ -43,6 +46,7 @@ public class BotHandler : BaseHandler
         _tickerService = tickerService;
         _catService = catService;
         AdvicesService = advicesService;
+        _delayService = delayService;
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -58,7 +62,7 @@ public class BotHandler : BaseHandler
 
         var msg = await BotClient.SendTextMessageAsync(ChatId, messageText, ParseMode.Markdown, replyMarkup: keyboard);
 
-        await Task.Delay(60 * 1000);
+        await _delayService.DelaySeconds(60);
 
         await BotClient.TryDeleteMessage(msg);
         await BotClient.TryDeleteMessage(Message);
@@ -82,7 +86,7 @@ public class BotHandler : BaseHandler
 
         var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
-        await Task.Delay(30 * 1000);
+        await _delayService.DelaySeconds(30);
 
         await BotClient.TryDeleteMessage(msg);
         await BotClient.TryDeleteMessage(Message);
@@ -94,7 +98,7 @@ public class BotHandler : BaseHandler
     {
         var msg = await BotClient.SendVideoAsync(chatId: ChatId, video: Resources.CockmanVideoUrl);
 
-        await Task.Delay(30 * 1000);
+        await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);
     }
 
@@ -104,7 +108,7 @@ public class BotHandler : BaseHandler
     {
         var msg = await BotClient.SendPhotoAsync(chatId: ChatId, photo: Resources.SamsungUrl, replyToMessageId: Message.MessageId);
 
-        await Task.Delay(30 * 1000);
+        await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);
     }
 
@@ -114,8 +118,8 @@ public class BotHandler : BaseHandler
     {
         var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
 
-        // Ignore message forwards
-        if (Message.ForwardFrom != null || Message.ForwardFromChat != null || !chatSettings.HaterussianLang)
+        // Ignore message forwards except self forwards or if hate settings turned off
+        if ((Message.ForwardFrom != null && Message.ForwardFrom.Id != User.Id) || !chatSettings.HaterussianLang)
             return;
 
         var replyText = Resources.Palanytsia;
@@ -127,7 +131,7 @@ public class BotHandler : BaseHandler
             animation: Resources.ItsUaChatVideoUrl,
             parseMode: ParseMode.Markdown);
 
-        await Task.Delay(30 * 1000);
+        await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);
     }
 
@@ -183,8 +187,7 @@ public class BotHandler : BaseHandler
 
         var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
-        await Task.Delay(30 * 1000);
-
+        await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);
     }
 
@@ -214,8 +217,7 @@ public class BotHandler : BaseHandler
 
         var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
-        await Task.Delay(30 * 1000);
-
+        await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);
     }
 
@@ -320,7 +322,7 @@ public class BotHandler : BaseHandler
 
                 var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
 
-                Task.Delay(300 * 1000).Wait();
+                await _delayService.DelaySeconds(300);
 
                 BotClient.TryDeleteMessage(msg).Wait();
                 BotClient.TryDeleteMessage(Message).Wait();
@@ -361,8 +363,7 @@ public class BotHandler : BaseHandler
         var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
         await BotClient.TryDeleteMessage(Message);
 
-        await Task.Delay(30 * 1000);
-
+        await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);
     }
 
@@ -399,8 +400,7 @@ public class BotHandler : BaseHandler
 
         var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
 
-        await Task.Delay(30 * 1000);
-
+        await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(Message);
         await BotClient.TryDeleteMessage(msg);
     }
@@ -450,8 +450,7 @@ public class BotHandler : BaseHandler
 
         var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
 
-        await Task.Delay(30 * 1000);
-
+        await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(Message);
         await BotClient.TryDeleteMessage(msg);
     }
@@ -466,7 +465,7 @@ public class BotHandler : BaseHandler
         {
             var msg = await BotClient.SendTextMessageAsync(chatId: ChatId, text: Resources.GoneAway, replyToMessageId: Message.MessageId);
 
-            await Task.Delay(30 * 1000);
+            await _delayService.DelaySeconds(30);
             await BotClient.TryDeleteMessage(msg);
             await BotClient.TryDeleteMessage(Message);
 
@@ -548,7 +547,7 @@ public class BotHandler : BaseHandler
 
         var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, parseMode: ParseMode.Markdown);
 
-        await Task.Delay(30 * 1000);
+        await _delayService.DelaySeconds(30);
 
         await BotClient.TryDeleteMessage(Message);
         await BotClient.TryDeleteMessage(msg);

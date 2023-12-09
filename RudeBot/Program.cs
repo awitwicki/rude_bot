@@ -3,8 +3,10 @@ using Autofac;
 using Microsoft.EntityFrameworkCore;
 using PowerBot.Lite;
 using RudeBot;
+using RudeBot.Common.Services;
 using RudeBot.Database;
 using RudeBot.Domain;
+using RudeBot.Domain.Interfaces;
 using RudeBot.Domain.Resources;
 using RudeBot.Handlers;
 using RudeBot.Managers;
@@ -43,6 +45,7 @@ botClient.RegisterContainers(x =>
             .Select(x => x.Replace("\r", "").ToLower())
         )
         .Keyed<TxtWordsDataset>(Consts.BadWordsService)
+        .As<ITxtWordsDataset>()
         .SingleInstance();
 
     x.RegisterType<TxtWordsDataset>()
@@ -50,6 +53,7 @@ botClient.RegisterContainers(x =>
             .Split("\n")
         )
         .Keyed<TxtWordsDataset>(Consts.AdvicesService)
+        .As<ITxtWordsDataset>()
         .SingleInstance();
 
     x.RegisterType<UserManager>()
@@ -72,6 +76,10 @@ botClient.RegisterContainers(x =>
     x.RegisterType<TeslaChatCounterService>()
         .As<ITeslaChatCounterService>()
         .SingleInstance();
+    
+    x.RegisterType<DelayService>()
+        .As<IDelayService>()
+        .OwnedByLifetimeScope();
 });
 
 botClient.Build();

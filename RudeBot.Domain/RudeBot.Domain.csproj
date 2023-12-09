@@ -30,4 +30,9 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Telegram.Bot" Version="17.0.0" />
+      <PackageReference Include="Telegram.Bot.Extensions.Polling" Version="1.0.2" />
+    </ItemGroup>
+
 </Project>

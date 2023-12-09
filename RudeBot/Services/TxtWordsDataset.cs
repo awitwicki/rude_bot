@@ -1,6 +1,8 @@
-﻿namespace RudeBot.Services;
+﻿using RudeBot.Domain.Interfaces;
 
-public class TxtWordsDataset
+namespace RudeBot.Services;
+
+public class TxtWordsDataset : ITxtWordsDataset
 {
     private readonly List<string> _words;
         

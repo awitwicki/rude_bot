@@ -107,6 +107,41 @@ public class BotHandlerTests
     }
     
     [Fact]
+    public async Task HandlePalanytsa_WithSettingsHaterussianLangAndForwardFromOtherChannelOrChat_ShouldDoNothing()
+    {
+        // Arrange
+        _chatSettingsService.GetChatSettings(Arg.Any<long>())
+            .Returns(Task.FromResult(new ChatSettings { HaterussianLang = true }));
+
+        var handler = new BotHandler(_userManager,
+            _chatSettingsService,
+            _teslaChatCounterService,
+            _tickerService,
+            _catService,
+            _advicesService,
+            _delayService)
+        {
+            BotClient = _telegramBotClient,
+            Update = new Update {
+                Id = 1,
+                Message = new Message {
+                    MessageId = 1, Chat = new Chat { Id = 1 },
+                    From = new User { Id = 1 },
+                    ForwardFromChat = new Chat { Id = 2 }
+                }
+            }
+        };
+
+        // Act
+        await handler.Palanytsa();
+
+        // Assert
+        await _telegramBotClient.DidNotReceive().MakeRequestAsync<Message>(
+            Arg.Any<SendAnimationRequest>()
+        );
+    }
+    
+    [Fact]
     public async Task HandlePalanytsa_WithSettingsHaterussianLang_ShouldNotifyAboutChatRules()
     {
         // Arrange

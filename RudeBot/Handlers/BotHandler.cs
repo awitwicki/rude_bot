@@ -119,7 +119,13 @@ public class BotHandler : BaseHandler
         var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
 
         // Ignore message forwards except self forwards or if hate settings turned off
-        if ((Message.ForwardFrom != null && Message.ForwardFrom.Id != User.Id) || !chatSettings.HaterussianLang)
+        if (!chatSettings.HaterussianLang)
+            return;
+            
+        if (Message.ForwardFrom != null && Message.ForwardFrom.Id != User.Id)
+            return;
+        
+        if (Message.ForwardFromChat != null)
             return;
 
         var replyText = Resources.Palanytsia;

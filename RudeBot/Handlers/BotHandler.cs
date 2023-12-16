@@ -60,7 +60,7 @@ public class BotHandler : BaseHandler
             InlineKeyboardButton.WithUrl(Resources.Page, Resources.ProjectUrl)
         });
 
-        var msg = await BotClient.SendTextMessageAsync(ChatId, messageText, ParseMode.Markdown, replyMarkup: keyboard);
+        var msg = await BotClient.SendTextMessageAsync(ChatId, messageText,  parseMode: ParseMode.Markdown, replyMarkup: keyboard);
 
         await _delayService.DelaySeconds(60);
 
@@ -73,7 +73,7 @@ public class BotHandler : BaseHandler
     public async Task DotRu()
     {
         var messageText = Resources.ruPropaganda;
-        var msg = await BotClient.SendTextMessageAsync(ChatId, messageText, replyToMessageId: Message.MessageId);
+        await BotClient.SendTextMessageAsync(ChatId, messageText, replyToMessageId: Message.MessageId);
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -96,7 +96,7 @@ public class BotHandler : BaseHandler
     [MessageHandler("шарий|шарій")]
     public async Task CockMan()
     {
-        var msg = await BotClient.SendVideoAsync(chatId: ChatId, video: Resources.CockmanVideoUrl);
+        var msg = await BotClient.SendVideoAsync(chatId: ChatId, video: InputFile.FromUri(Resources.CockmanVideoUrl));
 
         await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);
@@ -106,7 +106,7 @@ public class BotHandler : BaseHandler
     [MessageHandler("samsung|самсунг|сасунг")]
     public async Task Samsung()
     {
-        var msg = await BotClient.SendPhotoAsync(chatId: ChatId, photo: Resources.SamsungUrl, replyToMessageId: Message.MessageId);
+        var msg = await BotClient.SendPhotoAsync(chatId: ChatId, photo: InputFile.FromUri(Resources.SamsungUrl), replyToMessageId: Message.MessageId);
 
         await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);
@@ -134,7 +134,7 @@ public class BotHandler : BaseHandler
             chatId: ChatId,
             replyToMessageId: Message.MessageId,
             caption: replyText,
-            animation: Resources.ItsUaChatVideoUrl,
+            animation: InputFile.FromUri(Resources.ItsUaChatVideoUrl),
             parseMode: ParseMode.Markdown);
 
         await _delayService.DelaySeconds(30);
@@ -490,7 +490,7 @@ public class BotHandler : BaseHandler
             InlineKeyboardButton.WithCallbackData("Кітесса", $"print|{variants[1]}"),
         });
 
-        await BotClient.SendPhotoAsync(chatId: ChatId, photo: carUrl, replyToMessageId: Message.MessageId, replyMarkup: keyboard);
+        await BotClient.SendPhotoAsync(chatId: ChatId, photo: InputFile.FromUri(carUrl), replyToMessageId: Message.MessageId, replyMarkup: keyboard);
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -513,8 +513,7 @@ public class BotHandler : BaseHandler
 
         try
         {
-            var api = new OpenAIAPI(new APIAuthentication(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!), engine: new Engine(Resources.GPTModel));
-
+            var api = new OpenAIAPI(new APIAuthentication(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!));
             var result = await api.Completions.CreateCompletionAsync(inputMessageTest, max_tokens: 50, temperature: 0.0);
             returnMessage = result.ToString();
         }

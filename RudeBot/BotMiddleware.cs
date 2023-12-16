@@ -97,7 +97,7 @@ public class BotMiddleware : BaseMiddleware
                         InlineKeyboardButton.WithUrl("Тут", $"https://t.me/c/{chatId}/{duplicateMessageId}")
                     });
 
-                    await bot.SendTextMessageAsync(Chat.Id, messageText, ParseMode.Markdown,
+                    await bot.SendTextMessageAsync(Chat.Id, messageText, parseMode: ParseMode.Markdown,
                         replyToMessageId: Message.MessageId, replyMarkup: keyboard);
                 }
             }

@@ -46,7 +46,7 @@ public class ManageHandler : BaseHandler
                     chatId: ChatId,
                     replyToMessageId: Message.MessageId,
                     caption: responseText,
-                    animation: Resources.WelcomeToTheClubBuddyVideoUrl,
+                    animation: InputFile.FromUri(Resources.WelcomeToTheClubBuddyVideoUrl),
                     parseMode: ParseMode.Markdown,
                     replyMarkup: keyboardMarkup);
 
@@ -180,19 +180,29 @@ public class ManageHandler : BaseHandler
         switch (command)
         {
             case "ban_media":
-                await BotClient.RestrictChatMemberAsync(ChatId, userId, new ChatPermissions() { CanSendMessages = true, CanSendMediaMessages = false }, DateTime.UtcNow.AddDays(1));
+                await BotClient.RestrictChatMemberAsync(ChatId,
+                    userId,
+                    new ChatPermissions()
+                    {
+                        CanSendMessages = true,  
+                        CanSendPhotos = false,
+                        CanSendVideos = false, 
+                        CanSendVideoNotes = false,
+                        CanSendVoiceNotes = false
+                    },
+                    untilDate: DateTime.UtcNow.AddDays(1));
                 actionResult = $"\n{Resources.BannedMedia}";
                 break;
             case "mute_day":
-                await BotClient.RestrictChatMemberAsync(ChatId, userId, new ChatPermissions() { CanSendMessages = false }, DateTime.UtcNow.AddDays(1));
+                await BotClient.RestrictChatMemberAsync(ChatId, userId, new ChatPermissions() { CanSendMessages = false }, untilDate: DateTime.UtcNow.AddDays(1));
                 actionResult = $"\n{Resources.Muted}";
                 break;
             case "kick":
-                await BotClient.KickChatMemberAsync(ChatId, userId, DateTime.UtcNow.AddMinutes(1));
+                await BotClient.BanChatMemberAsync(ChatId, userId, DateTime.UtcNow.AddMinutes(1));
                 actionResult = $"\n{Resources.Kicked}";
                 break;
             case "ban":
-                await BotClient.KickChatMemberAsync(ChatId, userId, DateTime.UtcNow.AddYears(1000));
+                await BotClient.BanChatMemberAsync(ChatId, userId, DateTime.UtcNow.AddYears(1000));
                 actionResult = $"\n{Resources.Banned}";
                 break;
             case "add_warn":
@@ -205,7 +215,10 @@ public class ManageHandler : BaseHandler
                 var permissions = new ChatPermissions
                 {
                     CanSendMessages = true,
-                    CanSendMediaMessages = true,
+                    CanSendPhotos = true,
+                    CanSendVideos = true, 
+                    CanSendVideoNotes = true,
+                    CanSendVoiceNotes = true,
                     CanSendPolls = true,
                     CanSendOtherMessages = true,
                     CanAddWebPagePreviews = true,

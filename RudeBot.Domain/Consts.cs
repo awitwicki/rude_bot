@@ -2,10 +2,10 @@
 
 public static class Consts
 {
-    public const string BotVersion = "3.36.6";
+    public const string BotVersion = "3.37";
 
     public const string BadWordsService = "BadWordsService";
     public const string AdvicesService = "AdvicesService";
 
-    public const string TnxWordsRegex = "(?<=\\B)\\+(?=\\B)|спасибі|спс|сяп|tnx|дяки|дякс|благодарочка|вдячний|спасибо|дякую|благодарю|👍|😁|😂|😄|😆|хаха|хех|дзенькую|вогонь|агонь|агінь|вагінь";
+    public const string TnxWordsRegex = "(?<=\\B)\\+(?=\\B)|спасибі|спс|сяп|tnx|дяки|дякс|благодарочка|вдячний|спасибо|дякую|благодарю|👍|😁|😂|😄|😆|хаха|хех|дзенькую|вогонь|агонь|агінь|вагінь|xd|хд";
 }

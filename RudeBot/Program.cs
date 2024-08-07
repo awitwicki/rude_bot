@@ -3,41 +3,88 @@ using Autofac;
 using Microsoft.EntityFrameworkCore;
 using PowerBot.Lite;
 using RudeBot;
+using RudeBot.Common.Services;
 using RudeBot.Database;
+using RudeBot.Domain;
+using RudeBot.Domain.Interfaces;
+using RudeBot.Domain.Resources;
+using RudeBot.Handlers;
+using RudeBot.Managers;
 using RudeBot.Services;
+using RudeBot.Services.DuplicateDetectorService;
 
 Console.WriteLine("Starting RudeBot");
 
-string botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
-
-// Create database if not exists
-DataContext _dbContext = new DataContext();
-_dbContext.Database.Migrate();
-_dbContext.Dispose();
-
-// Create DI container
-var builder = new ContainerBuilder();
-
-// Register services
-builder.RegisterType<TickerService>()
-    .As<ITickerService>()
-    .SingleInstance();
-
-builder.RegisterType<TxtWordsDatasetReader>()
-    .Named<TxtWordsDatasetReader>(Consts.BadWordsReaderService)
-    .WithParameter("path", Consts.BadWordsTxtPath)
-    .SingleInstance();
-
-builder.RegisterType<TxtWordsDatasetReader>()
-    .Named<TxtWordsDatasetReader>(Consts.AdvicesReaderService)
-    .WithParameter("path", Consts.AdvicesTxtPath)
-    .SingleInstance();
-
-// Build container
-DIContainerInstance.Container = builder.Build();
+var botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
 
 // Run bot
-CoreBot botClient = new CoreBot(botToken);
+var botClient = new CoreBot(botToken);
+
+// Create database if not exists
+await using (var dbContext = new DataContext())
+{
+    dbContext.Database.Migrate();
+    Console.WriteLine("Database is synchronized");
+}
+
+// Register middlewares and handlers
+botClient.RegisterMiddleware<BotMiddleware>()
+    .RegisterHandler<BotHandler>()
+    .RegisterHandler<ManageHandler>();
+
+// Register services
+botClient.RegisterContainers(x =>
+{
+    x.RegisterType<TickerService>()
+        .As<ITickerService>()
+        .SingleInstance();
+
+    x.RegisterType<TxtWordsDataset>()
+        .WithParameter("data", Resources.BadWordsDataset
+            .Split("\n")
+            .Select(x => x.Replace("\r", "").ToLower())
+        )
+        .Keyed<TxtWordsDataset>(Consts.BadWordsService)
+        .As<ITxtWordsDataset>()
+        .SingleInstance();
+
+    x.RegisterType<TxtWordsDataset>()
+        .WithParameter("data", Resources.Advices
+            .Split("\n")
+        )
+        .Keyed<TxtWordsDataset>(Consts.AdvicesService)
+        .As<ITxtWordsDataset>()
+        .SingleInstance();
+
+    x.RegisterType<UserManager>()
+       .As<IUserManager>()
+       .InstancePerLifetimeScope();
+
+    x.RegisterType<CatService>()
+        .As<ICatService>()
+        .OwnedByLifetimeScope();
+
+    x.RegisterType<DuplicateDetectorService>()
+       .As<IDuplicateDetectorService>()
+       .WithParameter("expireTime", TimeSpan.FromDays(5))
+       .SingleInstance();
+
+    x.RegisterType<ChatSettingsService>()
+        .As<IChatSettingsService>()
+        .SingleInstance();
+    
+    x.RegisterType<TeslaChatCounterService>()
+        .As<ITeslaChatCounterService>()
+        .SingleInstance();
+    
+    x.RegisterType<DelayService>()
+        .As<IDelayService>()
+        .OwnedByLifetimeScope();
+});
+
+botClient.Build();
+
+await botClient.StartReceiving();
 
 // Wait for eternity
-await Task.Delay(Int32.MaxValue);
+await Task.Delay(-1);

@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace RudeBot.Services;
 
-namespace RudeBot.Services
+public interface ITickerService
 {
-    internal interface ITickerService
-    {
-        Task<double> GetTickerPrice(string tickerName);
-    }
+    Task<double> GetTickerPrice(string tickerName);
 }

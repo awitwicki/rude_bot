@@ -4,23 +4,23 @@
 
 namespace RudeBot.Migrations
 {
-    public partial class addusername : Migration
+    public partial class UseChatGptSetting : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "UserMention",
-                table: "Users",
-                type: "TEXT",
+            migrationBuilder.AddColumn<bool>(
+                name: "UseChatGpt",
+                table: "ChatSettings",
+                type: "boolean",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: false);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "UserMention",
-                table: "Users");
+                name: "UseChatGpt",
+                table: "ChatSettings");
         }
     }
 }

@@ -7,7 +7,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RudeBot", "RudeBot\RudeBot.
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{5CAB60AC-DEEA-4BDA-9452-59830E9262CC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerBot.Lite", "PowerBot.Lite\PowerBot.Lite\PowerBot.Lite.csproj", "{8838414A-2B3B-4A96-85D4-E9D35CA2A882}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseChatMigrator", "DatabaseChatMigrator\DatabaseChatMigrator.csproj", "{2A8F53C5-5470-4DC3-89B7-055AE45EED08}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RudeBot.Tests", "RudeBot.Tests\RudeBot.Tests.csproj", "{AE0834C0-1C17-403E-AFE8-44636B49E79B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RudeBot.Common", "RudeBot.Common\RudeBot.Common.csproj", "{F2979FEB-492B-4683-847E-76DE0039A677}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RudeBot.Common.Tests", "RudeBot.Common.Tests\RudeBot.Common.Tests.csproj", "{35AD99BF-CA02-460B-8EC0-56322F73A175}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RudeBot.Domain", "RudeBot.Domain\RudeBot.Domain.csproj", "{486D6CF1-D073-4118-BEAE-1BC049BB1384}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +31,26 @@ Global
 		{5CAB60AC-DEEA-4BDA-9452-59830E9262CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CAB60AC-DEEA-4BDA-9452-59830E9262CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CAB60AC-DEEA-4BDA-9452-59830E9262CC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8838414A-2B3B-4A96-85D4-E9D35CA2A882}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8838414A-2B3B-4A96-85D4-E9D35CA2A882}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8838414A-2B3B-4A96-85D4-E9D35CA2A882}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8838414A-2B3B-4A96-85D4-E9D35CA2A882}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A8F53C5-5470-4DC3-89B7-055AE45EED08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A8F53C5-5470-4DC3-89B7-055AE45EED08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A8F53C5-5470-4DC3-89B7-055AE45EED08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A8F53C5-5470-4DC3-89B7-055AE45EED08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE0834C0-1C17-403E-AFE8-44636B49E79B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE0834C0-1C17-403E-AFE8-44636B49E79B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE0834C0-1C17-403E-AFE8-44636B49E79B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE0834C0-1C17-403E-AFE8-44636B49E79B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2979FEB-492B-4683-847E-76DE0039A677}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2979FEB-492B-4683-847E-76DE0039A677}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2979FEB-492B-4683-847E-76DE0039A677}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2979FEB-492B-4683-847E-76DE0039A677}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35AD99BF-CA02-460B-8EC0-56322F73A175}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35AD99BF-CA02-460B-8EC0-56322F73A175}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35AD99BF-CA02-460B-8EC0-56322F73A175}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35AD99BF-CA02-460B-8EC0-56322F73A175}.Release|Any CPU.Build.0 = Release|Any CPU
+		{486D6CF1-D073-4118-BEAE-1BC049BB1384}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{486D6CF1-D073-4118-BEAE-1BC049BB1384}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{486D6CF1-D073-4118-BEAE-1BC049BB1384}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{486D6CF1-D073-4118-BEAE-1BC049BB1384}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

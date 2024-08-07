@@ -1,0 +1,150 @@
+body {
+    background: #111;
+    color: #D1BFA7;
+    min-height: 100%;
+    margin: 0;
+    padding: min(1cm, 5%);
+    display: flex;
+    font-family: 'Roboto';
+}
+
+.index {
+    font-size: 18px;
+    border-radius: 50%;
+    padding: 10px 10px 10px 10px;
+    text-align: center;
+    min-width: 20px;
+    background: #040404;
+    border: 1px solid #D1BFA7;
+}
+
+a {
+    color: white;
+}
+
+h1 {
+    height: 58px;
+    font-size: 48px;
+    background: linear-gradient(91.92deg, #E3535D -3.77%, #30C9C4 98.17%, #305BC9 102.6%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+h2 {
+    position: relative;
+    width: 718px;
+    height: 46px;
+    font-size: 1.5rem;
+}
+
+.description {
+    font-style: normal;
+    opacity: .8;
+    margin-bottom: 8px;
+    font-family: 'Inter';
+}
+
+.text-box {
+    margin-left: 1.5cm;
+}
+
+.index-box {
+    float: left;
+}
+
+.title {
+    font-size: 1.25rem!important;
+    font-weight: 500;
+}
+
+.title-center {
+    padding-top: 10px;
+}
+
+.ml-4 {
+    max-width: 200px;
+    margin-bottom: 38px;
+    border: 2px solid #d1bfa7;
+    border-radius: 50%;
+}
+
+.container-box {
+    margin-bottom: 38px;
+}
+
+.img-logo {
+    margin-top: 40px;
+    margin-left: 50px;
+}
+
+.column {
+    float: left;
+    width: 50%;
+}
+
+.badge-btn {
+    float: left;
+    width: 50%;
+    padding: 9px;
+    padding-top: 6px;
+    width: 205px;
+    height: 46px;
+    border-radius: 63px;
+    vertical-align: middle;
+}
+
+.telegram-btn {
+    background: linear-gradient(100deg, #1B5F7C 2.68%, #084965 97.28%);
+    border: 1px solid #30A8DB;
+}
+
+
+.telegram-btn:hover {
+    background: linear-gradient(100deg, #217194 2.68%, #095a7c 97.28%);
+}
+
+.github-btn {
+    background: linear-gradient(100deg, #6322A2 8.73%, #431C68 93.37%);
+    border: 1px solid #C824F8;
+}
+
+.github-btn:hover {
+    background: linear-gradient(100deg, #742bbd 8.73%, #522280 93.37%);
+}
+
+.padding-top {
+    padding-top: 80px;;
+}
+
+.left {
+    float: left;
+}
+
+.fab {
+    float: left;
+    width: auto;
+}
+
+.btn-text {
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 48px;
+    text-align: center;
+}
+
+.text-center
+{
+    text-align: center;
+}
+
+.center {
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.rel {
+    position: relative;
+    padding: 0.3em;
+}

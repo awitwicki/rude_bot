@@ -569,6 +569,42 @@ namespace RudeBot.Domain.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Заборона потужності в чаті.
+        /// </summary>
+        public static string PotuznistHate {
+            get {
+                return ResourceManager.GetString("PotuznistHate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Заборона потужності в чаті (тільки для адмінів): /potuzhnist.
+        /// </summary>
+        public static string PotuznistHateCommandDescription {
+            get {
+                return ResourceManager.GetString("PotuznistHateCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Потужність в чаті дозвллена.
+        /// </summary>
+        public static string PotuznistHateOff {
+            get {
+                return ResourceManager.GetString("PotuznistHateOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Потужність в чаті заборонена.
+        /// </summary>
+        public static string PotuznistHateOn {
+            get {
+                return ResourceManager.GetString("PotuznistHateOn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to https://awitwicki.github.io/rude_bot/.
         /// </summary>
         public static string ProjectUrl {

@@ -7,4 +7,5 @@ public class ChatSettings
     public bool HaterussianLang { get; set; }
     public bool UseChatGpt { get; set; }
     public bool SendRandomMessages { get; set; }
+    public bool Potuzhnist { get; set; }
 }

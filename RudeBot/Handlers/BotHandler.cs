@@ -140,6 +140,33 @@ public class BotHandler : BaseHandler
         await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);
     }
+    
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("потужн")]
+    public async Task Potuzhnist()
+    {
+        var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+
+        // Ignore message forwards except self forwards or if hate settings turned off
+        if (!chatSettings.Potuzhnist)
+            return;
+            
+        if (Message.ForwardFrom != null && Message.ForwardFrom.Id != User.Id)
+            return;
+        
+        if (Message.ForwardFromChat != null)
+            return;
+
+        var replyText = Resources.PotuznistHate;
+
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText,
+            replyToMessageId: Message.MessageId);
+        
+
+        await _delayService.DelaySeconds(5);
+        await BotClient.TryDeleteMessage(msg);
+        await BotClient.TryDeleteMessage(Message);
+    }
 
     [MessageReaction(ChatAction.Typing)]
     [MessageHandler("tesl|тесл")]

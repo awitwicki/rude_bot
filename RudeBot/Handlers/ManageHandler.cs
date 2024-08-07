@@ -394,10 +394,12 @@ public class ManageHandler : BaseHandler
             {
                 replyText = $"{Resources.ChatSettings}\n\n"
                             + $"{Resources.russianLangHate} `{chatSettings.HaterussianLang}`\n"
+                            + $"{Resources.PotuznistHate} `{chatSettings.Potuzhnist}`\n"
                             + $"{Resources.UseChatGPT} `{chatSettings.UseChatGpt}`\n"
                             + $"{Resources.SendRandomMessages} `{chatSettings.SendRandomMessages}`\n"
                             + $"\n"
                             + $"{Resources.russianLangHateCommandDescription}\n"
+                            + $"{Resources.PotuznistHateCommandDescription}\n"
                             + $"{Resources.UseChatGPTCommandDescription}\n"
                             + $"{Resources.SendRandomMessagesDescription}\n";
             }
@@ -437,6 +439,43 @@ public class ManageHandler : BaseHandler
                 await ChatSettingsService.AddOrUpdateChatSettings(chatSettings);
 
                 replyText = chatSettings.HaterussianLang ? Resources.russianLangHateOn : Resources.russianLangHateOff;
+            }
+        }
+
+        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+            
+        await Task.Delay(30 * 1000);
+
+        await BotClient.TryDeleteMessage(msg);
+        await BotClient.TryDeleteMessage(Message);
+    }
+    
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^/potuzhnist")]
+    public async Task ChangePotuzhnist()
+    {
+        Message msg = null;
+        string replyText;
+
+        // Сheck if user have rights to change settings
+        var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+        if (!usrSenderRights.IsHaveAdminRights())
+        {
+            replyText = Resources.CommandIsOnlyForAdmins;
+        }
+        else
+        {
+            var chatSettings = await ChatSettingsService.GetChatSettings(ChatId);
+            if (chatSettings == null)
+            {
+                replyText = $"{Resources.Error} 🤷🏻‍♂️";
+            }
+            else
+            {
+                chatSettings.Potuzhnist = !chatSettings.Potuzhnist;
+                await ChatSettingsService.AddOrUpdateChatSettings(chatSettings);
+
+                replyText = chatSettings.Potuzhnist ? Resources.PotuznistHateOn : Resources.PotuznistHateOff;
             }
         }
 

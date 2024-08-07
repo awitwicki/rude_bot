@@ -388,4 +388,16 @@ I якшо не важко, пліз тут анкета на 8 питань</va
   <data name="BadWordsDataset" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\FileResources\Badwords.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="PotuznistHate" xml:space="preserve">
+    <value>Заборона потужності в чаті</value>
+  </data>
+  <data name="PotuznistHateCommandDescription" xml:space="preserve">
+    <value>Заборона потужності в чаті (тільки для адмінів): /potuzhnist</value>
+  </data>
+  <data name="PotuznistHateOff" xml:space="preserve">
+    <value>Потужність в чаті дозвллена</value>
+  </data>
+  <data name="PotuznistHateOn" xml:space="preserve">
+    <value>Потужність в чаті заборонена</value>
+  </data>
 </root>

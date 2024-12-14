@@ -257,121 +257,92 @@ public class BotHandler : BaseHandler
     [MessageHandler("(^топ$|^top$)")]
     public async Task Top()
     {
-        // Prevent for top spamming (1 top message per all chats, needs to rework)
-        var timeout = TimeSpan.FromMilliseconds(50);
-        var lockTaken = false;
+        // Get all users
+        var users = await _userManager.GetAllUsersChatStats(ChatId);
 
-        try
-        {
-            Monitor.TryEnter(_topLocked, timeout, ref lockTaken);
-            if (lockTaken)
+        var replyText = $"*{Resources.AccountsInTheChat} {users.Count()}*\n\n";
+        replyText += $"{Resources.TopChatKarma}\n";
+
+        users.OrderByDescending(x => x.Karma)
+            .Take(5)
+            .ToList()
+            .ForEach(x =>
             {
-                // Get all users
-                var users = await _userManager.GetAllUsersChatStats(ChatId);
-
-                var replyText = $"*{Resources.AccountsInTheChat} {users.Count()}*\n\n";
-                replyText += $"{Resources.TopChatKarma}\n";
-
-                users.OrderByDescending(x => x.Karma)
-                    .Take(5)
-                    .ToList()
-                    .ForEach(x =>
-                    {
-                        var karmaPercent = "0";
-                        if (x.Karma > 0 && x.TotalMessages > 0)
-                        {
-                            karmaPercent = ((float)x.Karma * 100 / x.TotalMessages).ToString("0.00",
-                                new NumberFormatInfo{NumberDecimalSeparator = "."});
-                        }
-
-                        replyText += $"`{x.User.UserName}` - {Resources.Karma} `{x.Karma} ({karmaPercent}%)`\n";
-                    });
-
-                var topMinus3Users = users.OrderBy(x => x.Karma)
-                    .Where(x => x.Karma < 0)
-                    .Take(3)
-                    .OrderByDescending(x => x.Karma)
-                    .ToList();
-
-                if (topMinus3Users.Any())
+                var karmaPercent = "0";
+                if (x.Karma > 0 && x.TotalMessages > 0)
                 {
-                    replyText += $"\n{Resources.TopChatNegativeKarma}\n";
-
-                    topMinus3Users.ForEach(x =>
-                    {
-                        var karmaPercent = "0";
-                        if (x.Karma > 0 && x.TotalMessages > 0)
-                        {
-                            karmaPercent = ((float)x.Karma * 100 / x.TotalMessages).ToString("0.00",
-                                new NumberFormatInfo{NumberDecimalSeparator = "."});
-                        }
-                            
-                        replyText += $"`{x.User.UserName}` - {Resources.Karma} `{x.Karma} ({karmaPercent}%)`\n";
-                    });
+                    karmaPercent = ((float)x.Karma * 100 / x.TotalMessages).ToString("0.00",
+                        new NumberFormatInfo { NumberDecimalSeparator = "." });
                 }
 
-                replyText += $"\n{Resources.TopChatActive}\n";
+                replyText += $"`{x.User.UserName}` - {Resources.Karma} `{x.Karma} ({karmaPercent}%)`\n";
+            });
 
-                users.OrderByDescending(x => x.TotalMessages)
-                    .Take(5)
-                    .ToList()
-                    .ForEach(x =>
-                    {
-                        replyText += $"`{x.User.UserName}` - {Resources.Messages} `{x.TotalMessages}`\n";
-                    });
+        var topMinus3Users = users.OrderBy(x => x.Karma)
+            .Where(x => x.Karma < 0)
+            .Take(3)
+            .OrderByDescending(x => x.Karma)
+            .ToList();
 
-                replyText += $"\n{Resources.TopChatEmotionals}\n";
+        if (topMinus3Users.Any())
+        {
+            replyText += $"\n{Resources.TopChatNegativeKarma}\n";
 
-                users.OrderByDescending(x => x.TotalBadWords)
-                    .Take(5)
-                    .ToList()
-                    .ForEach(x =>
-                    {
-                        var BadWordsPercent = "0";
-                        if (x.TotalBadWords > 0 && x.TotalMessages > 0)
-                        {
-                            BadWordsPercent = ((float)x.TotalBadWords * 100 / x.TotalMessages).ToString("0.00",
-                                new NumberFormatInfo{NumberDecimalSeparator = "."});
-                        }
-
-                        replyText += $"`{x.User.UserName}` - {Resources.BadWords} `{x.TotalBadWords} ({BadWordsPercent}%)`\n";
-                    });
-
-                var topWarnsUsers = users.OrderByDescending(x => x.Warns)
-                    .Where(x => x.Warns > 0)
-                    .Take(5)
-                    .ToList();
-
-                if (topWarnsUsers.Any())
+            topMinus3Users.ForEach(x =>
+            {
+                var karmaPercent = "0";
+                if (x.Karma > 0 && x.TotalMessages > 0)
                 {
-                    replyText += $"\n{Resources.TopChatWarns}\n";
-
-                    topWarnsUsers.ForEach(x =>
-                    {
-                        replyText += $"`{x.User.UserName}` - {Resources.Warns} `{x.Warns}`\n";
-                    });
+                    karmaPercent = ((float)x.Karma * 100 / x.TotalMessages).ToString("0.00",
+                        new NumberFormatInfo { NumberDecimalSeparator = "." });
                 }
 
-                var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
-
-                await _delayService.DelaySeconds(300);
-
-                BotClient.TryDeleteMessage(msg).Wait();
-                BotClient.TryDeleteMessage(Message).Wait();
-            }
-            else // Top list is already exists, just remove top command message
-            {
-                await BotClient.TryDeleteMessage(Message);
-            }
+                replyText += $"`{x.User.UserName}` - {Resources.Karma} `{x.Karma} ({karmaPercent}%)`\n";
+            });
         }
-        finally
+
+        replyText += $"\n{Resources.TopChatActive}\n";
+
+        users.OrderByDescending(x => x.TotalMessages)
+            .Take(5)
+            .ToList()
+            .ForEach(x => { replyText += $"`{x.User.UserName}` - {Resources.Messages} `{x.TotalMessages}`\n"; });
+
+        replyText += $"\n{Resources.TopChatEmotionals}\n";
+
+        users.OrderByDescending(x => x.TotalBadWords)
+            .Take(5)
+            .ToList()
+            .ForEach(x =>
+            {
+                var BadWordsPercent = "0";
+                if (x.TotalBadWords > 0 && x.TotalMessages > 0)
+                {
+                    BadWordsPercent = ((float)x.TotalBadWords * 100 / x.TotalMessages).ToString("0.00",
+                        new NumberFormatInfo { NumberDecimalSeparator = "." });
+                }
+
+                replyText += $"`{x.User.UserName}` - {Resources.BadWords} `{x.TotalBadWords} ({BadWordsPercent}%)`\n";
+            });
+
+        var topWarnsUsers = users.OrderByDescending(x => x.Warns)
+            .Where(x => x.Warns > 0)
+            .Take(5)
+            .ToList();
+
+        if (topWarnsUsers.Any())
         {
-            // Ensure that the lock is released.
-            if (lockTaken)
-            {
-                Monitor.Exit(_topLocked);
-            }
+            replyText += $"\n{Resources.TopChatWarns}\n";
+
+            topWarnsUsers.ForEach(x => { replyText += $"`{x.User.UserName}` - {Resources.Warns} `{x.Warns}`\n"; });
         }
+
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId,
+            parseMode: ParseMode.Markdown);
+
+        await _delayService.DelaySeconds(300);
+        await BotClient.TryDeleteMessage(msg);
+        await BotClient.TryDeleteMessage(Message);
     }
 
     [MessageReaction(ChatAction.Typing)]

@@ -9,3 +9,5 @@ obj/
 *.sqlite*
 
 .idea
+.DS_Store
+*.user

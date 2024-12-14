@@ -10,7 +10,7 @@ using RudeBot.Models;
 using RudeBot.Services;
 using RudeBot.Extensions;
 using Autofac.Features.AttributeFilters;
-using OpenAI_API;
+using OpenAI;
 using RudeBot.Common.TransactionHelpers;
 using RudeBot.Domain;
 using RudeBot.Domain.Interfaces;
@@ -87,7 +87,10 @@ public class BotHandler : BaseHandler
         var replyText = Resources.PotuznistHate;
 
         var msg = await BotClient.SendTextMessageAsync(ChatId, replyText,
-            replyToMessageId: Message.MessageId);
+            replyParameters: new ReplyParameters
+            {
+                MessageId = Message.MessageId
+            });
 
         await _delayService.DelaySeconds(5);
         await BotClient.TryDeleteMessage(msg);
@@ -99,7 +102,10 @@ public class BotHandler : BaseHandler
     public async Task DotRu()
     {
         var messageText = Resources.ruPropaganda;
-        await BotClient.SendTextMessageAsync(ChatId, messageText, replyToMessageId: Message.MessageId);
+        await BotClient.SendTextMessageAsync(ChatId, messageText,replyParameters: new ReplyParameters
+        {
+            MessageId = Message.MessageId
+        });
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -110,7 +116,10 @@ public class BotHandler : BaseHandler
 
         var replyText = userStats.BuildInfoString();
 
-        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                }, parseMode: ParseMode.Markdown);
 
         await _delayService.DelaySeconds(30);
 
@@ -132,7 +141,10 @@ public class BotHandler : BaseHandler
     [MessageHandler("samsung|самсунг|сасунг")]
     public async Task Samsung()
     {
-        var msg = await BotClient.SendPhotoAsync(chatId: ChatId, photo: InputFile.FromUri(Resources.SamsungUrl), replyToMessageId: Message.MessageId);
+        var msg = await BotClient.SendPhotoAsync(chatId: ChatId, photo: InputFile.FromUri(Resources.SamsungUrl), replyParameters: new ReplyParameters
+        {
+            MessageId = Message.MessageId
+        });
 
         await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);
@@ -156,9 +168,12 @@ public class BotHandler : BaseHandler
 
         var replyText = Resources.Palanytsia;
 
-        var msg = await BotClient.SendAnimationAsync(
+        var msg = await BotClient.SendAnimation(
             chatId: ChatId,
-            replyToMessageId: Message.MessageId,
+            replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                },
             caption: replyText,
             animation: InputFile.FromUri(Resources.ItsUaChatVideoUrl),
             parseMode: ParseMode.Markdown);
@@ -187,7 +202,11 @@ public class BotHandler : BaseHandler
             var replyText = string.Format(Resources.TeslaAgain, timeFromLastTesla);
 
             await BotClient.SendTextMessageAsync(ChatId, replyText,
-                replyToMessageId: Message.MessageId, parseMode: ParseMode.Html);
+                replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                },
+                parseMode: ParseMode.Html);
         }
 
         lastTeslaInChat.Date = DateTimeOffset.UtcNow;
@@ -217,7 +236,10 @@ public class BotHandler : BaseHandler
 
         var replyText = string.Format(Resources.KarmaIncrease, userStats.User.UserMention, userStats.Karma);
 
-        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                }, parseMode: ParseMode.Markdown);
 
         await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);
@@ -247,7 +269,10 @@ public class BotHandler : BaseHandler
 
         var replyText = string.Format(Resources.KarmaDecrease, userStats.User.UserMention, userStats.Karma);
 
-        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                }, parseMode: ParseMode.Markdown);
 
         await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);
@@ -337,7 +362,10 @@ public class BotHandler : BaseHandler
             topWarnsUsers.ForEach(x => { replyText += $"`{x.User.UserName}` - {Resources.Warns} `{x.Warns}`\n"; });
         }
 
-        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId,
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                },
             parseMode: ParseMode.Markdown);
 
         await _delayService.DelaySeconds(300);
@@ -466,7 +494,10 @@ public class BotHandler : BaseHandler
 
         if (carUrl == null)
         {
-            var msg = await BotClient.SendTextMessageAsync(chatId: ChatId, text: Resources.GoneAway, replyToMessageId: Message.MessageId);
+            var msg = await BotClient.SendTextMessageAsync(chatId: ChatId, text: Resources.GoneAway, replyParameters: new ReplyParameters
+            {
+                MessageId = Message.MessageId
+            });
 
             await _delayService.DelaySeconds(30);
             await BotClient.TryDeleteMessage(msg);
@@ -487,41 +518,44 @@ public class BotHandler : BaseHandler
             InlineKeyboardButton.WithCallbackData("Кітесса", $"print|{variants[1]}"),
         });
 
-        await BotClient.SendPhotoAsync(chatId: ChatId, photo: InputFile.FromUri(carUrl), replyToMessageId: Message.MessageId, replyMarkup: keyboard);
+        await BotClient.SendPhotoAsync(chatId: ChatId, photo: InputFile.FromUri(carUrl), replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                }, replyMarkup: keyboard);
     }
 
-    [MessageReaction(ChatAction.Typing)]
-    [MessageHandler("^кіт ")]
-    public async Task ChatGptAsk()
-    {
-        var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
-        if (chatSettings == null || !chatSettings!.UseChatGpt)
-        {
-            return;
-        }
-            
-        var inputMessageTest = Message!.Text!.Replace("кіт ", "").Replace("Кіт ", "");
-        var returnMessage = ":)";
-
-        if (String.IsNullOrEmpty(inputMessageTest))
-        {
-            returnMessage = Resources.Empty;
-        }
-
-        try
-        {
-            var api = new OpenAIAPI(new APIAuthentication(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!));
-            var result = await api.Completions.CreateCompletionAsync(inputMessageTest, max_tokens: 50, temperature: 0.0);
-            returnMessage = result.ToString();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            returnMessage = Resources.OopsIDidntAgain;
-        }
-
-        await BotClient.SendTextMessageAsync(ChatId, returnMessage, replyToMessageId: Message.MessageId);
-    }
+    // [MessageReaction(ChatAction.Typing)]
+    // [MessageHandler("^кіт ")]
+    // public async Task ChatGptAsk()
+    // {
+    //     var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+    //     if (chatSettings == null || !chatSettings!.UseChatGpt)
+    //     {
+    //         return;
+    //     }
+    //         
+    //     var inputMessageTest = Message!.Text!.Replace("кіт ", "").Replace("Кіт ", "");
+    //     var returnMessage = ":)";
+    //
+    //     if (String.IsNullOrEmpty(inputMessageTest))
+    //     {
+    //         returnMessage = Resources.Empty;
+    //     }
+    //
+    //     try
+    //     {
+    //         var api = new OpenAIClient(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!);
+    //         var result = await api.Completions.CreateCompletionAsync(inputMessageTest, max_tokens: 50, temperature: 0.0);
+    //         returnMessage = result.ToString();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine(ex);
+    //         returnMessage = Resources.OopsIDidntAgain;
+    //     }
+    //
+    //     await BotClient.SendTextMessageAsync(ChatId, returnMessage, replyToMessageId: Message.MessageId);
+    // }
 
     [MessageReaction(ChatAction.Typing)]
     [MessageHandler("^/give")]
@@ -577,7 +611,13 @@ public class BotHandler : BaseHandler
             if (!string.IsNullOrEmpty(replyText))
             {
                 var isReply = (random.Next(100) > 50);
-                await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: isReply ? Message!.MessageId : null);
+
+                var replyParameters = new ReplyParameters
+                {
+                    MessageId = Message!.MessageId
+                };
+                
+                await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: isReply ? replyParameters : null);
             }
         }
     }

@@ -98,7 +98,10 @@ public class BotMiddleware : BaseMiddleware
                     });
 
                     await bot.SendTextMessageAsync(Chat.Id, messageText, parseMode: ParseMode.Markdown,
-                        replyToMessageId: Message.MessageId, replyMarkup: keyboard);
+                        replyParameters: new ReplyParameters
+                        {
+                            MessageId = Message.MessageId
+                        }, replyMarkup: keyboard);
                 }
             }
         }

@@ -26,7 +26,7 @@ public class ManageHandler : BaseHandler
     }
 
     [MessageReaction(ChatAction.Typing)]
-    [MessageTypeFilter(MessageType.ChatMembersAdded)]
+    [MessageTypeFilter(MessageType.NewChatMembers)]
     public async Task NewUserInChat()
     {
         // Process each new user in chat
@@ -44,7 +44,10 @@ public class ManageHandler : BaseHandler
 
                 var helloMessage = await BotClient.SendAnimationAsync(
                     chatId: ChatId,
-                    replyToMessageId: Message.MessageId,
+                    replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                },
                     caption: responseText,
                     animation: InputFile.FromUri(Resources.WelcomeToTheClubBuddyVideoUrl),
                     parseMode: ParseMode.Markdown,
@@ -93,7 +96,10 @@ public class ManageHandler : BaseHandler
         // Filter only reply to other user, ignore bots
         if (message.ReplyToMessage == null || message.ReplyToMessage.From!.Id == user.Id || message.ReplyToMessage.From.IsBot)
         {
-            msg = await BotClient.SendTextMessageAsync(chat.Id, Resources.ShouldBeReplyToMessage, replyToMessageId: message.MessageId);
+            msg = await BotClient.SendTextMessageAsync(chat.Id, Resources.ShouldBeReplyToMessage, replyParameters: new ReplyParameters
+                {
+                    MessageId = message.MessageId
+                });
 
             await Task.Delay(30 * 1000);
 
@@ -106,7 +112,10 @@ public class ManageHandler : BaseHandler
         var usrSenderRights = await BotClient.GetChatMemberAsync(chat.Id, user.Id);
         if (!(usrSenderRights.IsHaveAdminRights()))
         {
-            msg = await BotClient.SendTextMessageAsync(ChatId, Resources.WarnOrUnwarnIsOnlyForAdmins, replyToMessageId: message.MessageId);
+            msg = await BotClient.SendTextMessageAsync(ChatId, Resources.WarnOrUnwarnIsOnlyForAdmins, replyParameters: new ReplyParameters
+                {
+                    MessageId = message.MessageId
+                });
 
             await Task.Delay(30 * 1000);
 
@@ -119,7 +128,10 @@ public class ManageHandler : BaseHandler
         var usrReceiverRights = await BotClient.GetChatMemberAsync(chat.Id, message.ReplyToMessage.From.Id);
         if (usrReceiverRights.IsHaveAdminRights())
         {
-            msg = await BotClient.SendTextMessageAsync(chat.Id, Resources.WarnOrUnwarnNotWorksOnAdmins, replyToMessageId: message.MessageId);
+            msg = await BotClient.SendTextMessageAsync(chat.Id, Resources.WarnOrUnwarnNotWorksOnAdmins, replyParameters: new ReplyParameters
+                {
+                    MessageId = message.MessageId
+                });
 
             await Task.Delay(30 * 1000);
 
@@ -274,7 +286,10 @@ public class ManageHandler : BaseHandler
 
         var keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(Message.ReplyToMessage.From.Id);
 
-        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.ReplyToMessage.MessageId, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+        {
+            MessageId = Message.ReplyToMessage.MessageId
+        }, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
         await BotClient.TryDeleteMessage(Message);
     }
 
@@ -303,7 +318,10 @@ public class ManageHandler : BaseHandler
             replyText += $"\n\n " + string.Format(Resources.WarnBalance, userStats.Warns);
         }
 
-        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.ReplyToMessage.MessageId, parseMode: ParseMode.Markdown);
+        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+        {
+            MessageId = Message.ReplyToMessage.MessageId
+        }, parseMode: ParseMode.Markdown);
         await BotClient.TryDeleteMessage(Message);
     }
 
@@ -330,7 +348,10 @@ public class ManageHandler : BaseHandler
 
         if (replyText != null)
         {
-            msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId);
+            msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+            {
+                MessageId = Message.MessageId
+            });
 
             await Task.Delay(30 * 1000);
 
@@ -405,7 +426,10 @@ public class ManageHandler : BaseHandler
             }
         }
 
-        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                }, parseMode: ParseMode.Markdown);
          
         await Task.Delay(30 * 1000);
 
@@ -442,7 +466,10 @@ public class ManageHandler : BaseHandler
             }
         }
 
-        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                }, parseMode: ParseMode.Markdown);
             
         await Task.Delay(30 * 1000);
 
@@ -479,7 +506,10 @@ public class ManageHandler : BaseHandler
             }
         }
 
-        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                }, parseMode: ParseMode.Markdown);
             
         await Task.Delay(30 * 1000);
 
@@ -516,7 +546,10 @@ public class ManageHandler : BaseHandler
             }
         }
 
-        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                }, parseMode: ParseMode.Markdown);
             
         await Task.Delay(30 * 1000);
 
@@ -553,7 +586,10 @@ public class ManageHandler : BaseHandler
             }
         }
 
-        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyToMessageId: Message.MessageId, parseMode: ParseMode.Markdown);
+        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                }, parseMode: ParseMode.Markdown);
             
         await Task.Delay(30 * 1000);
 

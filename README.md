@@ -6,7 +6,7 @@
 ![License](https://img.shields.io/badge/License-Apache%20License%202.0-blue)
 ![Tests](https://img.shields.io/github/stars/awitwicki/rude_bot)
 ![Tests](https://img.shields.io/github/languages/top/awitwicki/rude_bot)
-![Tests](https://img.shields.io/badge/dotnet%20version-6.0-blue)
+![Tests](https://img.shields.io/badge/dotnet%20version-8.0-blue)
 ![Tests](https://img.shields.io/github/forks/awitwicki/rude_bot)
 ![Tests](https://img.shields.io/github/issues-pr/awitwicki/rude_bot)
 ![Tests](https://img.shields.io/github/last-commit/awitwicki/rude_bot)

@@ -55,9 +55,9 @@ public class BotHandlerTests
             Update = new Update {
                 Id = 1,
                 Message = new Message {
-                    MessageId = 1, Chat = new Chat { Id = 1 },
+                    Id = 1, Chat = new Chat { Id = 1 },
                     From = new User { Id = 1 },
-                    ForwardFrom = new User { Id = 2 }
+                    ForwardOrigin = new MessageOriginUser { SenderUser = new User { Id = 2 }}
                 }
             }
         };
@@ -66,7 +66,7 @@ public class BotHandlerTests
         await handler.Palanytsa();
 
         // Assert
-        await _telegramBotClient.DidNotReceive().MakeRequestAsync<Message>(
+        await _telegramBotClient.DidNotReceive().SendRequest(
             Arg.Any<SendAnimationRequest>()
         );
     }
@@ -90,9 +90,9 @@ public class BotHandlerTests
             Update = new Update {
                 Id = 1,
                 Message = new Message {
-                    MessageId = 1, Chat = new Chat { Id = 1 },
+                    Id = 1, Chat = new Chat { Id = 1 },
                     From = new User { Id = 1 },
-                    ForwardFrom = new User { Id = 1 }
+                    ForwardOrigin = new MessageOriginUser { SenderUser = new User { Id = 1 }}
                 }
             }
         };
@@ -101,7 +101,7 @@ public class BotHandlerTests
         await handler.Palanytsa();
 
         // Assert
-        await _telegramBotClient.Received().MakeRequestAsync<Message>(
+        await _telegramBotClient.Received().SendRequest(
             Arg.Any<SendAnimationRequest>()
         );
     }
@@ -125,9 +125,9 @@ public class BotHandlerTests
             Update = new Update {
                 Id = 1,
                 Message = new Message {
-                    MessageId = 1, Chat = new Chat { Id = 1 },
+                    Id = 1, Chat = new Chat { Id = 1 },
                     From = new User { Id = 1 },
-                    ForwardFromChat = new Chat { Id = 2 }
+                    ForwardOrigin = new MessageOriginUser { SenderUser = new User { Id = 2 }}
                 }
             }
         };
@@ -136,7 +136,7 @@ public class BotHandlerTests
         await handler.Palanytsa();
 
         // Assert
-        await _telegramBotClient.DidNotReceive().MakeRequestAsync<Message>(
+        await _telegramBotClient.DidNotReceive().SendRequest(
             Arg.Any<SendAnimationRequest>()
         );
     }
@@ -160,7 +160,7 @@ public class BotHandlerTests
             Update = new Update {
                 Id = 1,
                 Message = new Message {
-                    MessageId = 1, Chat = new Chat { Id = 1 },
+                    Id = 1, Chat = new Chat { Id = 1 },
                     From = new User { Id = 1 }
                 }
             }
@@ -170,7 +170,7 @@ public class BotHandlerTests
         await handler.Palanytsa();
 
         // Assert
-        await _telegramBotClient.Received().MakeRequestAsync<Message>(
+        await _telegramBotClient.Received().SendRequest(
             Arg.Any<SendAnimationRequest>()
         );
     }
@@ -194,7 +194,7 @@ public class BotHandlerTests
             Update = new Update {
                 Id = 1,
                 Message = new Message {
-                    MessageId = 1, Chat = new Chat { Id = 1 },
+                    Id = 1, Chat = new Chat { Id = 1 },
                     From = new User { Id = 1 }
                 }
             }
@@ -204,7 +204,7 @@ public class BotHandlerTests
         await handler.Palanytsa();
 
         // Assert
-        await _telegramBotClient.DidNotReceive().MakeRequestAsync<Message>(
+        await _telegramBotClient.DidNotReceive().SendRequest(
             Arg.Any<SendAnimationRequest>()
         );
     }

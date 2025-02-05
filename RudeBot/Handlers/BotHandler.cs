@@ -306,7 +306,7 @@ public class BotHandler : BaseHandler
         var topMinus3Users = users.OrderBy(x => x.Karma)
             .Where(x => x.Karma < 0)
             .Take(3)
-            .OrderByDescending(x => x.Karma)
+            .OrderBy(x => x.Karma)
             .ToList();
 
         if (topMinus3Users.Any())

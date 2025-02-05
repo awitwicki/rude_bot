@@ -524,38 +524,38 @@ public class BotHandler : BaseHandler
                 }, replyMarkup: keyboard);
     }
 
-    // [MessageReaction(ChatAction.Typing)]
-    // [MessageHandler("^кіт ")]
-    // public async Task ChatGptAsk()
-    // {
-    //     var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
-    //     if (chatSettings == null || !chatSettings!.UseChatGpt)
-    //     {
-    //         return;
-    //     }
-    //         
-    //     var inputMessageTest = Message!.Text!.Replace("кіт ", "").Replace("Кіт ", "");
-    //     var returnMessage = ":)";
-    //
-    //     if (String.IsNullOrEmpty(inputMessageTest))
-    //     {
-    //         returnMessage = Resources.Empty;
-    //     }
-    //
-    //     try
-    //     {
-    //         var api = new OpenAIClient(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!);
-    //         var result = await api.Completions.CreateCompletionAsync(inputMessageTest, max_tokens: 50, temperature: 0.0);
-    //         returnMessage = result.ToString();
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine(ex);
-    //         returnMessage = Resources.OopsIDidntAgain;
-    //     }
-    //
-    //     await BotClient.SendTextMessageAsync(ChatId, returnMessage, replyToMessageId: Message.MessageId);
-    // }
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^кіт ")]
+    public async Task AILlmAsk()
+    {
+        var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+        if (chatSettings == null || !chatSettings!.UseChatGpt)
+        {
+            return;
+        }
+            
+        var inputMessageTest = Message!.Text!.Replace("кіт ", "").Replace("Кіт ", "");
+        var returnMessage = ":)";
+    
+        if (String.IsNullOrEmpty(inputMessageTest))
+        {
+            returnMessage = Resources.Empty;
+        }
+    
+        try
+        {
+            var api = new OpenAIClient(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!);
+            var result = await api.Completions.CreateCompletionAsync(inputMessageTest, max_tokens: 50, temperature: 0.0);
+            returnMessage = result.ToString();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            returnMessage = Resources.OopsIDidntAgain;
+        }
+    
+        await BotClient.SendTextMessageAsync(ChatId, returnMessage, replyToMessageId: Message.MessageId);
+    }
 
     [MessageReaction(ChatAction.Typing)]
     [MessageHandler("^/give")]

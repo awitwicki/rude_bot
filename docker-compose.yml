@@ -8,8 +8,6 @@ services:
       dockerfile: RudeBot/Dockerfile
     container_name: rudebot-container
     restart: always
-    volumes:
-      - ./data:/app/data
     env_file:
       - .env
     networks:

@@ -23,7 +23,7 @@ var botClient = new CoreBot(botToken);
 // Create database if not exists
 await using (var dbContext = new DataContext())
 {
-    dbContext.Database.Migrate();
+    await dbContext.Database.MigrateAsync();
     Console.WriteLine("Database is synchronized");
 }
 
@@ -54,6 +54,11 @@ botClient.RegisterContainers(x =>
         )
         .Keyed<TxtWordsDataset>(Consts.AdvicesService)
         .As<ITxtWordsDataset>()
+        .SingleInstance();
+    
+    x.RegisterType<AllowedChatsService>()
+        .WithParameter("input", Environment.GetEnvironmentVariable("RUDEBOT_ALLOWED_CHATS"))
+        .As<IAllowedChatsService>()
         .SingleInstance();
 
     x.RegisterType<UserManager>()

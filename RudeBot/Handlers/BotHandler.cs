@@ -15,6 +15,7 @@ using RudeBot.Common.TransactionHelpers;
 using RudeBot.Domain;
 using RudeBot.Domain.Interfaces;
 using RudeBot.Domain.Resources;
+using GenerativeAI;
 
 namespace RudeBot.Handlers;
 
@@ -524,38 +525,46 @@ public class BotHandler : BaseHandler
                 }, replyMarkup: keyboard);
     }
 
-    // [MessageReaction(ChatAction.Typing)]
-    // [MessageHandler("^кіт ")]
-    // public async Task ChatGptAsk()
-    // {
-    //     var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
-    //     if (chatSettings == null || !chatSettings!.UseChatGpt)
-    //     {
-    //         return;
-    //     }
-    //         
-    //     var inputMessageTest = Message!.Text!.Replace("кіт ", "").Replace("Кіт ", "");
-    //     var returnMessage = ":)";
-    //
-    //     if (String.IsNullOrEmpty(inputMessageTest))
-    //     {
-    //         returnMessage = Resources.Empty;
-    //     }
-    //
-    //     try
-    //     {
-    //         var api = new OpenAIClient(Environment.GetEnvironmentVariable("RUDEBOT_OPENAI_API_KEY")!);
-    //         var result = await api.Completions.CreateCompletionAsync(inputMessageTest, max_tokens: 50, temperature: 0.0);
-    //         returnMessage = result.ToString();
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine(ex);
-    //         returnMessage = Resources.OopsIDidntAgain;
-    //     }
-    //
-    //     await BotClient.SendTextMessageAsync(ChatId, returnMessage, replyToMessageId: Message.MessageId);
-    // }
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^кіт ")]
+    public async Task ChatGptAsk()
+    {
+        var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
+        if (chatSettings == null || !chatSettings!.UseChatGpt)
+        {
+            return;
+        }
+            
+        var inputMessageTest = Message!.Text!.Replace("кіт ", "").Replace("Кіт ", "");
+        var returnMessage = ":)";
+    
+        if (String.IsNullOrEmpty(inputMessageTest))
+        {
+            returnMessage = Resources.Empty;
+        }
+    
+        try
+        {
+            var googleAi = new GoogleAi(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_API_KEY")!);
+            var googleModel = googleAi.CreateGenerativeModel("gemini-2.5-flash-preview-05-20");
+
+            var prompt = Resources.UseAIPrompt;
+            prompt += inputMessageTest;
+            
+            var googleModelResponse = await googleModel.GenerateContentAsync(prompt);
+            returnMessage = googleModelResponse.Text();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            returnMessage = Resources.OopsIDidntAgain;
+        }
+    
+        await BotClient.SendMessage(chatId: ChatId,text: returnMessage!, replyParameters: new ReplyParameters
+        {
+            MessageId = Message.MessageId
+        });
+    }
 
     [MessageReaction(ChatAction.Typing)]
     [MessageHandler("^/give")]
@@ -589,6 +598,7 @@ public class BotHandler : BaseHandler
         await BotClient.TryDeleteMessage(msg);
     }
         
+    [MessageReaction(ChatAction.Typing)]
     [MessageTypeFilter(MessageType.Text)]
     public async Task MessageTrigger()
     {
@@ -597,15 +607,38 @@ public class BotHandler : BaseHandler
             var replyText = "";
             var random = new Random();
             var sendRandomMessage = (random.Next(1, 1000) > 985);
-                
             var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
                 
             if (!Message.IsCommand() && 
                 (Message?.ReplyToMessage?.From?.Id == BotClient.BotId ||
                  (sendRandomMessage && chatSettings.SendRandomMessages)))
             {
-                var advices = AdvicesService.GetWords();
-                replyText = advices.PickRandom();
+                
+                // Is advice from text or use AI
+                if (chatSettings.UseChatGpt)
+                {
+                    try
+                    {
+                        var googleAi = new GoogleAi(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_API_KEY")!);
+                        var googleModel = googleAi.CreateGenerativeModel("gemini-2.5-flash-preview-05-20");
+
+                        var prompt = Resources.UseAIPrompt;
+                        prompt += Message!.Text;
+            
+                        var googleModelResponse = await googleModel.GenerateContentAsync(prompt);
+                        replyText = googleModelResponse.Text();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                        replyText = Resources.OopsIDidntAgain;
+                    }
+                }
+                else
+                {
+                    var advices = AdvicesService.GetWords();
+                    replyText = advices.PickRandom();
+                }
             }
 
             if (!string.IsNullOrEmpty(replyText))

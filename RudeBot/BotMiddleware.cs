@@ -1,6 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using PowerBot.Lite.Middlewares;
 using RudeBot.Domain;
+using RudeBot.Domain.Interfaces;
 using RudeBot.Domain.Resources;
 using RudeBot.Managers;
 using RudeBot.Models;
@@ -18,22 +19,30 @@ public class BotMiddleware : BaseMiddleware
     private readonly IUserManager _userManager;
     private readonly TxtWordsDataset _badWordsService;
     private readonly IDuplicateDetectorService _duplicateDetectorService;
+    private readonly IAllowedChatsService _allowedChatsService;
 
     public BotMiddleware(
         IUserManager userManager,
         [KeyFilter(Consts.BadWordsService)] TxtWordsDataset badWordsService,
-        IDuplicateDetectorService duplicateDetectorService
+        IDuplicateDetectorService duplicateDetectorService,
+        IAllowedChatsService allowedChatsService
     )
     {
         _userManager = userManager;
         _badWordsService = badWordsService;
         _duplicateDetectorService = duplicateDetectorService;
+        _allowedChatsService = allowedChatsService;
     }
 
     public override async Task Invoke(ITelegramBotClient bot, Update update, Func<Task> func)
     {
         if (update.Type == UpdateType.Message)
         {
+            if (!_allowedChatsService.IsChatAllowed(update.Message.Chat.Id))
+            { 
+                return;
+            }
+            
             var Message = update.Message;
             var User = update.Message!.From!;
             var Chat = update.Message!.Chat;

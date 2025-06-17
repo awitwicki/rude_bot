@@ -598,7 +598,6 @@ public class BotHandler : BaseHandler
         await BotClient.TryDeleteMessage(msg);
     }
         
-    [MessageReaction(ChatAction.Typing)]
     [MessageTypeFilter(MessageType.Text)]
     public async Task MessageTrigger()
     {
@@ -619,6 +618,7 @@ public class BotHandler : BaseHandler
                 {
                     try
                     {
+                        await BotClient.SendChatAction(ChatId, ChatAction.Typing);
                         var googleAi = new GoogleAi(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_API_KEY")!);
                         var googleModel = googleAi.CreateGenerativeModel("gemini-2.5-flash-preview-05-20");
 

@@ -89,30 +89,31 @@ public class BotMiddleware : BaseMiddleware
             }
 
             // Try find duplicates
-            if (!string.IsNullOrEmpty(Message.Text) || !string.IsNullOrEmpty(Message.Caption))
-            {
-                var duplicates = _duplicateDetectorService.FindDuplicates(Chat.Id, Message.MessageId, text!);
-
-                var duplicateMessageId = duplicates.FirstOrDefault();
-
-                if (duplicateMessageId > 0)
-                {
-                    var messageText = Resources.Klichko;
-
-                    var chatId = $"{Chat.Id}"[3..];
-
-                    var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[]
-                    {
-                        InlineKeyboardButton.WithUrl("Тут", $"https://t.me/c/{chatId}/{duplicateMessageId}")
-                    });
-
-                    await bot.SendTextMessageAsync(Chat.Id, messageText, parseMode: ParseMode.Markdown,
-                        replyParameters: new ReplyParameters
-                        {
-                            MessageId = Message.MessageId
-                        }, replyMarkup: keyboard);
-                }
-            }
+            // TODO need fix to ignore spam from newbies
+            // if (!string.IsNullOrEmpty(Message.Text) || !string.IsNullOrEmpty(Message.Caption))
+            // {
+            //     var duplicates = _duplicateDetectorService.FindDuplicates(Chat.Id, Message.MessageId, text!);
+            //
+            //     var duplicateMessageId = duplicates.FirstOrDefault();
+            //
+            //     if (duplicateMessageId > 0)
+            //     {
+            //         var messageText = Resources.Klichko;
+            //
+            //         var chatId = $"{Chat.Id}"[3..];
+            //
+            //         var keyboard = new InlineKeyboardMarkup(new InlineKeyboardButton[]
+            //         {
+            //             InlineKeyboardButton.WithUrl("Тут", $"https://t.me/c/{chatId}/{duplicateMessageId}")
+            //         });
+            //
+            //         await bot.SendTextMessageAsync(Chat.Id, messageText, parseMode: ParseMode.Markdown,
+            //             replyParameters: new ReplyParameters
+            //             {
+            //                 MessageId = Message.MessageId
+            //             }, replyMarkup: keyboard);
+            //     }
+            // }
         }
 
         // Invoke handler matched methods

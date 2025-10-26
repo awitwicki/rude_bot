@@ -9,13 +9,13 @@ public class ChatSettingsService : IChatSettingsService
     private Dictionary<long, ChatSettings> _chatSettingsCache;
     private DataContext _dbContext;
 
-    public ChatSettingsService()
+    public ChatSettingsService(DataContext dbContext)
     {
-        _dbContext = new DataContext();
+        _dbContext = dbContext;
 
         Task.Run(async () => { await LoadAllChatSettings(); }).Wait();
     }
-        
+
     public async Task LoadAllChatSettings()
     {
         _chatSettingsCache = new Dictionary<long, ChatSettings>();

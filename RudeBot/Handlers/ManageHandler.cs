@@ -1,16 +1,15 @@
-﻿using Telegram.Bot;
-using Telegram.Bot.Types.Enums;
+﻿using Telegram.Bot.Types.Enums;
 using PowerBot.Lite.Attributes;
 using PowerBot.Lite.Handlers;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using RudeBot.Managers;
-using RudeBot.Models;
 using RudeBot.Services;
 using PowerBot.Lite.Utils;
 using RudeBot.Extensions;
 using RudeBot.Keyboards;
 using RudeBot.Domain.Resources;
+using Telegram.Bot;
 
 namespace RudeBot.Handlers;
 
@@ -42,12 +41,12 @@ public class ManageHandler : BaseHandler
 
                 var responseText = string.Format(Resources.HelloMessage, newUser.GetUserMention());
 
-                var helloMessage = await BotClient.SendAnimationAsync(
+                var helloMessage = await BotClient.SendAnimation(
                     chatId: ChatId,
                     replyParameters: new ReplyParameters
-                {
-                    MessageId = Message.MessageId
-                },
+                    {
+                        MessageId = Message.MessageId
+                    },
                     caption: responseText,
                     animation: InputFile.FromUri(Resources.WelcomeToTheClubBuddyVideoUrl),
                     parseMode: ParseMode.Markdown,
@@ -59,7 +58,7 @@ public class ManageHandler : BaseHandler
                 // Try Remove Hello message
                 try
                 {
-                    await BotClient.DeleteMessageAsync(helloMessage.Chat.Id, helloMessage.MessageId);
+                    await BotClient.DeleteMessage(helloMessage.Chat.Id, helloMessage.MessageId);
                 }
                 catch { }
             });
@@ -74,15 +73,15 @@ public class ManageHandler : BaseHandler
         // Wrong user clicked
         if (User.Id != newbieUserId)
         {
-            await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.OnceAgaInAndGetBaned, true);
+            await BotClient.AnswerCallbackQuery(CallbackQuery.Id, Resources.OnceAgaInAndGetBaned, true);
             return;
         }
 
         // Newbie clicked
-        await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.NewbieClicked, true);
+        await BotClient.AnswerCallbackQuery(CallbackQuery.Id, Resources.NewbieClicked, true);
 
         // Delete captcha message
-        await BotClient.DeleteMessageAsync(ChatId, Message.MessageId);
+        await BotClient.DeleteMessage(ChatId, Message.MessageId);
     }
 
     private async Task<bool> _processWarnRights(Message message, Chat chat, User user)
@@ -96,7 +95,7 @@ public class ManageHandler : BaseHandler
         // Filter only reply to other user, ignore bots
         if (message.ReplyToMessage == null || message.ReplyToMessage.From!.Id == user.Id || message.ReplyToMessage.From.IsBot)
         {
-            msg = await BotClient.SendTextMessageAsync(chat.Id, Resources.ShouldBeReplyToMessage, replyParameters: new ReplyParameters
+            msg = await BotClient.SendMessage(chatId: chat.Id, text: Resources.ShouldBeReplyToMessage, replyParameters: new ReplyParameters
                 {
                     MessageId = message.MessageId
                 });
@@ -109,10 +108,10 @@ public class ManageHandler : BaseHandler
         }
 
         // Filter for only admins
-        var usrSenderRights = await BotClient.GetChatMemberAsync(chat.Id, user.Id);
+        var usrSenderRights = await BotClient.GetChatMember(chat.Id, user.Id);
         if (!(usrSenderRights.IsHaveAdminRights()))
         {
-            msg = await BotClient.SendTextMessageAsync(ChatId, Resources.WarnOrUnwarnIsOnlyForAdmins, replyParameters: new ReplyParameters
+            msg = await BotClient.SendMessage(chatId: ChatId, text: Resources.WarnOrUnwarnIsOnlyForAdmins, replyParameters: new ReplyParameters
                 {
                     MessageId = message.MessageId
                 });
@@ -125,10 +124,10 @@ public class ManageHandler : BaseHandler
         }
 
         // Admin cant warn other admins
-        var usrReceiverRights = await BotClient.GetChatMemberAsync(chat.Id, message.ReplyToMessage.From.Id);
+        var usrReceiverRights = await BotClient.GetChatMember(chat.Id, message.ReplyToMessage.From.Id);
         if (usrReceiverRights.IsHaveAdminRights())
         {
-            msg = await BotClient.SendTextMessageAsync(chat.Id, Resources.WarnOrUnwarnNotWorksOnAdmins, replyParameters: new ReplyParameters
+            msg = await BotClient.SendMessage(chatId: chat.Id, text: Resources.WarnOrUnwarnNotWorksOnAdmins, replyParameters: new ReplyParameters
                 {
                     MessageId = message.MessageId
                 });
@@ -147,24 +146,24 @@ public class ManageHandler : BaseHandler
     public async Task ManageHideKeyboard()
     {
         // Filter for only admins
-        var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, User.Id);
+        var usrSenderRights = await BotClient.GetChatMember(ChatId, User.Id);
         if (!usrSenderRights.IsHaveAdminRights())
         {
-            await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.ButtonOnlyForAdmins, true);
+            await BotClient.AnswerCallbackQuery(CallbackQuery.Id, Resources.ButtonOnlyForAdmins, true);
             return;
         }
 
-        await BotClient.EditMessageReplyMarkupAsync(ChatId, MessageId, null);
+        await BotClient.EditMessageReplyMarkup(ChatId, MessageId, null);
     }
 
     [CallbackQueryHandler("^manage_")]
     public async Task ManageUserRights()
     {
         // Filter for only admins
-        var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, User.Id);
+        var usrSenderRights = await BotClient.GetChatMember(ChatId, User.Id);
         if (!usrSenderRights.IsHaveAdminRights())
         {
-            await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.ButtonOnlyForAdmins, true);
+            await BotClient.AnswerCallbackQuery(CallbackQuery.Id, Resources.ButtonOnlyForAdmins, true);
             return;
         }
 
@@ -183,7 +182,7 @@ public class ManageHandler : BaseHandler
         // If user not exists in db then ignore
         if (userStats == null)
         {
-            await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.NotDone, true);
+            await BotClient.AnswerCallbackQuery(CallbackQuery.Id, Resources.NotDone, true);
             return;
         }
 
@@ -192,7 +191,7 @@ public class ManageHandler : BaseHandler
         switch (command)
         {
             case "ban_media":
-                await BotClient.RestrictChatMemberAsync(ChatId,
+                await BotClient.RestrictChatMember(ChatId,
                     userId,
                     new ChatPermissions()
                     {
@@ -206,15 +205,15 @@ public class ManageHandler : BaseHandler
                 actionResult = $"\n{Resources.BannedMedia}";
                 break;
             case "mute_day":
-                await BotClient.RestrictChatMemberAsync(ChatId, userId, new ChatPermissions() { CanSendMessages = false }, untilDate: DateTime.UtcNow.AddDays(1));
+                await BotClient.RestrictChatMember(ChatId, userId, new ChatPermissions() { CanSendMessages = false }, untilDate: DateTime.UtcNow.AddDays(1));
                 actionResult = $"\n{Resources.Muted}";
                 break;
             case "kick":
-                await BotClient.BanChatMemberAsync(ChatId, userId, DateTime.UtcNow.AddMinutes(1));
+                await BotClient.BanChatMember(ChatId, userId, DateTime.UtcNow.AddMinutes(1));
                 actionResult = $"\n{Resources.Kicked}";
                 break;
             case "ban":
-                await BotClient.BanChatMemberAsync(ChatId, userId, DateTime.UtcNow.AddYears(1000));
+                await BotClient.BanChatMember(ChatId, userId, DateTime.UtcNow.AddYears(1000));
                 actionResult = $"\n{Resources.Banned}";
                 break;
             case "add_warn":
@@ -238,7 +237,7 @@ public class ManageHandler : BaseHandler
                     CanInviteUsers = true,
                     CanPinMessages = true,
                 };
-                await BotClient.RestrictChatMemberAsync(ChatId, userId, permissions);
+                await BotClient.RestrictChatMember(ChatId, userId, permissions);
 
                 userStats.Warns = 0;
                 await UserManager.UpdateUserChatStats(userStats);
@@ -259,9 +258,9 @@ public class ManageHandler : BaseHandler
         logs += actionResult;
 
         var keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(userId);
-        await BotClient.EditMessageTextAsync(ChatId, CallbackQuery.Message.MessageId, replyText + logs, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
+        await BotClient.EditMessageText(ChatId, CallbackQuery.Message.MessageId, replyText + logs, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
 
-        await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, Resources.Done, true);
+        await BotClient.AnswerCallbackQuery(CallbackQuery.Id, Resources.Done, true);
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -286,7 +285,7 @@ public class ManageHandler : BaseHandler
 
         var keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(Message.ReplyToMessage.From.Id);
 
-        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+        var msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
         {
             MessageId = Message.ReplyToMessage.MessageId
         }, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
@@ -318,7 +317,7 @@ public class ManageHandler : BaseHandler
             replyText += $"\n\n " + string.Format(Resources.WarnBalance, userStats.Warns);
         }
 
-        var msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+        var msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
         {
             MessageId = Message.ReplyToMessage.MessageId
         }, parseMode: ParseMode.Markdown);
@@ -339,7 +338,7 @@ public class ManageHandler : BaseHandler
         else
         {
             // Сheck if user have rights to scan
-            var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+            var usrSenderRights = await BotClient.GetChatMember(ChatId, Message.From!.Id);
             if (!usrSenderRights.IsHaveAdminRights())
             {
                 replyText = Resources.ScanIsOnlyForAdmins;
@@ -348,7 +347,7 @@ public class ManageHandler : BaseHandler
 
         if (replyText != null)
         {
-            msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+            msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
             {
                 MessageId = Message.MessageId
             });
@@ -373,14 +372,14 @@ public class ManageHandler : BaseHandler
         InlineKeyboardMarkup keyboardMarkup = null;
 
         // If this user is admin then dont pin manage keyboard
-        var usrReceiverRights = await BotClient.GetChatMemberAsync(ChatId, Message.ReplyToMessage.From.Id);
+        var usrReceiverRights = await BotClient.GetChatMember(ChatId, Message.ReplyToMessage.From.Id);
         if (!usrReceiverRights.IsHaveAdminRights())
         {
             // TODO: bug - clicks on this keyboard makes bot change message text like it was /warn command
             keyboardMarkup = KeyboardBuilder.BuildUserRightsManagementKeyboard(Message.ReplyToMessage.From.Id);
         }
 
-        await BotClient.SendTextMessageAsync(ChatId, replyText, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
+        await BotClient.SendMessage(chatId: ChatId, text: replyText, replyMarkup: keyboardMarkup, parseMode: ParseMode.Markdown);
         await BotClient.TryDeleteMessage(Message);
     }
 
@@ -388,7 +387,7 @@ public class ManageHandler : BaseHandler
     public async Task PrintMessageCallback()
     {
         var message = CallbackQuery!.Data!.Replace("print|", "");
-        await BotClient.AnswerCallbackQueryAsync(CallbackQuery.Id, message, true);
+        await BotClient.AnswerCallbackQuery(CallbackQuery.Id, message, true);
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -399,7 +398,7 @@ public class ManageHandler : BaseHandler
         string replyText;
 
         // Сheck if user have rights to scan
-        var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+        var usrSenderRights = await BotClient.GetChatMember(ChatId, Message.From!.Id);
         if (!usrSenderRights.IsHaveAdminRights())
         {
             replyText = Resources.CommandIsOnlyForAdmins;
@@ -426,7 +425,7 @@ public class ManageHandler : BaseHandler
             }
         }
 
-        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+        msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
                 {
                     MessageId = Message.MessageId
                 }, parseMode: ParseMode.Markdown);
@@ -445,7 +444,7 @@ public class ManageHandler : BaseHandler
         string replyText;
 
         // Сheck if user have rights to change settings
-        var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+        var usrSenderRights = await BotClient.GetChatMember(ChatId, Message.From!.Id);
         if (!usrSenderRights.IsHaveAdminRights())
         {
             replyText = Resources.CommandIsOnlyForAdmins;
@@ -466,7 +465,7 @@ public class ManageHandler : BaseHandler
             }
         }
 
-        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+        msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
                 {
                     MessageId = Message.MessageId
                 }, parseMode: ParseMode.Markdown);
@@ -485,7 +484,7 @@ public class ManageHandler : BaseHandler
         string replyText;
 
         // Сheck if user have rights to change settings
-        var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+        var usrSenderRights = await BotClient.GetChatMember(ChatId, Message.From!.Id);
         if (!usrSenderRights.IsHaveAdminRights())
         {
             replyText = Resources.CommandIsOnlyForAdmins;
@@ -506,7 +505,7 @@ public class ManageHandler : BaseHandler
             }
         }
 
-        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+        msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
                 {
                     MessageId = Message.MessageId
                 }, parseMode: ParseMode.Markdown);
@@ -525,7 +524,7 @@ public class ManageHandler : BaseHandler
         string replyText;
 
         // Check if user have rights to change settings
-        var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+        var usrSenderRights = await BotClient.GetChatMember(ChatId, Message.From!.Id);
         if (!usrSenderRights.IsHaveAdminRights())
         {
             replyText = Resources.CommandIsOnlyForAdmins;
@@ -546,7 +545,7 @@ public class ManageHandler : BaseHandler
             }
         }
 
-        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+        msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
                 {
                     MessageId = Message.MessageId
                 }, parseMode: ParseMode.Markdown);
@@ -565,7 +564,7 @@ public class ManageHandler : BaseHandler
         string replyText;
 
         // Сheck if user have rights to change settings
-        var usrSenderRights = await BotClient.GetChatMemberAsync(ChatId, Message.From!.Id);
+        var usrSenderRights = await BotClient.GetChatMember(ChatId, Message.From!.Id);
         if (!usrSenderRights.IsHaveAdminRights())
         {
             replyText = Resources.CommandIsOnlyForAdmins;
@@ -586,7 +585,7 @@ public class ManageHandler : BaseHandler
             }
         }
 
-        msg = await BotClient.SendTextMessageAsync(ChatId, replyText, replyParameters: new ReplyParameters
+        msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
                 {
                     MessageId = Message.MessageId
                 }, parseMode: ParseMode.Markdown);

@@ -9,10 +9,9 @@ public class TeslaChatCounterService : ITeslaChatCounterService
     private Dictionary<long, TeslaChatCounter> _chatTeslaCountersCache;
     private DataContext _dbContext;
     
-    public TeslaChatCounterService()
+    public TeslaChatCounterService(DataContext dbContext)
     {
-        _dbContext = new DataContext();
-
+        _dbContext = dbContext;
         Task.Run(async () => { await LoadAllTeslaCounters(); }).Wait();
     }
     

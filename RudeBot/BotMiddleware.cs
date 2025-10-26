@@ -2,7 +2,6 @@
 using PowerBot.Lite.Middlewares;
 using RudeBot.Domain;
 using RudeBot.Domain.Interfaces;
-using RudeBot.Domain.Resources;
 using RudeBot.Managers;
 using RudeBot.Models;
 using RudeBot.Services;
@@ -10,7 +9,6 @@ using RudeBot.Services.DuplicateDetectorService;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RudeBot;
 
@@ -79,7 +77,6 @@ public class BotMiddleware : BaseMiddleware
             else
             {
                 // Update username, nickname and messages counter
-                var user = TelegramUser.FromUser(User);
                 userStats.User = TelegramUser.FromUser(User);
                 userStats.TotalMessages++;
                 userStats.TotalBadWords += messageBadWords;

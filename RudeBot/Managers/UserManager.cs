@@ -9,9 +9,9 @@ public class UserManager : IUserManager
 {
     private DataContext _dbContext;
 
-    public UserManager()
+    public UserManager(DataContext dbContext)
     {
-        _dbContext = new DataContext();
+        _dbContext = dbContext;
     }
 
     public async Task<TelegramUser> CreateUser(TelegramUser user)

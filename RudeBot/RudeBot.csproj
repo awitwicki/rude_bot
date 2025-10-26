@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="8.2.0" />
+    <PackageReference Include="Autofac" Version="8.4.0" />
     <PackageReference Include="Google_GenerativeAI" Version="2.7.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.1">
       <PrivateAssets>all</PrivateAssets>
@@ -17,9 +17,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
-    <PackageReference Include="OpenAI" Version="2.1.0" />
-    <PackageReference Include="PowerBot.Lite" Version="2.2.1" />
-    <PackageReference Include="YahooFinanceApi" Version="2.3.3" />
+    <PackageReference Include="PowerBot.Lite" Version="2.2.5" />
   </ItemGroup>
 
   <ItemGroup>

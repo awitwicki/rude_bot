@@ -10,7 +10,7 @@ internal static class TelegramExtensions
     {
         try
         {
-            await client.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            await client.DeleteMessage(message.Chat.Id, message.MessageId);
             return true;
         }
         catch

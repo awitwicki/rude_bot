@@ -15,7 +15,6 @@ public class BotHandlerTests
     private readonly IUserManager _userManager;
     private readonly IChatSettingsService _chatSettingsService;
     private readonly ITeslaChatCounterService _teslaChatCounterService;
-    private readonly ITickerService _tickerService;
     private readonly ICatService _catService;
     private readonly ITxtWordsDataset _advicesService;
     private readonly IDelayService _delayService;
@@ -26,7 +25,6 @@ public class BotHandlerTests
         _userManager = Substitute.For<IUserManager>();
         _chatSettingsService = Substitute.For<IChatSettingsService>();
         _teslaChatCounterService = Substitute.For<ITeslaChatCounterService>();
-        _tickerService = Substitute.For<ITickerService>();
         _catService = Substitute.For<ICatService>();
         _advicesService = Substitute.For<ITxtWordsDataset>();
         _delayService = Substitute.For<IDelayService>();
@@ -46,7 +44,6 @@ public class BotHandlerTests
         var handler = new BotHandler(_userManager,
             _chatSettingsService,
             _teslaChatCounterService,
-            _tickerService,
             _catService,
             _advicesService,
             _delayService)
@@ -81,7 +78,6 @@ public class BotHandlerTests
         var handler = new BotHandler(_userManager,
             _chatSettingsService,
             _teslaChatCounterService,
-            _tickerService,
             _catService,
             _advicesService,
             _delayService)
@@ -116,7 +112,6 @@ public class BotHandlerTests
         var handler = new BotHandler(_userManager,
             _chatSettingsService,
             _teslaChatCounterService,
-            _tickerService,
             _catService,
             _advicesService,
             _delayService)
@@ -151,7 +146,6 @@ public class BotHandlerTests
         var handler = new BotHandler(_userManager,
             _chatSettingsService,
             _teslaChatCounterService,
-            _tickerService,
             _catService,
             _advicesService,
             _delayService)
@@ -185,7 +179,6 @@ public class BotHandlerTests
         var handler = new BotHandler(_userManager,
             _chatSettingsService,
             _teslaChatCounterService,
-            _tickerService,
             _catService,
             _advicesService,
             _delayService)

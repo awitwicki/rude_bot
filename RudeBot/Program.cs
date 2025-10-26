@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Autofac;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PowerBot.Lite;
 using RudeBot;
 using RudeBot.Common.Services;
@@ -21,7 +22,12 @@ var botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
 var botClient = new CoreBot(botToken);
 
 // Create database if not exists
-await using (var dbContext = new DataContext())
+var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
+optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("RUDEBOT_DB_CONNECTION_STRING")!);
+
+var dbContextOptions = optionsBuilder.Options;
+
+await using (var dbContext = new DataContext(dbContextOptions))
 {
     await dbContext.Database.MigrateAsync();
     Console.WriteLine("Database is synchronized");
@@ -35,10 +41,14 @@ botClient.RegisterMiddleware<BotMiddleware>()
 // Register services
 botClient.RegisterContainers(x =>
 {
-    x.RegisterType<TickerService>()
-        .As<ITickerService>()
+    x.Register(ctx => dbContextOptions)
+        .As<DbContextOptions<DataContext>>()
         .SingleInstance();
 
+    x.RegisterType<DataContext>()
+        .AsSelf()
+        .InstancePerLifetimeScope();
+    
     x.RegisterType<TxtWordsDataset>()
         .WithParameter("data", Resources.BadWordsDataset
             .Split("\n")
@@ -59,7 +69,7 @@ botClient.RegisterContainers(x =>
     x.RegisterType<AllowedChatsService>()
         .WithParameter("input", Environment.GetEnvironmentVariable("RUDEBOT_ALLOWED_CHATS"))
         .As<IAllowedChatsService>()
-        .SingleInstance();
+        .InstancePerLifetimeScope();
 
     x.RegisterType<UserManager>()
        .As<IUserManager>()
@@ -67,7 +77,7 @@ botClient.RegisterContainers(x =>
 
     x.RegisterType<CatService>()
         .As<ICatService>()
-        .OwnedByLifetimeScope();
+        .InstancePerLifetimeScope();
 
     x.RegisterType<DuplicateDetectorService>()
        .As<IDuplicateDetectorService>()
@@ -76,15 +86,15 @@ botClient.RegisterContainers(x =>
 
     x.RegisterType<ChatSettingsService>()
         .As<IChatSettingsService>()
-        .SingleInstance();
+        .InstancePerLifetimeScope();
     
     x.RegisterType<TeslaChatCounterService>()
         .As<ITeslaChatCounterService>()
-        .SingleInstance();
+        .InstancePerLifetimeScope();
     
     x.RegisterType<DelayService>()
         .As<IDelayService>()
-        .OwnedByLifetimeScope();
+        .InstancePerLifetimeScope();
 });
 
 botClient.Build();

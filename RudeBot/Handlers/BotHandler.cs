@@ -429,7 +429,7 @@ public class BotHandler : BaseHandler
         try
         {
             var googleAi = new GoogleAi(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_API_KEY")!);
-            var googleModel = googleAi.CreateGenerativeModel("gemini-2.5-flash-preview-05-20");
+            var googleModel = googleAi.CreateGenerativeModel("gemini-flash-latest");
 
             var prompt = Resources.UseAIPrompt;
             prompt += inputMessageTest;

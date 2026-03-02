@@ -14,6 +14,7 @@ using RudeBot.Common.TransactionHelpers;
 using RudeBot.Domain;
 using RudeBot.Domain.Interfaces;
 using RudeBot.Domain.Resources;
+using RudeBot.Services.ChatContextService;
 using GenerativeAI;
 
 namespace RudeBot.Handlers;
@@ -26,7 +27,8 @@ public class BotHandler : BaseHandler
     private static Object _topLocked { get; set; } = new Object();
     private IChatSettingsService _chatSettingsService { get; set; }
     private readonly IDelayService _delayService;
-        
+    private readonly IChatContextService _chatContextService;
+
     private ITeslaChatCounterService _teslaChatCounterService { get; set; }
 
     public BotHandler(
@@ -35,7 +37,8 @@ public class BotHandler : BaseHandler
         ITeslaChatCounterService teslaChatCounterService,
         ICatService catService,
         [KeyFilter(Consts.AdvicesService)] ITxtWordsDataset advicesService,
-        IDelayService delayService
+        IDelayService delayService,
+        IChatContextService chatContextService
     )
     {
         _userManager = userManager;
@@ -44,6 +47,7 @@ public class BotHandler : BaseHandler
         _catService = catService;
         AdvicesService = advicesService;
         _delayService = delayService;
+        _chatContextService = chatContextService;
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -431,9 +435,9 @@ public class BotHandler : BaseHandler
             var googleAi = new GoogleAi(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_API_KEY")!);
             var googleModel = googleAi.CreateGenerativeModel("gemini-flash-latest");
 
-            var prompt = Resources.UseAIPrompt;
-            prompt += inputMessageTest;
-            
+            var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
+            var prompt = BuildAiPrompt(currentUserName, inputMessageTest, _chatContextService.GetMessages(ChatId));
+
             var googleModelResponse = await googleModel.GenerateContentAsync(prompt);
             returnMessage = googleModelResponse.Text();
         }
@@ -442,7 +446,7 @@ public class BotHandler : BaseHandler
             Console.WriteLine(ex);
             returnMessage = Resources.OopsIDidntAgain;
         }
-    
+
         await BotClient.SendMessage(chatId: ChatId,text: returnMessage!, replyParameters: new ReplyParameters
         {
             MessageId = Message.MessageId
@@ -505,9 +509,9 @@ public class BotHandler : BaseHandler
                         var googleAi = new GoogleAi(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_API_KEY")!);
                         var googleModel = googleAi.CreateGenerativeModel("gemini-flash-latest");
 
-                        var prompt = Resources.UseAIPrompt;
-                        prompt += Message!.Text;
-            
+                        var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
+                        var prompt = BuildAiPrompt(currentUserName, Message!.Text!, _chatContextService.GetMessages(ChatId));
+
                         var googleModelResponse = await googleModel.GenerateContentAsync(prompt);
                         replyText = googleModelResponse.Text();
                     }
@@ -532,9 +536,28 @@ public class BotHandler : BaseHandler
                 {
                     MessageId = Message!.MessageId
                 };
-                
+
                 await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: isReply ? replyParameters : null);
             }
         }
+    }
+
+    private static string BuildAiPrompt(string currentUserName, string currentMessage, List<ChatContextMessage> context)
+    {
+        var prompt = Resources.UseAIPrompt + "\n\n";
+
+        if (context.Count > 0)
+        {
+            prompt += "Контекст останніх повідомлень в чаті:\n";
+            foreach (var msg in context)
+            {
+                prompt += $"{msg.UserName}: {msg.Text}\n";
+            }
+            prompt += "\n";
+        }
+
+        prompt += $"Повідомлення від {currentUserName}:\n{currentMessage}";
+
+        return prompt;
     }
 }

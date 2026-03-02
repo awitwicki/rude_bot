@@ -12,6 +12,7 @@ using RudeBot.Domain.Resources;
 using RudeBot.Handlers;
 using RudeBot.Managers;
 using RudeBot.Services;
+using RudeBot.Services.ChatContextService;
 using RudeBot.Services.DuplicateDetectorService;
 
 Console.WriteLine("Starting RudeBot");
@@ -82,6 +83,10 @@ botClient.RegisterContainers(x =>
     x.RegisterType<DuplicateDetectorService>()
        .As<IDuplicateDetectorService>()
        .WithParameter("expireTime", TimeSpan.FromDays(5))
+       .SingleInstance();
+
+    x.RegisterType<ChatContextService>()
+       .As<IChatContextService>()
        .SingleInstance();
 
     x.RegisterType<ChatSettingsService>()

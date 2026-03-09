@@ -4,6 +4,7 @@ using RudeBot.Handlers;
 using RudeBot.Managers;
 using RudeBot.Models;
 using RudeBot.Services;
+using RudeBot.Services.ChatContextService;
 using Telegram.Bot;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
@@ -18,8 +19,9 @@ public class BotHandlerTests
     private readonly ICatService _catService;
     private readonly ITxtWordsDataset _advicesService;
     private readonly IDelayService _delayService;
+    private readonly IChatContextService _chatContextService;
     private readonly ITelegramBotClient _telegramBotClient;
-    
+
     public BotHandlerTests()
     {
         _userManager = Substitute.For<IUserManager>();
@@ -28,8 +30,9 @@ public class BotHandlerTests
         _catService = Substitute.For<ICatService>();
         _advicesService = Substitute.For<ITxtWordsDataset>();
         _delayService = Substitute.For<IDelayService>();
+        _chatContextService = Substitute.For<IChatContextService>();
         _telegramBotClient = Substitute.For<ITelegramBotClient>();
-        
+
         _delayService.DelaySeconds(Arg.Any<int>())
             .Returns(Task.Delay(1));
     }
@@ -46,7 +49,8 @@ public class BotHandlerTests
             _teslaChatCounterService,
             _catService,
             _advicesService,
-            _delayService)
+            _delayService,
+            _chatContextService)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -80,7 +84,8 @@ public class BotHandlerTests
             _teslaChatCounterService,
             _catService,
             _advicesService,
-            _delayService)
+            _delayService,
+            _chatContextService)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -114,7 +119,8 @@ public class BotHandlerTests
             _teslaChatCounterService,
             _catService,
             _advicesService,
-            _delayService)
+            _delayService,
+            _chatContextService)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -148,7 +154,8 @@ public class BotHandlerTests
             _teslaChatCounterService,
             _catService,
             _advicesService,
-            _delayService)
+            _delayService,
+            _chatContextService)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -181,7 +188,8 @@ public class BotHandlerTests
             _teslaChatCounterService,
             _catService,
             _advicesService,
-            _delayService)
+            _delayService,
+            _chatContextService)
         {
             BotClient = _telegramBotClient,
             Update = new Update {

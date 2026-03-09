@@ -8,4 +8,5 @@ public class ChatSettings
     public bool UseChatGpt { get; set; }
     public bool SendRandomMessages { get; set; }
     public bool Potuzhnist { get; set; }
+    public bool SummarizeMessages { get; set; }
 }

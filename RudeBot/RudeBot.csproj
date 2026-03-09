@@ -6,10 +6,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <InternalsVisibleTo>RudeBot.Tests</InternalsVisibleTo>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="8.4.0" />
+    <PackageReference Include="Cron.NET" Version="1.1.0" />
     <PackageReference Include="Google_GenerativeAI" Version="2.7.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.1">
       <PrivateAssets>all</PrivateAssets>

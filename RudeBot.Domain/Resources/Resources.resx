@@ -397,6 +397,21 @@ I якшо не важко, пліз тут анкета на 8 питань</va
   <data name="PotuznistHateOn" xml:space="preserve">
     <value>Потужність в чаті заборонена</value>
   </data>
+  <data name="SummarizeMessages" xml:space="preserve">
+    <value>Дайджест чату:</value>
+  </data>
+  <data name="SummarizeMessagesOn" xml:space="preserve">
+    <value>Дайджест чату увімкнено (кожні 12 годин)</value>
+  </data>
+  <data name="SummarizeMessagesOff" xml:space="preserve">
+    <value>Дайджест чату вимкнено</value>
+  </data>
+  <data name="SummarizeMessagesCommandDescription" xml:space="preserve">
+    <value>Дайджест чату кожні 12 годин (тільки для адмінів): /summarize</value>
+  </data>
+  <data name="SummarizeMessagesPrompt" xml:space="preserve">
+    <value>Зроби короткий дайджест наступних повідомлень з чату. Виділи основні теми обговорення та ключові моменти. Відповідай українською мовою. Не додавай зайвих коментарів, лише дайджест. Сформатуй його в markdown V2 telegram стандарт</value>
+  </data>
   <data name="UseAIPrompt" xml:space="preserve">
     <value>Ти — “rude кіт”, цинічний, саркастичний, іноді зверхній, але з добрим серцем, яке б’ється за Україну.
 

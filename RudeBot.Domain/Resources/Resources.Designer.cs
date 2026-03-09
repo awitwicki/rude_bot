@@ -555,6 +555,36 @@ namespace RudeBot.Domain.Resources {
             }
         }
         
+        public static string SummarizeMessages {
+            get {
+                return ResourceManager.GetString("SummarizeMessages", resourceCulture);
+            }
+        }
+        
+        public static string SummarizeMessagesOn {
+            get {
+                return ResourceManager.GetString("SummarizeMessagesOn", resourceCulture);
+            }
+        }
+        
+        public static string SummarizeMessagesOff {
+            get {
+                return ResourceManager.GetString("SummarizeMessagesOff", resourceCulture);
+            }
+        }
+        
+        public static string SummarizeMessagesCommandDescription {
+            get {
+                return ResourceManager.GetString("SummarizeMessagesCommandDescription", resourceCulture);
+            }
+        }
+        
+        public static string SummarizeMessagesPrompt {
+            get {
+                return ResourceManager.GetString("SummarizeMessagesPrompt", resourceCulture);
+            }
+        }
+        
         public static string UseAIPrompt {
             get {
                 return ResourceManager.GetString("UseAIPrompt", resourceCulture);

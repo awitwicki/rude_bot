@@ -417,11 +417,13 @@ public class ManageHandler : BaseHandler
                             + $"{Resources.PotuznistHate} `{chatSettings.Potuzhnist}`\n"
                             + $"{Resources.UseChatGPT} `{chatSettings.UseChatGpt}`\n"
                             + $"{Resources.SendRandomMessages} `{chatSettings.SendRandomMessages}`\n"
+                            + $"{Resources.SummarizeMessages} `{chatSettings.SummarizeMessages}`\n"
                             + $"\n"
                             + $"{Resources.russianLangHateCommandDescription}\n"
                             + $"{Resources.PotuznistHateCommandDescription}\n"
                             + $"{Resources.UseChatGPTCommandDescription}\n"
-                            + $"{Resources.SendRandomMessagesDescription}\n";
+                            + $"{Resources.SendRandomMessagesDescription}\n"
+                            + $"{Resources.SummarizeMessagesCommandDescription}\n";
             }
         }
 
@@ -589,7 +591,46 @@ public class ManageHandler : BaseHandler
                 {
                     MessageId = Message.MessageId
                 }, parseMode: ParseMode.Markdown);
-            
+
+        await Task.Delay(30 * 1000);
+
+        await BotClient.TryDeleteMessage(msg);
+        await BotClient.TryDeleteMessage(Message);
+    }
+
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^/summarize")]
+    public async Task ChangeSummarizeMessages()
+    {
+        Message msg = null;
+        string replyText;
+
+        var usrSenderRights = await BotClient.GetChatMember(ChatId, Message.From!.Id);
+        if (!usrSenderRights.IsHaveAdminRights())
+        {
+            replyText = Resources.CommandIsOnlyForAdmins;
+        }
+        else
+        {
+            var chatSettings = await ChatSettingsService.GetChatSettings(ChatId);
+            if (chatSettings == null)
+            {
+                replyText = $"{Resources.Error} 🤷🏻‍♂️";
+            }
+            else
+            {
+                chatSettings.SummarizeMessages = !chatSettings.SummarizeMessages;
+                await ChatSettingsService.AddOrUpdateChatSettings(chatSettings);
+
+                replyText = chatSettings.SummarizeMessages ? Resources.SummarizeMessagesOn : Resources.SummarizeMessagesOff;
+            }
+        }
+
+        msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                }, parseMode: ParseMode.Markdown);
+
         await Task.Delay(30 * 1000);
 
         await BotClient.TryDeleteMessage(msg);

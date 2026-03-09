@@ -6,6 +6,7 @@ using RudeBot.Managers;
 using RudeBot.Models;
 using RudeBot.Services;
 using RudeBot.Services.ChatContextService;
+using RudeBot.Services.ChatDigestService;
 using RudeBot.Services.DuplicateDetectorService;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -20,13 +21,15 @@ public class BotMiddleware : BaseMiddleware
     private readonly IDuplicateDetectorService _duplicateDetectorService;
     private readonly IAllowedChatsService _allowedChatsService;
     private readonly IChatContextService _chatContextService;
+    private readonly IChatDigestService _chatDigestService;
 
     public BotMiddleware(
         IUserManager userManager,
         [KeyFilter(Consts.BadWordsService)] TxtWordsDataset badWordsService,
         IDuplicateDetectorService duplicateDetectorService,
         IAllowedChatsService allowedChatsService,
-        IChatContextService chatContextService
+        IChatContextService chatContextService,
+        IChatDigestService chatDigestService
     )
     {
         _userManager = userManager;
@@ -34,6 +37,7 @@ public class BotMiddleware : BaseMiddleware
         _duplicateDetectorService = duplicateDetectorService;
         _allowedChatsService = allowedChatsService;
         _chatContextService = chatContextService;
+        _chatDigestService = chatDigestService;
     }
 
     public override async Task Invoke(ITelegramBotClient bot, Update update, Func<Task> func)
@@ -90,10 +94,30 @@ public class BotMiddleware : BaseMiddleware
             }
 
             // Record message to chat context cache
+            var userName = User.Username ?? User.FirstName ?? User.Id.ToString();
             if (!string.IsNullOrEmpty(text))
             {
-                var userName = User.Username ?? User.FirstName ?? User.Id.ToString();
                 _chatContextService.AddMessage(Chat.Id, userName, text);
+            }
+
+            // Record message to chat digest cache
+            if (!string.IsNullOrEmpty(text))
+            {
+                _chatDigestService.AddMessage(Chat.Id, userName, text);
+            }
+            else if (Message.Photo != null)
+            {
+                var digestText = string.IsNullOrEmpty(Message.Caption)
+                    ? "[image]"
+                    : $"[image] {Message.Caption}";
+                _chatDigestService.AddMessage(Chat.Id, userName, digestText);
+            }
+            else if (Message.Video != null)
+            {
+                var digestText = string.IsNullOrEmpty(Message.Caption)
+                    ? "[video]"
+                    : $"[video] {Message.Caption}";
+                _chatDigestService.AddMessage(Chat.Id, userName, digestText);
             }
 
             // Try find duplicates

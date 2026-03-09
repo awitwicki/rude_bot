@@ -13,7 +13,10 @@ using RudeBot.Handlers;
 using RudeBot.Managers;
 using RudeBot.Services;
 using RudeBot.Services.ChatContextService;
+using RudeBot.Services.ChatDigestService;
 using RudeBot.Services.DuplicateDetectorService;
+using Cron.NET;
+using Telegram.Bot;
 
 Console.WriteLine("Starting RudeBot");
 
@@ -89,9 +92,29 @@ botClient.RegisterContainers(x =>
        .As<IChatContextService>()
        .SingleInstance();
 
+    x.RegisterType<ChatDigestService>()
+       .As<IChatDigestService>()
+       .SingleInstance();
+
     x.RegisterType<ChatSettingsService>()
         .As<IChatSettingsService>()
         .InstancePerLifetimeScope();
+
+    x.Register(_ => new TelegramBotClient(botToken))
+        .As<ITelegramBotClient>()
+        .SingleInstance();
+
+    x.RegisterType<ChatDigestSummaryGenerator>()
+        .As<IChatDigestSummaryGenerator>()
+        .SingleInstance();
+
+    x.RegisterType<CronDaemon>()
+        .AsSelf()
+        .SingleInstance();
+
+    x.RegisterType<ChatDigestBackgroundService>()
+        .As<IStartable>()
+        .SingleInstance();
     
     x.RegisterType<TeslaChatCounterService>()
         .As<ITeslaChatCounterService>()

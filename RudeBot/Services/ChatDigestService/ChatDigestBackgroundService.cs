@@ -29,8 +29,7 @@ public class ChatDigestBackgroundService : IStartable
 
     public void Start()
     {
-        //_cronDaemon.AddJob("0 0,12 * * *", () =>
-        _cronDaemon.AddJob("0 * * * *", () =>
+        _cronDaemon.AddJob("0 19 * * *", () =>
         {
             Task.Run(async () =>
             {

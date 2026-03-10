@@ -10,7 +10,7 @@ public class ChatDigestSummaryGenerator : IChatDigestSummaryGenerator
     public async Task<string> GenerateSummary(List<ChatDigestMessage> messages)
     {
         var googleAi = new GoogleAi(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_API_KEY")!);
-        var googleModel = googleAi.CreateGenerativeModel("gemini-flash-latest");
+        var googleModel = googleAi.CreateGenerativeModel(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_MODEL_NAME")!);
 
         var messagesText = string.Join("\n",
             messages.Select(m => $"[{m.Timestamp:HH:mm}] {m.UserName}: {m.Text}"));

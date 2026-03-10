@@ -433,7 +433,7 @@ public class BotHandler : BaseHandler
         try
         {
             var googleAi = new GoogleAi(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_API_KEY")!);
-            var googleModel = googleAi.CreateGenerativeModel("gemini-flash-latest");
+            var googleModel = googleAi.CreateGenerativeModel(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_MODEL_NAME")!);
 
             var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
             var prompt = BuildAiPrompt(currentUserName, inputMessageTest, _chatContextService.GetMessages(ChatId));
@@ -507,7 +507,7 @@ public class BotHandler : BaseHandler
                     {
                         await BotClient.SendChatAction(ChatId, ChatAction.Typing);
                         var googleAi = new GoogleAi(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_API_KEY")!);
-                        var googleModel = googleAi.CreateGenerativeModel("gemini-flash-latest");
+                        var googleModel = googleAi.CreateGenerativeModel(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_MODEL_NAME")!);
 
                         var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
                         var prompt = BuildAiPrompt(currentUserName, Message!.Text!, _chatContextService.GetMessages(ChatId));

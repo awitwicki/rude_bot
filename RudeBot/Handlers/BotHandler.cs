@@ -544,7 +544,7 @@ public class BotHandler : BaseHandler
 
     private static string BuildAiPrompt(string currentUserName, string currentMessage, List<ChatContextMessage> context)
     {
-        var prompt = Resources.UseAIPrompt + "\n\n";
+        var prompt = Resources.AiPrompt + "\n\n";
 
         if (context.Count > 0)
         {

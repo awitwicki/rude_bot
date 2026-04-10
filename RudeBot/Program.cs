@@ -131,7 +131,7 @@ botClient.RegisterContainers(x =>
 botClient.Build();
 
 // Pre-load chat settings cache before receiving messages
-var chatSettingsService = DIContainerInstance.Container.Resolve<IChatSettingsService>();
+var chatSettingsService = PowerBot.Lite.Services.DIContainerInstance.Container.Resolve<IChatSettingsService>();
 await chatSettingsService.LoadAllChatSettings();
 Console.WriteLine("Chat settings loaded");
 

@@ -20,6 +20,9 @@ using Telegram.Bot;
 
 Console.WriteLine("Starting RudeBot");
 
+// Ensure enough thread pool threads for low-core systems (e.g. Synology NAS)
+ThreadPool.SetMinThreads(16, 16);
+
 var botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
 
 // Run bot
@@ -98,7 +101,7 @@ botClient.RegisterContainers(x =>
 
     x.RegisterType<ChatSettingsService>()
         .As<IChatSettingsService>()
-        .InstancePerLifetimeScope();
+        .SingleInstance();
 
     x.Register(_ => new TelegramBotClient(botToken))
         .As<ITelegramBotClient>()
@@ -126,6 +129,11 @@ botClient.RegisterContainers(x =>
 });
 
 botClient.Build();
+
+// Pre-load chat settings cache before receiving messages
+var chatSettingsService = DIContainerInstance.Container.Resolve<IChatSettingsService>();
+await chatSettingsService.LoadAllChatSettings();
+Console.WriteLine("Chat settings loaded");
 
 await botClient.StartReceiving();
 

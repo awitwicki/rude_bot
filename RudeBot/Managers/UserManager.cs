@@ -28,7 +28,6 @@ public class UserManager : IUserManager
         return _dbContext
             .UserStats
             .Include(x => x.User)
-            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.UserId == userId && x.ChatId == chatId)!;
     }
 
@@ -54,7 +53,6 @@ public class UserManager : IUserManager
 
     public async Task<UserChatStats> UpdateUserChatStats(UserChatStats user)
     {
-        _dbContext.UserStats.Update(user);
         await _dbContext.SaveChangesAsync();
 
         return user;

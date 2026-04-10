@@ -1,4 +1,5 @@
-﻿using Autofac.Features.AttributeFilters;
+﻿using System.Diagnostics;
+using Autofac.Features.AttributeFilters;
 using PowerBot.Lite.Middlewares;
 using RudeBot.Domain;
 using RudeBot.Domain.Interfaces;
@@ -42,6 +43,8 @@ public class BotMiddleware : BaseMiddleware
 
     public override async Task Invoke(ITelegramBotClient bot, Update update, Func<Task> func)
     {
+        var sw = Stopwatch.StartNew();
+
         if (update.Type == UpdateType.Message)
         {
             if (!_allowedChatsService.IsChatAllowed(update.Message.Chat.Id))
@@ -68,7 +71,9 @@ public class BotMiddleware : BaseMiddleware
             }
 
             // Get UserStats
+            Console.WriteLine($"[PERF] Middleware bad words check: {sw.ElapsedMilliseconds}ms");
             var userStats = await _userManager.GetUserChatStats(User.Id, Chat.Id);
+            Console.WriteLine($"[PERF] Middleware GetUserChatStats: {sw.ElapsedMilliseconds}ms");
 
             // Register new user stats
             if (userStats is null)
@@ -92,6 +97,7 @@ public class BotMiddleware : BaseMiddleware
                 // Save user
                 await _userManager.UpdateUserChatStats(userStats);
             }
+            Console.WriteLine($"[PERF] Middleware user stats update: {sw.ElapsedMilliseconds}ms");
 
             // Record message to chat context cache
             var userName = User.Username ?? User.FirstName ?? User.Id.ToString();
@@ -148,7 +154,10 @@ public class BotMiddleware : BaseMiddleware
             // }
         }
 
+        Console.WriteLine($"[PERF] Middleware total: {sw.ElapsedMilliseconds}ms");
+
         // Invoke handler matched methods
         await NextMiddleware.Invoke(bot, update, func);
+        Console.WriteLine($"[PERF] Middleware + handler total: {sw.ElapsedMilliseconds}ms");
     }
 }

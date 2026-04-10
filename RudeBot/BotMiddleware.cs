@@ -90,7 +90,9 @@ public class BotMiddleware : BaseMiddleware
             else
             {
                 // Update username, nickname and messages counter
-                userStats.User = TelegramUser.FromUser(User);
+                var updatedUser = TelegramUser.FromUser(User);
+                userStats.User.UserMention = updatedUser.UserMention;
+                userStats.User.UserName = updatedUser.UserName;
                 userStats.TotalMessages++;
                 userStats.TotalBadWords += messageBadWords;
 

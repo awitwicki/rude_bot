@@ -9,4 +9,5 @@ public class ChatSettings
     public bool SendRandomMessages { get; set; }
     public bool Potuzhnist { get; set; }
     public bool SummarizeMessages { get; set; }
+    public bool SendHelloMessage { get; set; }
 }

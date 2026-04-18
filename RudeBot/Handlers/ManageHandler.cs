@@ -28,6 +28,10 @@ public class ManageHandler : BaseHandler
     [MessageTypeFilter(MessageType.NewChatMembers)]
     public async Task NewUserInChat()
     {
+        var chatSettings = await ChatSettingsService.GetChatSettings(ChatId);
+        if (!chatSettings.SendHelloMessage)
+            return;
+
         // Process each new user in chat
         foreach (var newUser in Message.NewChatMembers!)
         {
@@ -418,12 +422,14 @@ public class ManageHandler : BaseHandler
                             + $"{Resources.UseChatGPT} `{chatSettings.UseChatGpt}`\n"
                             + $"{Resources.SendRandomMessages} `{chatSettings.SendRandomMessages}`\n"
                             + $"{Resources.SummarizeMessages} `{chatSettings.SummarizeMessages}`\n"
+                            + $"{Resources.SendHelloMessage} `{chatSettings.SendHelloMessage}`\n"
                             + $"\n"
                             + $"{Resources.russianLangHateCommandDescription}\n"
                             + $"{Resources.PotuznistHateCommandDescription}\n"
                             + $"{Resources.UseChatGPTCommandDescription}\n"
                             + $"{Resources.SendRandomMessagesDescription}\n"
-                            + $"{Resources.SummarizeMessagesCommandDescription}\n";
+                            + $"{Resources.SummarizeMessagesCommandDescription}\n"
+                            + $"{Resources.SendHelloMessageCommandDescription}\n";
             }
         }
 
@@ -623,6 +629,45 @@ public class ManageHandler : BaseHandler
                 await ChatSettingsService.AddOrUpdateChatSettings(chatSettings);
 
                 replyText = chatSettings.SummarizeMessages ? Resources.SummarizeMessagesOn : Resources.SummarizeMessagesOff;
+            }
+        }
+
+        msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                }, parseMode: ParseMode.Markdown);
+
+        await Task.Delay(30 * 1000);
+
+        await BotClient.TryDeleteMessage(msg);
+        await BotClient.TryDeleteMessage(Message);
+    }
+
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^/sendhello")]
+    public async Task ChangeSendHelloMessage()
+    {
+        Message msg = null;
+        string replyText;
+
+        var usrSenderRights = await BotClient.GetChatMember(ChatId, Message.From!.Id);
+        if (!usrSenderRights.IsHaveAdminRights())
+        {
+            replyText = Resources.CommandIsOnlyForAdmins;
+        }
+        else
+        {
+            var chatSettings = await ChatSettingsService.GetChatSettings(ChatId);
+            if (chatSettings == null)
+            {
+                replyText = $"{Resources.Error} 🤷🏻‍♂️";
+            }
+            else
+            {
+                chatSettings.SendHelloMessage = !chatSettings.SendHelloMessage;
+                await ChatSettingsService.AddOrUpdateChatSettings(chatSettings);
+
+                replyText = chatSettings.SendHelloMessage ? Resources.SendHelloMessageOn : Resources.SendHelloMessageOff;
             }
         }
 

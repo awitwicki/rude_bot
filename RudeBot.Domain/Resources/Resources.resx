@@ -409,6 +409,18 @@ I якшо не важко, пліз тут анкета на 8 питань</va
   <data name="SummarizeMessagesCommandDescription" xml:space="preserve">
     <value>Дайджест чату кожні 12 годин (тільки для адмінів): /summarize</value>
   </data>
+  <data name="SendHelloMessage" xml:space="preserve">
+    <value>Вітати нових користувачів:</value>
+  </data>
+  <data name="SendHelloMessageOn" xml:space="preserve">
+    <value>Вітання нових користувачів увімкнено</value>
+  </data>
+  <data name="SendHelloMessageOff" xml:space="preserve">
+    <value>Вітання нових користувачів вимкнено</value>
+  </data>
+  <data name="SendHelloMessageCommandDescription" xml:space="preserve">
+    <value>Вітати нових користувачів (тільки для адмінів): /sendhello</value>
+  </data>
   <data name="SummarizeMessagesPrompt" xml:space="preserve">
     <value>Зроби короткий дайджест наступних повідомлень з чату. Виділи основні теми обговорення та ключові моменти. Відповідай українською мовою. Не додавай зайвих коментарів, лише дайджест.
 

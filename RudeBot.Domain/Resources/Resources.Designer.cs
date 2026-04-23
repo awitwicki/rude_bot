@@ -489,36 +489,6 @@ namespace RudeBot.Domain.Resources {
             }
         }
         
-        public static string NotEnoughRudeCoins {
-            get {
-                return ResourceManager.GetString("NotEnoughRudeCoins", resourceCulture);
-            }
-        }
-        
-        public static string RudeCoinsTransactionSuccess {
-            get {
-                return ResourceManager.GetString("RudeCoinsTransactionSuccess", resourceCulture);
-            }
-        }
-        
-        public static string CantSendToYourself {
-            get {
-                return ResourceManager.GetString("CantSendToYourself", resourceCulture);
-            }
-        }
-        
-        public static string CantSendToBots {
-            get {
-                return ResourceManager.GetString("CantSendToBots", resourceCulture);
-            }
-        }
-        
-        public static string CanGiveOnlyNumbersArg {
-            get {
-                return ResourceManager.GetString("CanGiveOnlyNumbersArg", resourceCulture);
-            }
-        }
-        
         public static string Advices {
             get {
                 return ResourceManager.GetString("Advices", resourceCulture);

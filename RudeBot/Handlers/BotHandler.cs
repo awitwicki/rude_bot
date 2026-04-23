@@ -10,7 +10,6 @@ using RudeBot.Models;
 using RudeBot.Services;
 using RudeBot.Extensions;
 using Autofac.Features.AttributeFilters;
-using RudeBot.Common.TransactionHelpers;
 using RudeBot.Domain;
 using RudeBot.Domain.Interfaces;
 using RudeBot.Domain.Resources;
@@ -454,38 +453,6 @@ public class BotHandler : BaseHandler
         });
     }
 
-    [MessageReaction(ChatAction.Typing)]
-    [MessageHandler("^/give")]
-    public async Task Give()
-    {
-        var replyText = "";
-            
-        var transactionRequestError = TransactionArgsValidator.CheckTransactionRequestMessage(Message, User);
-           
-        if (!string.IsNullOrWhiteSpace(transactionRequestError))
-        {
-            replyText = transactionRequestError;
-        }
-        else
-        {
-            // Parse args
-            var amountStr = Message!.Text!.Split(" ").Last();
-            var amount = int.Parse(amountStr);
-
-            var userSender = await _userManager.GetUserChatStats(User.Id, ChatId);
-            var userReceiver = await _userManager.GetUserChatStats(Message.ReplyToMessage!.From!.Id, ChatId);
-
-            replyText = await _userManager.RudeCoinsTransaction(userSender, userReceiver, amount);
-        }
-
-        var msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, parseMode: ParseMode.Markdown);
-
-        await _delayService.DelaySeconds(30);
-
-        await BotClient.TryDeleteMessage(Message);
-        await BotClient.TryDeleteMessage(msg);
-    }
-        
     [MessageTypeFilter(MessageType.Text)]
     public async Task MessageTrigger()
     {

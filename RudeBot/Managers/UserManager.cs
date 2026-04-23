@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RudeBot.Database;
-using RudeBot.Domain.Resources;
 using RudeBot.Models;
 
 namespace RudeBot.Managers;
@@ -66,25 +65,7 @@ public class UserManager : IUserManager
                 .SetProperty(x => x.TotalMessages, x => x.TotalMessages + 1)
                 .SetProperty(x => x.TotalBadWords, x => x.TotalBadWords + badWordsDelta));
     }
-        
-    public async Task<string> RudeCoinsTransaction(UserChatStats userSender, UserChatStats userReceiver, int amount)
-    {
-        if (userSender.RudeCoins < amount)
-        {
-            return Resources.NotEnoughRudeCoins;
-        }
-            
-        userSender.RudeCoins -= amount;
-        userReceiver.RudeCoins += amount;
-            
-        _dbContext.UserStats.Update(userSender);
-        _dbContext.UserStats.Update(userReceiver);
 
-        await _dbContext.SaveChangesAsync();
-            
-        return string.Format(Resources.RudeCoinsTransactionSuccess, amount, userSender.RudeCoins);
-    }
-        
     public async Task<UserChatStats> CreateUserChatStats(UserChatStats userChatStats)
     {
         // If user exists then remove object to prevent crating new existing user

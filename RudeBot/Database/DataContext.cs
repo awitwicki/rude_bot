@@ -18,7 +18,7 @@ public class DataContext : DbContext
     // Uncomment if you want to create a EF migration
     // public DataContext()
     // {
-    //     
+    //
     // }
     //
     // protected override void OnConfiguring(DbContextOptionsBuilder options)

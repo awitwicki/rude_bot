@@ -10,7 +10,6 @@ public class UserChatStats
     public long UserId { get; set; }
     public TelegramUser User { get; set; }
     public int Karma { get; set; }
-    public int RudeCoins { get; set; }
     public int Warns { get; set; }
     public int TotalMessages { get; set; }
     public int TotalBadWords { get; set; }
@@ -22,7 +21,6 @@ public class UserChatStats
             ChatId = chat.Id,
             Karma = 0,
             TotalMessages = 0,
-            RudeCoins = 1000,
             TotalBadWords = 0,
             Warns = 0
         };
@@ -72,7 +70,6 @@ public class UserChatStats
                      $"🚧 Попереджень: `{Warns}`\n" +
                      $"Повідомлень: `{TotalMessages}`\n" +
                      $"Матюків: `{TotalBadWords} ({badWordsPercent}%)`\n" +
-                     $"Rude-коїнів: `{RudeCoins}`💰\n" +
                      $"Довжина: `{userSize}` сантиметрів, ну і гігант...\n" +
                      $"Орієнтація: `{orientation}` користувач";
 

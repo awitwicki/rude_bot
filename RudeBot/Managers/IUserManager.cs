@@ -10,5 +10,4 @@ public interface IUserManager
     Task<UserChatStats> CreateUserChatStats(UserChatStats userChatStats);
     Task<UserChatStats> UpdateUserChatStats(UserChatStats user);
     Task<int> IncrementUserChatStats(long userId, long chatId, int badWordsDelta);
-    Task<string> RudeCoinsTransaction(UserChatStats userSender, UserChatStats userReceiver, int amount);
 }

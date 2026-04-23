@@ -129,7 +129,6 @@
 `Зрада` - розпочну процедуру бану,
 `/warn /unwarn` - (admins only) винесу попередження за погану поведінку,
 `/scan` - (admins only) просканую когось,
-`/give {{25}}` - поділитися 25 рудекоїнами,
 `/settings` - настройки бота для цього чату,
 `кіт {{а ти маму мав?}}` - задай своє запитання коту, бажано англійською,
 А ще я вітаю новеньких у чаті.
@@ -361,22 +360,6 @@ I якшо не важко, пліз тут анкета на 8 питань</va
   </data>
   <data name="ItsUaChatVideoUrl" xml:space="preserve">
     <value>https://raw.githubusercontent.com/awitwicki/rude_bot/main/media/itsuachat.mp4</value>
-  </data>
-  <data name="NotEnoughRudeCoins" xml:space="preserve">
-    <value>Недостатньо рудкоїнів</value>
-  </data>
-  <data name="RudeCoinsTransactionSuccess" xml:space="preserve">
-    <value>Транзакція {0} рудкоїнів зарахована 👌🏻✅
-На рахунку залишилося {1} рудкоїнів</value>
-  </data>
-  <data name="CantSendToYourself" xml:space="preserve">
-    <value>Собі не можна!</value>
-  </data>
-  <data name="CantSendToBots" xml:space="preserve">
-    <value>Ботам не можна!</value>
-  </data>
-  <data name="CanGiveOnlyNumbersArg" xml:space="preserve">
-    <value>В аргументах може бути тільки число (int)</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="Advices" type="System.Resources.ResXFileRef, System.Windows.Forms">

@@ -240,7 +240,8 @@ public class BotHandler : BaseHandler
         var msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
                 {
                     MessageId = Message.MessageId
-                }, parseMode: ParseMode.Markdown);
+                }, parseMode: ParseMode.Markdown,
+            disableNotification: true);
 
         await _delayService.DelaySeconds(30);
         await BotClient.TryDeleteMessage(msg);

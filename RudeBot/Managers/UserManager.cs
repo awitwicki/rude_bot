@@ -57,6 +57,15 @@ public class UserManager : IUserManager
 
         return user;
     }
+
+    public Task<int> IncrementUserChatStats(long userId, long chatId, int badWordsDelta)
+    {
+        return _dbContext.UserStats
+            .Where(x => x.UserId == userId && x.ChatId == chatId)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(x => x.TotalMessages, x => x.TotalMessages + 1)
+                .SetProperty(x => x.TotalBadWords, x => x.TotalBadWords + badWordsDelta));
+    }
         
     public async Task<string> RudeCoinsTransaction(UserChatStats userSender, UserChatStats userReceiver, int amount)
     {

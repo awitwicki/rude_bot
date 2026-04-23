@@ -70,36 +70,24 @@ public class BotMiddleware : BaseMiddleware
                 }
             }
 
-            // Get UserStats
             Console.WriteLine($"[PERF] Middleware bad words check: {sw.ElapsedMilliseconds}ms");
-            var userStats = await _userManager.GetUserChatStats(User.Id, Chat.Id);
-            Console.WriteLine($"[PERF] Middleware GetUserChatStats: {sw.ElapsedMilliseconds}ms");
 
-            // Register new user stats
-            if (userStats is null)
+            // Fast path: single atomic UPDATE, no SELECT, no Users join, no change tracking
+            var rows = await _userManager.IncrementUserChatStats(User.Id, Chat.Id, messageBadWords);
+            Console.WriteLine($"[PERF] Middleware user stats increment: {sw.ElapsedMilliseconds}ms");
+
+            if (rows == 0)
             {
-                // Create User
-                userStats = UserChatStats.FromChat(Chat);
-                userStats.UserId = User.Id;
-                userStats.TotalMessages = 1;
-                userStats.TotalBadWords = messageBadWords;
-                userStats.User = TelegramUser.FromUser(User);
+                // New user — fall back to full create path
+                var newStats = UserChatStats.FromChat(Chat);
+                newStats.UserId = User.Id;
+                newStats.TotalMessages = 1;
+                newStats.TotalBadWords = messageBadWords;
+                newStats.User = TelegramUser.FromUser(User);
 
-                await _userManager.CreateUserChatStats(userStats);
+                await _userManager.CreateUserChatStats(newStats);
+                Console.WriteLine($"[PERF] Middleware user stats create: {sw.ElapsedMilliseconds}ms");
             }
-            else
-            {
-                // Update username, nickname and messages counter
-                var updatedUser = TelegramUser.FromUser(User);
-                userStats.User.UserMention = updatedUser.UserMention;
-                userStats.User.UserName = updatedUser.UserName;
-                userStats.TotalMessages++;
-                userStats.TotalBadWords += messageBadWords;
-
-                // Save user
-                await _userManager.UpdateUserChatStats(userStats);
-            }
-            Console.WriteLine($"[PERF] Middleware user stats update: {sw.ElapsedMilliseconds}ms");
 
             // Record message to chat context cache
             var userName = User.Username ?? User.FirstName ?? User.Id.ToString();

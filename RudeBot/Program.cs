@@ -38,6 +38,14 @@ await using (var dbContext = new DataContext(dbContextOptions))
 {
     await dbContext.Database.MigrateAsync();
     Console.WriteLine("Database is synchronized");
+
+    // Warm up EF model compilation and Npgsql connection so the first real
+    // message doesn't pay the 1–3 s cold-start cost.
+    _ = await dbContext.UserStats
+        .Include(x => x.User)
+        .Where(x => false)
+        .ToListAsync();
+    Console.WriteLine("EF warm-up complete");
 }
 
 // Register middlewares and handlers

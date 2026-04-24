@@ -9,6 +9,7 @@ public class DataContext : DbContext
     public DbSet<UserChatStats> UserStats { get; set; }
     public DbSet<ChatSettings> ChatSettings { get; set; }
     public DbSet<TeslaChatCounter> TeslaChatCounters { get; set; }
+    public DbSet<ChatMessage> ChatMessages { get; set; }
 
     public DataContext(DbContextOptions<DataContext> options)
         : base(options)
@@ -31,5 +32,9 @@ public class DataContext : DbContext
         modelBuilder.Entity<ChatSettings>()
             .Property(p => p.SendRandomMessages)
             .HasDefaultValue(true);
+
+        modelBuilder.Entity<ChatMessage>()
+            .HasIndex(m => new { m.ChatId, m.CreatedAt })
+            .IsDescending(false, true);
     }
 }

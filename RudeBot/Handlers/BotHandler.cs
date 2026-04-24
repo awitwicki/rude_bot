@@ -436,7 +436,7 @@ public class BotHandler : BaseHandler
             var googleModel = googleAi.CreateGenerativeModel(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_MODEL_NAME")!);
 
             var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
-            var prompt = BuildAiPrompt(currentUserName, inputMessageTest, _chatContextService.GetMessages(ChatId));
+            var prompt = BuildAiPrompt(currentUserName, inputMessageTest, await _chatContextService.GetMessagesAsync(ChatId));
 
             var googleModelResponse = await googleModel.GenerateContentAsync(prompt);
             returnMessage = googleModelResponse.Text();
@@ -478,7 +478,7 @@ public class BotHandler : BaseHandler
                         var googleModel = googleAi.CreateGenerativeModel(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_MODEL_NAME")!);
 
                         var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
-                        var prompt = BuildAiPrompt(currentUserName, Message!.Text!, _chatContextService.GetMessages(ChatId));
+                        var prompt = BuildAiPrompt(currentUserName, Message!.Text!, await _chatContextService.GetMessagesAsync(ChatId));
 
                         var googleModelResponse = await googleModel.GenerateContentAsync(prompt);
                         replyText = googleModelResponse.Text();

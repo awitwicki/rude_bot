@@ -63,7 +63,11 @@ botClient.RegisterContainers(x =>
     x.RegisterType<DataContext>()
         .AsSelf()
         .InstancePerLifetimeScope();
-    
+
+    x.RegisterType<ChatMessageRepository>()
+        .As<IChatMessageRepository>()
+        .InstancePerLifetimeScope();
+
     x.RegisterType<TxtWordsDataset>()
         .WithParameter("data", Resources.BadWordsDataset
             .Split("\n")
@@ -100,12 +104,8 @@ botClient.RegisterContainers(x =>
        .SingleInstance();
 
     x.RegisterType<ChatContextService>()
-       .As<IChatContextService>()
-       .SingleInstance();
-
-    x.RegisterType<ChatDigestService>()
-       .As<IChatDigestService>()
-       .SingleInstance();
+        .As<IChatContextService>()
+        .InstancePerLifetimeScope();
 
     x.RegisterType<ChatSettingsService>()
         .As<IChatSettingsService>()
@@ -117,6 +117,10 @@ botClient.RegisterContainers(x =>
 
     x.RegisterType<ChatDigestSummaryGenerator>()
         .As<IChatDigestSummaryGenerator>()
+        .SingleInstance();
+
+    x.RegisterType<ChatDigestRunner>()
+        .As<IChatDigestRunner>()
         .SingleInstance();
 
     x.RegisterType<CronDaemon>()

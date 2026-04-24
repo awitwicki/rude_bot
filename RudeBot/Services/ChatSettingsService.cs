@@ -66,4 +66,13 @@ public class ChatSettingsService : IChatSettingsService
 
         return settings;
     }
+
+    public Task<List<long>> GetChatIdsWithSummarizeEnabled()
+    {
+        var ids = _chatSettingsCache.Values
+            .Where(s => s.SummarizeMessages)
+            .Select(s => s.ChatId)
+            .ToList();
+        return Task.FromResult(ids);
+    }
 }

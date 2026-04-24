@@ -130,6 +130,7 @@
 `/warn /unwarn` - (admins only) винесу попередження за погану поведінку,
 `/scan` - (admins only) просканую когось,
 `/settings` - настройки бота для цього чату,
+`/digest` - дайджест чату, найсвіжіший,
 `кіт {{а ти маму мав?}}` - задай своє запитання коту, бажано англійською,
 А ще я вітаю новеньких у чаті.
 
@@ -384,13 +385,16 @@ I якшо не важко, пліз тут анкета на 8 питань</va
     <value>Дайджест чату:</value>
   </data>
   <data name="SummarizeMessagesOn" xml:space="preserve">
-    <value>Дайджест чату увімкнено (кожні 12 годин)</value>
+    <value>Дайджест чату увімкнено (кожні 24 години)</value>
   </data>
   <data name="SummarizeMessagesOff" xml:space="preserve">
     <value>Дайджест чату вимкнено</value>
   </data>
   <data name="SummarizeMessagesCommandDescription" xml:space="preserve">
-    <value>Дайджест чату кожні 12 годин (тільки для адмінів): /summarize</value>
+    <value>Дайджест чату кожні 24 години (тільки для адмінів): /summarize</value>
+  </data>
+  <data name="DigestEmpty" xml:space="preserve">
+    <value>За останню добу нічого підсумовувати 🤷</value>
   </data>
   <data name="SendHelloMessage" xml:space="preserve">
     <value>Вітати нових користувачів:</value>

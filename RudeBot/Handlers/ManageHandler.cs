@@ -5,6 +5,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using RudeBot.Managers;
 using RudeBot.Services;
+using RudeBot.Services.ChatDigestService;
 using PowerBot.Lite.Utils;
 using RudeBot.Extensions;
 using RudeBot.Keyboards;
@@ -16,12 +17,17 @@ namespace RudeBot.Handlers;
 public class ManageHandler : BaseHandler
 {
     private IUserManager UserManager { get; set; }
-    private IChatSettingsService ChatSettingsService{ get; set; }
-        
-    public ManageHandler(IUserManager userManager, IChatSettingsService chatSettingsService)
+    private IChatSettingsService ChatSettingsService { get; set; }
+    private IChatDigestRunner ChatDigestRunner { get; set; }
+
+    public ManageHandler(
+        IUserManager userManager,
+        IChatSettingsService chatSettingsService,
+        IChatDigestRunner chatDigestRunner)
     {
         UserManager = userManager;
         ChatSettingsService = chatSettingsService;
+        ChatDigestRunner = chatDigestRunner;
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -640,6 +646,59 @@ public class ManageHandler : BaseHandler
         await Task.Delay(30 * 1000);
 
         await BotClient.TryDeleteMessage(msg);
+        await BotClient.TryDeleteMessage(Message);
+    }
+
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^/digest")]
+    public async Task OnDigest()
+    {
+        var usrSenderRights = await BotClient.GetChatMember(ChatId, Message.From!.Id);
+        if (!usrSenderRights.IsHaveAdminRights())
+        {
+            var denyMsg = await BotClient.SendMessage(
+                chatId: ChatId,
+                text: Resources.CommandIsOnlyForAdmins,
+                replyParameters: new ReplyParameters { MessageId = Message.MessageId });
+
+            await Task.Delay(30 * 1000);
+            await BotClient.TryDeleteMessage(denyMsg);
+            await BotClient.TryDeleteMessage(Message);
+            return;
+        }
+
+        ChatDigestResult result;
+        try
+        {
+            result = await ChatDigestRunner.RunForChat(ChatId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] /digest: {ex}");
+            result = ChatDigestResult.GenerationFailed;
+        }
+
+        if (result == ChatDigestResult.Empty)
+        {
+            var msg = await BotClient.SendMessage(
+                chatId: ChatId,
+                text: Resources.DigestEmpty,
+                replyParameters: new ReplyParameters { MessageId = Message.MessageId });
+
+            await Task.Delay(30 * 1000);
+            await BotClient.TryDeleteMessage(msg);
+        }
+        else if (result == ChatDigestResult.GenerationFailed)
+        {
+            var msg = await BotClient.SendMessage(
+                chatId: ChatId,
+                text: Resources.OopsIDidntAgain,
+                replyParameters: new ReplyParameters { MessageId = Message.MessageId });
+
+            await Task.Delay(30 * 1000);
+            await BotClient.TryDeleteMessage(msg);
+        }
+
         await BotClient.TryDeleteMessage(Message);
     }
 

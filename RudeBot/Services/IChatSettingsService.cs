@@ -7,4 +7,5 @@ public interface IChatSettingsService
     Task LoadAllChatSettings();
     Task<ChatSettings> AddOrUpdateChatSettings(ChatSettings settings);
     Task<ChatSettings> GetChatSettings(long chatId);
+    Task<List<long>> GetChatIdsWithSummarizeEnabled();
 }

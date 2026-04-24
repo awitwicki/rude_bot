@@ -2,39 +2,16 @@ namespace RudeBot.Services.ChatContextService;
 
 public class ChatContextService : IChatContextService
 {
-    private const int MaxMessages = 10;
-    private readonly Dictionary<long, LinkedList<ChatContextMessage>> _cache = new();
-    private readonly object _lock = new();
+    private readonly IChatMessageRepository _repo;
 
-    public void AddMessage(long chatId, string userName, string text)
+    public ChatContextService(IChatMessageRepository repo)
     {
-        lock (_lock)
-        {
-            if (!_cache.TryGetValue(chatId, out var messages))
-            {
-                messages = new LinkedList<ChatContextMessage>();
-                _cache[chatId] = messages;
-            }
-
-            messages.AddLast(new ChatContextMessage(userName, text));
-
-            if (messages.Count > MaxMessages)
-            {
-                messages.RemoveFirst();
-            }
-        }
+        _repo = repo;
     }
 
-    public List<ChatContextMessage> GetMessages(long chatId)
+    public async Task<List<ChatContextMessage>> GetMessagesAsync(long chatId)
     {
-        lock (_lock)
-        {
-            if (_cache.TryGetValue(chatId, out var messages))
-            {
-                return messages.ToList();
-            }
-
-            return new List<ChatContextMessage>();
-        }
+        var rows = await _repo.GetLastNAsync(chatId, ChatContextConsts.WindowSize);
+        return rows.Select(m => new ChatContextMessage(m.UserName, m.Text)).ToList();
     }
 }

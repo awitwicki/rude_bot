@@ -19,11 +19,18 @@ public class ChatMessageRepository : IChatMessageRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<List<ChatMessage>> GetLastNAsync(long chatId, int count)
+    public async Task<List<ChatMessage>> GetLastNAsync(long chatId, int count, bool sanitizeCommands = true)
     {
-        var rows = await _dbContext.ChatMessages
+        var query = _dbContext.ChatMessages
             .AsNoTracking()
-            .Where(m => m.ChatId == chatId)
+            .Where(m => m.ChatId == chatId);
+
+        if (sanitizeCommands)
+        {
+            query = query.Where(m => !EF.Functions.Like(m.Text, "/%"));
+        }
+
+        var rows = await query
             .OrderByDescending(m => m.CreatedAt)
             .Take(count)
             .ToListAsync();

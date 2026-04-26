@@ -11,3 +11,5 @@ obj/
 .idea
 .DS_Store
 *.user
+
+docs/superpowers

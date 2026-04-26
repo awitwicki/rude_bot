@@ -1,6 +1,5 @@
 using Autofac;
 using Telegram.Bot;
-using Telegram.Bot.Types.Enums;
 
 namespace RudeBot.Services.ChatDigestService;
 
@@ -35,8 +34,7 @@ public class ChatDigestRunner : IChatDigestRunner
 
         await _botClient.SendMessage(
             chatId: chatId,
-            text: summary,
-            parseMode: ParseMode.MarkdownV2);
+            text: summary);
 
         return ChatDigestResult.Posted;
     }

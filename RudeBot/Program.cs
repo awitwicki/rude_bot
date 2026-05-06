@@ -25,6 +25,13 @@ ThreadPool.SetMinThreads(16, 16);
 
 var botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
 
+var creatorIdRaw = Environment.GetEnvironmentVariable("RUDEBOT_CREATOR_ID");
+if (long.TryParse(creatorIdRaw, out var creatorId))
+{
+    Consts.CreatorId = creatorId;
+    Console.WriteLine($"Creator id loaded: {creatorId}");
+}
+
 // Run bot
 var botClient = new CoreBot(botToken);
 

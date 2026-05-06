@@ -26,6 +26,7 @@ Use next environment variables:
 * `RUDEBOT_ALLOWED_CHATS=-10010101,-10000101010` - whitelist chats. If it empty or not added to envs, whitelist mode will be turned off.
 * `RUDEBOT_GEMINI_API_KEY=xxxxxxxxxxx` - [Gemini Api key](https://aistudio.google.com/apikey) for ai messages.
 * `RUDEBOT_GEMINI_MODEL_NAME=gemini-3.1-flash-lite-preview` - Gemini model name.
+* `RUDEBOT_CREATOR_ID=123456789` - telegram user id of the bot creator. When this user triggers the AI handler (via `кіт ...` or replying to the bot), a serious helpful prompt is used instead of the default toxic one.
 
 **Docker compose:**  create `.env` file and fill it with that variables.
 

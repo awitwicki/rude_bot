@@ -590,5 +590,11 @@ namespace RudeBot.Domain.Resources {
                 return ResourceManager.GetString("AiPrompt", resourceCulture);
             }
         }
+
+        public static string AiPromptCreator {
+            get {
+                return ResourceManager.GetString("AiPromptCreator", resourceCulture);
+            }
+        }
     }
 }

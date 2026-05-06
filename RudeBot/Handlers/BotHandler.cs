@@ -436,7 +436,7 @@ public class BotHandler : BaseHandler
             var googleModel = googleAi.CreateGenerativeModel(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_MODEL_NAME")!);
 
             var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
-            var prompt = BuildAiPrompt(currentUserName, inputMessageTest, await _chatContextService.GetMessagesAsync(ChatId));
+            var prompt = BuildAiPrompt(User.Id, currentUserName, inputMessageTest, await _chatContextService.GetMessagesAsync(ChatId));
 
             var googleModelResponse = await googleModel.GenerateContentAsync(prompt);
             returnMessage = googleModelResponse.Text();
@@ -478,7 +478,7 @@ public class BotHandler : BaseHandler
                         var googleModel = googleAi.CreateGenerativeModel(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_MODEL_NAME")!);
 
                         var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
-                        var prompt = BuildAiPrompt(currentUserName, Message!.Text!, await _chatContextService.GetMessagesAsync(ChatId));
+                        var prompt = BuildAiPrompt(User.Id, currentUserName, Message!.Text!, await _chatContextService.GetMessagesAsync(ChatId));
 
                         var googleModelResponse = await googleModel.GenerateContentAsync(prompt);
                         replyText = googleModelResponse.Text();
@@ -510,9 +510,13 @@ public class BotHandler : BaseHandler
         }
     }
 
-    private static string BuildAiPrompt(string currentUserName, string currentMessage, List<ChatContextMessage> context)
+    private static string BuildAiPrompt(long userId, string currentUserName, string currentMessage, List<ChatContextMessage> context)
     {
-        var prompt = Resources.AiPrompt + "\n\n";
+        var basePrompt = Consts.CreatorId.HasValue && userId == Consts.CreatorId.Value
+            ? Resources.AiPromptCreator
+            : Resources.AiPrompt;
+
+        var prompt = basePrompt + "\n\n";
 
         if (context.Count > 0)
         {

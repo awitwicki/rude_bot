@@ -32,6 +32,12 @@ if (long.TryParse(creatorIdRaw, out var creatorId))
     Console.WriteLine($"Creator id loaded: {creatorId}");
 }
 
+// Resolve bot's own Telegram user id once so we can recognise our own messages later
+var bootstrapBotClient = new TelegramBotClient(botToken);
+var botMe = await bootstrapBotClient.GetMe();
+Consts.BotUserId = botMe.Id;
+Console.WriteLine($"Bot user id loaded: {Consts.BotUserId} (@{botMe.Username})");
+
 // Run bot
 var botClient = new CoreBot(botToken);
 

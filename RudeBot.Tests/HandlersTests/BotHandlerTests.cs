@@ -20,6 +20,7 @@ public class BotHandlerTests
     private readonly ITxtWordsDataset _advicesService;
     private readonly IDelayService _delayService;
     private readonly IChatContextService _chatContextService;
+    private readonly IChatMessageRepository _chatMessageRepository;
     private readonly ITelegramBotClient _telegramBotClient;
 
     public BotHandlerTests()
@@ -31,6 +32,7 @@ public class BotHandlerTests
         _advicesService = Substitute.For<ITxtWordsDataset>();
         _delayService = Substitute.For<IDelayService>();
         _chatContextService = Substitute.For<IChatContextService>();
+        _chatMessageRepository = Substitute.For<IChatMessageRepository>();
         _telegramBotClient = Substitute.For<ITelegramBotClient>();
 
         _delayService.DelaySeconds(Arg.Any<int>())
@@ -50,7 +52,8 @@ public class BotHandlerTests
             _catService,
             _advicesService,
             _delayService,
-            _chatContextService)
+            _chatContextService,
+            _chatMessageRepository)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -85,7 +88,8 @@ public class BotHandlerTests
             _catService,
             _advicesService,
             _delayService,
-            _chatContextService)
+            _chatContextService,
+            _chatMessageRepository)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -120,7 +124,8 @@ public class BotHandlerTests
             _catService,
             _advicesService,
             _delayService,
-            _chatContextService)
+            _chatContextService,
+            _chatMessageRepository)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -155,7 +160,8 @@ public class BotHandlerTests
             _catService,
             _advicesService,
             _delayService,
-            _chatContextService)
+            _chatContextService,
+            _chatMessageRepository)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -189,7 +195,8 @@ public class BotHandlerTests
             _catService,
             _advicesService,
             _delayService,
-            _chatContextService)
+            _chatContextService,
+            _chatMessageRepository)
         {
             BotClient = _telegramBotClient,
             Update = new Update {

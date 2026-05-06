@@ -12,6 +12,6 @@ public class ChatContextService : IChatContextService
     public async Task<List<ChatContextMessage>> GetMessagesAsync(long chatId)
     {
         var rows = await _repo.GetLastNAsync(chatId, ChatContextConsts.WindowSize);
-        return rows.Select(m => new ChatContextMessage(m.UserName, m.Text)).ToList();
+        return rows.Select(m => new ChatContextMessage(m.UserName, m.Text, m.UserId)).ToList();
     }
 }

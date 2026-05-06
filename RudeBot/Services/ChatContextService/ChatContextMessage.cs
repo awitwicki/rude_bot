@@ -1,3 +1,3 @@
 namespace RudeBot.Services.ChatContextService;
 
-public record ChatContextMessage(string UserName, string Text);
+public record ChatContextMessage(string UserName, string Text, long UserId = 0);

@@ -32,9 +32,10 @@ public class ChatDigestRunner : IChatDigestRunner
         var summary = await _summaryGenerator.GenerateSummary(messages);
         if (string.IsNullOrEmpty(summary)) return ChatDigestResult.GenerationFailed;
 
-        await _botClient.SendMessage(
+        var sent = await _botClient.SendMessage(
             chatId: chatId,
             text: summary);
+        await repo.PersistBotSentAsync(sent, summary);
 
         return ChatDigestResult.Posted;
     }

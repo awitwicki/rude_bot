@@ -27,6 +27,7 @@ public class BotHandler : BaseHandler
     private IChatSettingsService _chatSettingsService { get; set; }
     private readonly IDelayService _delayService;
     private readonly IChatContextService _chatContextService;
+    private readonly IChatMessageRepository _chatMessageRepository;
 
     private ITeslaChatCounterService _teslaChatCounterService { get; set; }
 
@@ -37,7 +38,8 @@ public class BotHandler : BaseHandler
         ICatService catService,
         [KeyFilter(Consts.AdvicesService)] ITxtWordsDataset advicesService,
         IDelayService delayService,
-        IChatContextService chatContextService
+        IChatContextService chatContextService,
+        IChatMessageRepository chatMessageRepository
     )
     {
         _userManager = userManager;
@@ -47,6 +49,7 @@ public class BotHandler : BaseHandler
         AdvicesService = advicesService;
         _delayService = delayService;
         _chatContextService = chatContextService;
+        _chatMessageRepository = chatMessageRepository;
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -447,10 +450,12 @@ public class BotHandler : BaseHandler
             returnMessage = Resources.OopsIDidntAgain;
         }
 
-        await BotClient.SendMessage(chatId: ChatId,text: returnMessage!, replyParameters: new ReplyParameters
+        var sentMessage = await BotClient.SendMessage(chatId: ChatId, text: returnMessage!, replyParameters: new ReplyParameters
         {
             MessageId = Message.MessageId
         });
+
+        await _chatMessageRepository.PersistBotSentAsync(sentMessage, returnMessage!);
     }
 
     [MessageTypeFilter(MessageType.Text)]
@@ -505,7 +510,9 @@ public class BotHandler : BaseHandler
                     MessageId = Message!.MessageId
                 };
 
-                await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: isReply ? replyParameters : null);
+                var sentMessage = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: isReply ? replyParameters : null);
+
+                await _chatMessageRepository.PersistBotSentAsync(sentMessage, replyText);///
             }
         }
     }
@@ -520,10 +527,11 @@ public class BotHandler : BaseHandler
 
         if (context.Count > 0)
         {
-            prompt += "Контекст останніх повідомлень в чаті:\n";
+            prompt += "Контекст останніх повідомлень в чаті (рядки з позначкою [твоя відповідь] — це повідомлення, які ти, надіслав раніше):\n";
             foreach (var msg in context)
             {
-                prompt += $"{msg.UserName}: {msg.Text}\n";
+                var prefix = msg.UserId == Consts.BotUserId ? "[твоя відповідь] " : "";
+                prompt += $"{prefix}{msg.UserName}: {msg.Text}\n";
             }
             prompt += "\n";
         }

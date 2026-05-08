@@ -10,6 +10,7 @@ public class DataContext : DbContext
     public DbSet<ChatSettings> ChatSettings { get; set; }
     public DbSet<TeslaChatCounter> TeslaChatCounters { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
+    public DbSet<UserChatProfile> UserChatProfiles { get; set; }
 
     public DataContext(DbContextOptions<DataContext> options)
         : base(options)
@@ -36,5 +37,12 @@ public class DataContext : DbContext
         modelBuilder.Entity<ChatMessage>()
             .HasIndex(m => new { m.ChatId, m.CreatedAt })
             .IsDescending(false, true);
+
+        modelBuilder.Entity<UserChatProfile>()
+            .HasIndex(p => new { p.ChatId, p.UserId })
+            .IsUnique();
+
+        modelBuilder.Entity<UserChatProfile>()
+            .HasIndex(p => p.ChatId);
     }
 }

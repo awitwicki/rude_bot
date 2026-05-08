@@ -1,4 +1,7 @@
 using Autofac;
+using RudeBot.Domain;
+using RudeBot.Models;
+using RudeBot.Services.UserProfileService;
 using Telegram.Bot;
 
 namespace RudeBot.Services.ChatDigestService;
@@ -25,6 +28,8 @@ public class ChatDigestRunner : IChatDigestRunner
 
         await using var scope = _rootScope.BeginLifetimeScope();
         var repo = scope.Resolve<IChatMessageRepository>();
+        var profileService = scope.Resolve<IUserProfileService>();
+        var profileMerger = scope.Resolve<IUserProfileMerger>();
 
         var messages = await repo.GetSinceAsync(chatId, since);
         if (messages.Count == 0) return ChatDigestResult.Empty;
@@ -37,6 +42,50 @@ public class ChatDigestRunner : IChatDigestRunner
             text: summary);
         await repo.PersistBotSentAsync(sent, summary);
 
+        try
+        {
+            await UpdateProfilesForActiveUsers(chatId, messages, profileService, profileMerger);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] ChatDigestRunner profile stage for chat {chatId}: {ex}");
+        }
+
         return ChatDigestResult.Posted;
+    }
+
+    private static async Task UpdateProfilesForActiveUsers(
+        long chatId,
+        List<ChatMessage> messages,
+        IUserProfileService profileService,
+        IUserProfileMerger profileMerger)
+    {
+        var grouped = messages
+            .Where(m => m.UserId != 0
+                        && m.UserId != Consts.BotUserId
+                        && !string.IsNullOrWhiteSpace(m.Text))
+            .GroupBy(m => m.UserId);
+
+        foreach (var group in grouped)
+        {
+            var userMessages = group.ToList();
+            var latest = userMessages.OrderByDescending(m => m.CreatedAt).First();
+            var userName = latest.UserName;
+
+            try
+            {
+                var existing = await profileService.GetAsync(chatId, group.Key);
+                var merged = await profileMerger.MergeAsync(existing?.Profile ?? "", userName, userMessages);
+
+                if (string.IsNullOrWhiteSpace(merged)) continue;
+                if (existing != null && merged == existing.Profile) continue;
+
+                await profileService.UpsertAsync(chatId, group.Key, userName, merged);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] ChatDigestRunner profile update for chat {chatId} user {group.Key}: {ex}");
+            }
+        }
     }
 }

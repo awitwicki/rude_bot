@@ -14,6 +14,7 @@ using RudeBot.Domain;
 using RudeBot.Domain.Interfaces;
 using RudeBot.Domain.Resources;
 using RudeBot.Services.ChatContextService;
+using RudeBot.Services.UserProfileService;
 using GenerativeAI;
 
 namespace RudeBot.Handlers;
@@ -28,19 +29,19 @@ public class BotHandler : BaseHandler
     private readonly IDelayService _delayService;
     private readonly IChatContextService _chatContextService;
     private readonly IChatMessageRepository _chatMessageRepository;
+    private readonly IUserProfileService _userProfileService;
 
     private ITeslaChatCounterService _teslaChatCounterService { get; set; }
 
-    public BotHandler(
-        IUserManager userManager,
+    public BotHandler(IUserManager userManager,
         IChatSettingsService chatSettingsService,
         ITeslaChatCounterService teslaChatCounterService,
         ICatService catService,
         [KeyFilter(Consts.AdvicesService)] ITxtWordsDataset advicesService,
         IDelayService delayService,
         IChatContextService chatContextService,
-        IChatMessageRepository chatMessageRepository
-    )
+        IChatMessageRepository chatMessageRepository,
+        IUserProfileService userProfileService)
     {
         _userManager = userManager;
         _chatSettingsService = chatSettingsService;
@@ -50,6 +51,7 @@ public class BotHandler : BaseHandler
         _delayService = delayService;
         _chatContextService = chatContextService;
         _chatMessageRepository = chatMessageRepository;
+        _userProfileService = userProfileService;
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -377,6 +379,34 @@ public class BotHandler : BaseHandler
         await BotClient.TryDeleteMessage(Message);
     }
 
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^/myprofile$")]
+    public async Task MyProfile()
+    {
+        var profile = await _userProfileService.GetAsync(ChatId, User.Id);
+
+        string replyText;
+        if (profile == null || string.IsNullOrWhiteSpace(profile.Profile))
+        {
+            replyText = Resources.MyProfileEmpty;
+        }
+        else
+        {
+            var header = string.Format(Resources.MyProfileHeader, profile.UpdatedAt);
+            replyText = $"{header}\n\n{profile.Profile}";
+        }
+
+        var msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
+        {
+            MessageId = Message.MessageId
+        });
+
+        await _delayService.DelaySeconds(30);
+
+        await BotClient.TryDeleteMessage(msg);
+        await BotClient.TryDeleteMessage(Message);
+    }
+
     [MessageReaction(ChatAction.UploadPhoto)]
     [MessageHandler("(^/cat$|^cat$|^кіт$|^кицька$)")]
     public async Task Cat()
@@ -439,7 +469,8 @@ public class BotHandler : BaseHandler
             var googleModel = googleAi.CreateGenerativeModel(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_MODEL_NAME")!);
 
             var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
-            var prompt = BuildAiPrompt(User.Id, currentUserName, inputMessageTest, await _chatContextService.GetMessagesAsync(ChatId));
+            var profiles = await _userProfileService.ListForChatAsync(ChatId);
+            var prompt = BuildAiPrompt(User.Id, currentUserName, inputMessageTest, await _chatContextService.GetMessagesAsync(ChatId), profiles);
 
             var googleModelResponse = await googleModel.GenerateContentAsync(prompt);
             returnMessage = googleModelResponse.Text();
@@ -483,7 +514,8 @@ public class BotHandler : BaseHandler
                         var googleModel = googleAi.CreateGenerativeModel(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_MODEL_NAME")!);
 
                         var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
-                        var prompt = BuildAiPrompt(User.Id, currentUserName, Message!.Text!, await _chatContextService.GetMessagesAsync(ChatId));
+                        var profiles = await _userProfileService.ListForChatAsync(ChatId);
+                        var prompt = BuildAiPrompt(User.Id, currentUserName, Message!.Text!, await _chatContextService.GetMessagesAsync(ChatId), profiles);
 
                         var googleModelResponse = await googleModel.GenerateContentAsync(prompt);
                         replyText = googleModelResponse.Text();
@@ -517,13 +549,28 @@ public class BotHandler : BaseHandler
         }
     }
 
-    private static string BuildAiPrompt(long userId, string currentUserName, string currentMessage, List<ChatContextMessage> context)
+    private static string BuildAiPrompt(
+        long userId,
+        string currentUserName,
+        string currentMessage,
+        List<ChatContextMessage> context,
+        List<UserChatProfile> profiles)
     {
         var basePrompt = Consts.CreatorId.HasValue && userId == Consts.CreatorId.Value
             ? Resources.AiPromptCreator
             : Resources.AiPrompt;
 
         var prompt = basePrompt + "\n\n";
+
+        if (profiles.Count > 0)
+        {
+            prompt += "Що ти пам'ятаєш про учасників чату (твоя довготривала пам'ять):\n";
+            foreach (var p in profiles)
+            {
+                prompt += $"{p.UserName}: {p.Profile}\n";
+            }
+            prompt += "\n";
+        }
 
         if (context.Count > 0)
         {

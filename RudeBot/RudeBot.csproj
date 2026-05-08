@@ -13,6 +13,10 @@
     <PackageReference Include="Autofac" Version="9.1.0" />
     <PackageReference Include="Cron.NET" Version="1.1.0" />
     <PackageReference Include="Google_GenerativeAI" Version="3.6.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

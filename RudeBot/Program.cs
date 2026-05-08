@@ -14,6 +14,7 @@ using RudeBot.Managers;
 using RudeBot.Services;
 using RudeBot.Services.ChatContextService;
 using RudeBot.Services.ChatDigestService;
+using RudeBot.Services.UserProfileService;
 using RudeBot.Services.DuplicateDetectorService;
 using Cron.NET;
 using Telegram.Bot;
@@ -119,6 +120,14 @@ botClient.RegisterContainers(x =>
     x.RegisterType<ChatContextService>()
         .As<IChatContextService>()
         .InstancePerLifetimeScope();
+
+    x.RegisterType<UserProfileService>()
+        .As<IUserProfileService>()
+        .InstancePerLifetimeScope();
+
+    x.RegisterType<UserProfileMerger>()
+        .As<IUserProfileMerger>()
+        .SingleInstance();
 
     x.RegisterType<ChatSettingsService>()
         .As<IChatSettingsService>()

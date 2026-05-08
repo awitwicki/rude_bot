@@ -584,7 +584,25 @@ namespace RudeBot.Domain.Resources {
                 return ResourceManager.GetString("SummarizeMessagesPrompt", resourceCulture);
             }
         }
-        
+
+        public static string UserProfileMergePrompt {
+            get {
+                return ResourceManager.GetString("UserProfileMergePrompt", resourceCulture);
+            }
+        }
+
+        public static string MyProfileEmpty {
+            get {
+                return ResourceManager.GetString("MyProfileEmpty", resourceCulture);
+            }
+        }
+
+        public static string MyProfileHeader {
+            get {
+                return ResourceManager.GetString("MyProfileHeader", resourceCulture);
+            }
+        }
+
         public static string AiPrompt {
             get {
                 return ResourceManager.GetString("AiPrompt", resourceCulture);

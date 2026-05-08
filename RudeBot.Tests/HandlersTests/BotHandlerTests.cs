@@ -5,6 +5,7 @@ using RudeBot.Managers;
 using RudeBot.Models;
 using RudeBot.Services;
 using RudeBot.Services.ChatContextService;
+using RudeBot.Services.UserProfileService;
 using Telegram.Bot;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
@@ -21,6 +22,7 @@ public class BotHandlerTests
     private readonly IDelayService _delayService;
     private readonly IChatContextService _chatContextService;
     private readonly IChatMessageRepository _chatMessageRepository;
+    private readonly IUserProfileService _userProfileService;
     private readonly ITelegramBotClient _telegramBotClient;
 
     public BotHandlerTests()
@@ -33,6 +35,11 @@ public class BotHandlerTests
         _delayService = Substitute.For<IDelayService>();
         _chatContextService = Substitute.For<IChatContextService>();
         _chatMessageRepository = Substitute.For<IChatMessageRepository>();
+        _userProfileService = Substitute.For<IUserProfileService>();
+        _userProfileService.ListForChatAsync(Arg.Any<long>())
+            .Returns(new List<RudeBot.Models.UserChatProfile>());
+        _userProfileService.GetAsync(Arg.Any<long>(), Arg.Any<long>())
+            .Returns((RudeBot.Models.UserChatProfile?)null);
         _telegramBotClient = Substitute.For<ITelegramBotClient>();
 
         _delayService.DelaySeconds(Arg.Any<int>())
@@ -53,7 +60,8 @@ public class BotHandlerTests
             _advicesService,
             _delayService,
             _chatContextService,
-            _chatMessageRepository)
+            _chatMessageRepository,
+            _userProfileService)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -89,7 +97,8 @@ public class BotHandlerTests
             _advicesService,
             _delayService,
             _chatContextService,
-            _chatMessageRepository)
+            _chatMessageRepository,
+            _userProfileService)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -125,7 +134,8 @@ public class BotHandlerTests
             _advicesService,
             _delayService,
             _chatContextService,
-            _chatMessageRepository)
+            _chatMessageRepository,
+            _userProfileService)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -161,7 +171,8 @@ public class BotHandlerTests
             _advicesService,
             _delayService,
             _chatContextService,
-            _chatMessageRepository)
+            _chatMessageRepository,
+            _userProfileService)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -196,7 +207,8 @@ public class BotHandlerTests
             _advicesService,
             _delayService,
             _chatContextService,
-            _chatMessageRepository)
+            _chatMessageRepository,
+            _userProfileService)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -215,5 +227,78 @@ public class BotHandlerTests
         await _telegramBotClient.DidNotReceive().SendRequest(
             Arg.Any<SendAnimationRequest>()
         );
+    }
+
+    [Fact]
+    public async Task MyProfile_NoProfileExists_RepliesWithEmptyMessage()
+    {
+        _userProfileService.GetAsync(1, 42).Returns((RudeBot.Models.UserChatProfile?)null);
+
+        var handler = new BotHandler(_userManager,
+            _chatSettingsService,
+            _teslaChatCounterService,
+            _catService,
+            _advicesService,
+            _delayService,
+            _chatContextService,
+            _chatMessageRepository,
+            _userProfileService)
+        {
+            BotClient = _telegramBotClient,
+            Update = new Update {
+                Id = 1,
+                Message = new Message {
+                    Id = 7, Chat = new Chat { Id = 1 },
+                    From = new User { Id = 42 },
+                    Text = "/myprofile"
+                }
+            }
+        };
+
+        await handler.MyProfile();
+
+        await _telegramBotClient.Received(1).SendRequest(
+            Arg.Is<SendMessageRequest>(r => r.Text == RudeBot.Domain.Resources.Resources.MyProfileEmpty));
+    }
+
+    [Fact]
+    public async Task MyProfile_ProfileExists_RepliesWithHeaderAndProfile()
+    {
+        _userProfileService.GetAsync(1, 42).Returns(new RudeBot.Models.UserChatProfile
+        {
+            ChatId = 1,
+            UserId = 42,
+            UserName = "alice",
+            Profile = "Має пса Бобіка.",
+            UpdatedAt = new DateTime(2026, 5, 7),
+        });
+
+        var handler = new BotHandler(_userManager,
+            _chatSettingsService,
+            _teslaChatCounterService,
+            _catService,
+            _advicesService,
+            _delayService,
+            _chatContextService,
+            _chatMessageRepository,
+            _userProfileService)
+        {
+            BotClient = _telegramBotClient,
+            Update = new Update {
+                Id = 1,
+                Message = new Message {
+                    Id = 7, Chat = new Chat { Id = 1 },
+                    From = new User { Id = 42 },
+                    Text = "/myprofile"
+                }
+            }
+        };
+
+        await handler.MyProfile();
+
+        await _telegramBotClient.Received(1).SendRequest(
+            Arg.Is<SendMessageRequest>(r =>
+                r.Text.Contains("Має пса Бобіка.") &&
+                r.Text.Contains("07.05.2026")));
     }
 }

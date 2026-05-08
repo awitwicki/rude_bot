@@ -135,8 +135,6 @@ public class BotHandler : BaseHandler
         }, parseMode: ParseMode.Markdown);
     }
 
-    
-
     [MessageReaction(ChatAction.UploadVideo)]
     [MessageHandler("шарий|шарій")]
     public async Task CockMan()
@@ -151,13 +149,10 @@ public class BotHandler : BaseHandler
     [MessageHandler("samsung|самсунг|сасунг")]
     public async Task Samsung()
     {
-        var msg = await BotClient.SendPhoto(chatId: ChatId, photo: InputFile.FromUri(Resources.SamsungUrl), replyParameters: new ReplyParameters
+        await BotClient.SendPhoto(chatId: ChatId, photo: InputFile.FromUri(Resources.SamsungUrl), replyParameters: new ReplyParameters
         {
             MessageId = Message.MessageId
         });
-
-        await _delayService.DelaySeconds(30);
-        await BotClient.TryDeleteMessage(msg);
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -512,16 +507,14 @@ public class BotHandler : BaseHandler
 
             if (!string.IsNullOrEmpty(replyText))
             {
-                var isReply = (random.Next(100) > 50);
-
                 var replyParameters = new ReplyParameters
                 {
                     MessageId = Message!.MessageId
                 };
 
-                var sentMessage = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: isReply ? replyParameters : null);
+                var sentMessage = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: replyParameters);
 
-                await _chatMessageRepository.PersistBotSentAsync(sentMessage, replyText);///
+                await _chatMessageRepository.PersistBotSentAsync(sentMessage, replyText);
             }
         }
     }

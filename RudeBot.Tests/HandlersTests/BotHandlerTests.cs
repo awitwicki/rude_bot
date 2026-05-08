@@ -230,8 +230,19 @@ public class BotHandlerTests
     }
 
     [Fact]
-    public async Task MyProfile_NoProfileExists_RepliesWithEmptyMessage()
+    public async Task Karma_NoProfileExists_RepliesWithStatsOnly()
     {
+        _userManager.GetUserChatStats(42, 1).Returns(new UserChatStats
+        {
+            Id = 42,
+            ChatId = 1,
+            UserId = 42,
+            User = new TelegramUser { Id = 42, UserMention = "@alice", UserName = "alice" },
+            Karma = 5,
+            Warns = 0,
+            TotalMessages = 100,
+            TotalBadWords = 3,
+        });
         _userProfileService.GetAsync(1, 42).Returns((RudeBot.Models.UserChatProfile?)null);
 
         var handler = new BotHandler(_userManager,
@@ -250,20 +261,34 @@ public class BotHandlerTests
                 Message = new Message {
                     Id = 7, Chat = new Chat { Id = 1 },
                     From = new User { Id = 42 },
-                    Text = "/myprofile"
+                    Text = "карма"
                 }
             }
         };
 
-        await handler.MyProfile();
+        await handler.Karma();
 
         await _telegramBotClient.Received(1).SendRequest(
-            Arg.Is<SendMessageRequest>(r => r.Text == RudeBot.Domain.Resources.Resources.MyProfileEmpty));
+            Arg.Is<SendMessageRequest>(r =>
+                r.Text.Contains("@alice") &&
+                r.Text.Contains("Карма") &&
+                !r.Text.Contains(RudeBot.Domain.Resources.Resources.MyProfileEmpty)));
     }
 
     [Fact]
-    public async Task MyProfile_ProfileExists_RepliesWithHeaderAndProfile()
+    public async Task Karma_ProfileExists_RepliesWithStatsAndProfile()
     {
+        _userManager.GetUserChatStats(42, 1).Returns(new UserChatStats
+        {
+            Id = 42,
+            ChatId = 1,
+            UserId = 42,
+            User = new TelegramUser { Id = 42, UserMention = "@alice", UserName = "alice" },
+            Karma = 5,
+            Warns = 0,
+            TotalMessages = 100,
+            TotalBadWords = 3,
+        });
         _userProfileService.GetAsync(1, 42).Returns(new RudeBot.Models.UserChatProfile
         {
             ChatId = 1,
@@ -289,16 +314,72 @@ public class BotHandlerTests
                 Message = new Message {
                     Id = 7, Chat = new Chat { Id = 1 },
                     From = new User { Id = 42 },
-                    Text = "/myprofile"
+                    Text = "карма"
                 }
             }
         };
 
-        await handler.MyProfile();
+        await handler.Karma();
 
         await _telegramBotClient.Received(1).SendRequest(
             Arg.Is<SendMessageRequest>(r =>
+                r.Text.Contains("@alice") &&
+                r.Text.Contains("Карма") &&
                 r.Text.Contains("Має пса Бобіка.") &&
                 r.Text.Contains("07.05.2026")));
+    }
+
+    [Fact]
+    public async Task Karma_ProfileWithMarkdownChars_EscapesThemBeforeSending()
+    {
+        _userManager.GetUserChatStats(42, 1).Returns(new UserChatStats
+        {
+            Id = 42,
+            ChatId = 1,
+            UserId = 42,
+            User = new TelegramUser { Id = 42, UserMention = "@alice", UserName = "alice" },
+            Karma = 0,
+            Warns = 0,
+            TotalMessages = 1,
+            TotalBadWords = 0,
+        });
+        _userProfileService.GetAsync(1, 42).Returns(new RudeBot.Models.UserChatProfile
+        {
+            ChatId = 1,
+            UserId = 42,
+            UserName = "alice",
+            Profile = "Любить _підкреслення_ і *зірочки* та `код` і [дужки].",
+            UpdatedAt = new DateTime(2026, 5, 7),
+        });
+
+        var handler = new BotHandler(_userManager,
+            _chatSettingsService,
+            _teslaChatCounterService,
+            _catService,
+            _advicesService,
+            _delayService,
+            _chatContextService,
+            _chatMessageRepository,
+            _userProfileService)
+        {
+            BotClient = _telegramBotClient,
+            Update = new Update {
+                Id = 1,
+                Message = new Message {
+                    Id = 7, Chat = new Chat { Id = 1 },
+                    From = new User { Id = 42 },
+                    Text = "карма"
+                }
+            }
+        };
+
+        await handler.Karma();
+
+        await _telegramBotClient.Received(1).SendRequest(
+            Arg.Is<SendMessageRequest>(r =>
+                r.Text.Contains("\\_підкреслення\\_") &&
+                r.Text.Contains("\\*зірочки\\*") &&
+                r.Text.Contains("\\`код\\`") &&
+                r.Text.Contains("\\[дужки]")));
     }
 }

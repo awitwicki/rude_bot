@@ -427,7 +427,7 @@ I якшо не важко, пліз тут анкета на 8 питань</va
     <value>Поки що нічого про тебе не знаю. Поговори трохи в чаті, і я запам'ятаю.</value>
   </data>
   <data name="MyProfileHeader" xml:space="preserve">
-    <value>Що я про тебе пам'ятаю (оновлено {0:dd.MM.yyyy}):</value>
+    <value>Що я на тебе нарив (оновлено {0:dd.MM.yyyy}):</value>
   </data>
   <data name="AiPrompt" xml:space="preserve">
     <value>Ти — "rude кіт", цинічний, саркастичний, зверхній, але з добрим серцем, яке б'ється за Україну.

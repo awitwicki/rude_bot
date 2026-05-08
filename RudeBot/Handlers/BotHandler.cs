@@ -16,6 +16,7 @@ using RudeBot.Domain.Resources;
 using RudeBot.Services.ChatContextService;
 using RudeBot.Services.UserProfileService;
 using GenerativeAI;
+using RudeBot.Common.Helpers;
 
 namespace RudeBot.Handlers;
 
@@ -118,19 +119,23 @@ public class BotHandler : BaseHandler
     public async Task Karma()
     {
         var userStats = await _userManager.GetUserChatStats(User.Id, ChatId);
+        var profile = await _userProfileService.GetAsync(ChatId, User.Id);
 
         var replyText = userStats.BuildInfoString();
 
-        var msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
-                {
-                    MessageId = Message.MessageId
-                }, parseMode: ParseMode.Markdown);
+        if (profile != null && !string.IsNullOrWhiteSpace(profile.Profile))
+        {
+            var header = string.Format(Resources.MyProfileHeader, profile.UpdatedAt);
+            replyText += $"\n\n{header}\n{MarkdownHelper.EscapeTelegramMarkdown(profile.Profile)}";
+        }
 
-        await _delayService.DelaySeconds(30);
-
-        await BotClient.TryDeleteMessage(msg);
-        await BotClient.TryDeleteMessage(Message);
+        await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
+        {
+            MessageId = Message.MessageId
+        }, parseMode: ParseMode.Markdown);
     }
+
+    
 
     [MessageReaction(ChatAction.UploadVideo)]
     [MessageHandler("шарий|шарій")]
@@ -375,34 +380,6 @@ public class BotHandler : BaseHandler
             parseMode: ParseMode.Markdown);
 
         await _delayService.DelaySeconds(300);
-        await BotClient.TryDeleteMessage(msg);
-        await BotClient.TryDeleteMessage(Message);
-    }
-
-    [MessageReaction(ChatAction.Typing)]
-    [MessageHandler("^/myprofile$")]
-    public async Task MyProfile()
-    {
-        var profile = await _userProfileService.GetAsync(ChatId, User.Id);
-
-        string replyText;
-        if (profile == null || string.IsNullOrWhiteSpace(profile.Profile))
-        {
-            replyText = Resources.MyProfileEmpty;
-        }
-        else
-        {
-            var header = string.Format(Resources.MyProfileHeader, profile.UpdatedAt);
-            replyText = $"{header}\n\n{profile.Profile}";
-        }
-
-        var msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
-        {
-            MessageId = Message.MessageId
-        });
-
-        await _delayService.DelaySeconds(30);
-
         await BotClient.TryDeleteMessage(msg);
         await BotClient.TryDeleteMessage(Message);
     }

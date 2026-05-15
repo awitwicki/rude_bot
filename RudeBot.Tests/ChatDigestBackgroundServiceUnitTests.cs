@@ -1,4 +1,5 @@
 using Cron.NET;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using RudeBot.Services;
 using RudeBot.Services.ChatDigestService;
@@ -10,16 +11,18 @@ public class ChatDigestBackgroundServiceUnitTests
     private readonly IChatSettingsService _chatSettingsService;
     private readonly IChatDigestRunner _runner;
     private readonly CronDaemon _cronDaemon;
+    private readonly ILogger<ChatDigestBackgroundService> _logger;
 
     public ChatDigestBackgroundServiceUnitTests()
     {
         _chatSettingsService = Substitute.For<IChatSettingsService>();
         _runner = Substitute.For<IChatDigestRunner>();
         _cronDaemon = Substitute.For<CronDaemon>();
+        _logger = Substitute.For<ILogger<ChatDigestBackgroundService>>();
     }
 
     private ChatDigestBackgroundService CreateService() =>
-        new(_chatSettingsService, _runner, _cronDaemon);
+        new(_chatSettingsService, _runner, _cronDaemon, _logger);
 
     [Fact]
     public async Task ProcessAllChats_WithEnabledChat_CallsRunner()

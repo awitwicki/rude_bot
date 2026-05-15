@@ -1,4 +1,5 @@
 using GenerativeAI;
+using Microsoft.Extensions.Logging;
 using RudeBot.Domain.Resources;
 using RudeBot.Models;
 
@@ -6,6 +7,13 @@ namespace RudeBot.Services.UserProfileService;
 
 public class UserProfileMerger : IUserProfileMerger
 {
+    private readonly ILogger<UserProfileMerger> _logger;
+
+    public UserProfileMerger(ILogger<UserProfileMerger> logger)
+    {
+        _logger = logger;
+    }
+
     public async Task<string> MergeAsync(string existingProfile, string userName, List<ChatMessage> userMessages)
     {
         if (userMessages == null || userMessages.Count == 0)
@@ -35,7 +43,7 @@ public class UserProfileMerger : IUserProfileMerger
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] UserProfileMerger.MergeAsync for {userName}: {ex}");
+            _logger.LogError(ex, "UserProfileMerger.MergeAsync failed for {UserName}", userName);
             return existingProfile;
         }
     }

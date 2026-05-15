@@ -1,4 +1,5 @@
 using Autofac;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using RudeBot.Domain;
 using RudeBot.Models;
@@ -18,6 +19,7 @@ public class ChatDigestRunnerTests
     private readonly IUserProfileService _profileService;
     private readonly IUserProfileMerger _profileMerger;
     private readonly ILifetimeScope _rootScope;
+    private readonly ILogger<ChatDigestRunner> _logger;
 
     public ChatDigestRunnerTests()
     {
@@ -26,6 +28,7 @@ public class ChatDigestRunnerTests
         _summaryGenerator = Substitute.For<IChatDigestSummaryGenerator>();
         _profileService = Substitute.For<IUserProfileService>();
         _profileMerger = Substitute.For<IUserProfileMerger>();
+        _logger = Substitute.For<ILogger<ChatDigestRunner>>();
 
         var builder = new ContainerBuilder();
         builder.RegisterInstance(_repo).As<IChatMessageRepository>();
@@ -35,7 +38,7 @@ public class ChatDigestRunnerTests
     }
 
     private ChatDigestRunner CreateRunner() =>
-        new(_rootScope, _botClient, _summaryGenerator);
+        new(_rootScope, _botClient, _summaryGenerator, _logger);
 
     private static List<ChatMessage> Msgs(params string[] texts) =>
         texts.Select(t => new ChatMessage

@@ -1,4 +1,5 @@
 using RudeBot.Models;
+using Serilog;
 using Telegram.Bot.Types;
 
 namespace RudeBot.Services;
@@ -21,7 +22,8 @@ public static class ChatMessageRepositoryExtensions
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] Bot ChatMessage persist: {ex}");
+            Log.ForContext(typeof(ChatMessageRepositoryExtensions))
+                .Error(ex, "Bot ChatMessage persist failed");
         }
     }
 }

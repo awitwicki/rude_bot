@@ -17,6 +17,7 @@ using RudeBot.Services.ChatContextService;
 using RudeBot.Services.UserProfileService;
 using GenerativeAI;
 using RudeBot.Common.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace RudeBot.Handlers;
 
@@ -33,6 +34,7 @@ public class BotHandler : BaseHandler
     private readonly IUserProfileService _userProfileService;
 
     private ITeslaChatCounterService _teslaChatCounterService { get; set; }
+    private readonly ILogger<BotHandler> _logger;
 
     public BotHandler(IUserManager userManager,
         IChatSettingsService chatSettingsService,
@@ -42,7 +44,8 @@ public class BotHandler : BaseHandler
         IDelayService delayService,
         IChatContextService chatContextService,
         IChatMessageRepository chatMessageRepository,
-        IUserProfileService userProfileService)
+        IUserProfileService userProfileService,
+        ILogger<BotHandler> logger)
     {
         _userManager = userManager;
         _chatSettingsService = chatSettingsService;
@@ -53,6 +56,7 @@ public class BotHandler : BaseHandler
         _chatContextService = chatContextService;
         _chatMessageRepository = chatMessageRepository;
         _userProfileService = userProfileService;
+        _logger = logger;
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -449,7 +453,7 @@ public class BotHandler : BaseHandler
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            _logger.LogError(ex, "ChatGptAsk Gemini call failed");
             returnMessage = Resources.OopsIDidntAgain;
         }
 
@@ -494,7 +498,7 @@ public class BotHandler : BaseHandler
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex);
+                        _logger.LogError(ex, "MessageTrigger Gemini call failed");
                         replyText = Resources.OopsIDidntAgain;
                     }
                 }

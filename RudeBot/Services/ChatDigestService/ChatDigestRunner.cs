@@ -1,4 +1,5 @@
 using Autofac;
+using Microsoft.Extensions.Logging;
 using RudeBot.Domain;
 using RudeBot.Models;
 using RudeBot.Services.UserProfileService;
@@ -11,15 +12,18 @@ public class ChatDigestRunner : IChatDigestRunner
     private readonly ILifetimeScope _rootScope;
     private readonly ITelegramBotClient _botClient;
     private readonly IChatDigestSummaryGenerator _summaryGenerator;
+    private readonly ILogger<ChatDigestRunner> _logger;
 
     public ChatDigestRunner(
         ILifetimeScope rootScope,
         ITelegramBotClient botClient,
-        IChatDigestSummaryGenerator summaryGenerator)
+        IChatDigestSummaryGenerator summaryGenerator,
+        ILogger<ChatDigestRunner> logger)
     {
         _rootScope = rootScope;
         _botClient = botClient;
         _summaryGenerator = summaryGenerator;
+        _logger = logger;
     }
 
     public async Task<ChatDigestResult> RunForChat(long chatId)
@@ -48,13 +52,13 @@ public class ChatDigestRunner : IChatDigestRunner
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] ChatDigestRunner profile stage for chat {chatId}: {ex}");
+            _logger.LogError(ex, "ChatDigestRunner profile stage failed for chat {ChatId}", chatId);
         }
 
         return ChatDigestResult.Posted;
     }
 
-    private static async Task UpdateProfilesForActiveUsers(
+    private async Task UpdateProfilesForActiveUsers(
         long chatId,
         List<ChatMessage> messages,
         IUserProfileService profileService,
@@ -84,7 +88,7 @@ public class ChatDigestRunner : IChatDigestRunner
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ERROR] ChatDigestRunner profile update for chat {chatId} user {group.Key}: {ex}");
+                _logger.LogError(ex, "ChatDigestRunner profile update failed for chat {ChatId} user {UserId}", chatId, group.Key);
             }
         }
     }

@@ -1,5 +1,6 @@
 using Autofac;
 using Cron.NET;
+using Microsoft.Extensions.Logging;
 
 namespace RudeBot.Services.ChatDigestService;
 
@@ -8,15 +9,18 @@ public class ChatDigestBackgroundService : IStartable
     private readonly IChatSettingsService _chatSettingsService;
     private readonly IChatDigestRunner _runner;
     private readonly CronDaemon _cronDaemon;
+    private readonly ILogger<ChatDigestBackgroundService> _logger;
 
     public ChatDigestBackgroundService(
         IChatSettingsService chatSettingsService,
         IChatDigestRunner runner,
-        CronDaemon cronDaemon)
+        CronDaemon cronDaemon,
+        ILogger<ChatDigestBackgroundService> logger)
     {
         _chatSettingsService = chatSettingsService;
         _runner = runner;
         _cronDaemon = cronDaemon;
+        _logger = logger;
     }
 
     public void Start()
@@ -31,13 +35,13 @@ public class ChatDigestBackgroundService : IStartable
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"ChatDigest error: {ex}");
+                    _logger.LogError(ex, "ChatDigest cron job failed");
                 }
             });
         });
 
         _cronDaemon.Start();
-        Console.WriteLine($"ChatDigest: cron scheduled ({ChatDigestConsts.CronExpression})");
+        _logger.LogInformation("ChatDigest cron scheduled ({CronExpression})", ChatDigestConsts.CronExpression);
     }
 
     public void Stop() => _cronDaemon.Stop();
@@ -54,7 +58,7 @@ public class ChatDigestBackgroundService : IStartable
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ChatDigest error for chat {chatId}: {ex}");
+                _logger.LogError(ex, "ChatDigest failed for chat {ChatId}", chatId);
             }
         }
     }

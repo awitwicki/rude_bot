@@ -16,8 +16,13 @@ using RudeBot.Services.ChatContextService;
 using RudeBot.Services.ChatDigestService;
 using RudeBot.Services.UserProfileService;
 using RudeBot.Services.DuplicateDetectorService;
+using RudeBot.Services.LogRetentionService;
 using Cron.NET;
 using Telegram.Bot;
+using RudeBot.Logging;
+using Serilog;
+using Serilog.Events;
+using Serilog.Extensions.Logging;
 
 Console.WriteLine("Starting RudeBot");
 
@@ -25,6 +30,9 @@ Console.WriteLine("Starting RudeBot");
 ThreadPool.SetMinThreads(16, 16);
 
 var botToken = Environment.GetEnvironmentVariable("RUDEBOT_TELEGRAM_TOKEN")!;
+var dbConnectionString = Environment.GetEnvironmentVariable("RUDEBOT_DB_CONNECTION_STRING")!;
+var minLevelRaw = Environment.GetEnvironmentVariable("RUDEBOT_LOGGING_MIN_LEVEL");
+var minLevel = Enum.TryParse<LogEventLevel>(minLevelRaw, ignoreCase: true, out var lvl) ? lvl : LogEventLevel.Information;
 
 var creatorIdRaw = Environment.GetEnvironmentVariable("RUDEBOT_CREATOR_ID");
 if (long.TryParse(creatorIdRaw, out var creatorId))
@@ -42,9 +50,11 @@ Console.WriteLine($"Bot user id loaded: {Consts.BotUserId} (@{botMe.Username})")
 // Run bot
 var botClient = new CoreBot(botToken);
 
-// Create database if not exists
+// Create database if not exists. Migrations must run BEFORE the logger is
+// initialised because one of them creates the `logs` schema that the Serilog
+// PostgreSQL sink writes into.
 var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
-optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("RUDEBOT_DB_CONNECTION_STRING")!);
+optionsBuilder.UseNpgsql(dbConnectionString);
 
 var dbContextOptions = optionsBuilder.Options;
 
@@ -62,6 +72,9 @@ await using (var dbContext = new DataContext(dbContextOptions))
     Console.WriteLine("EF warm-up complete");
 }
 
+LoggingBootstrap.Init(dbConnectionString, minLevel);
+Log.Information("Logging initialised at minimum level {MinLevel}", minLevel);
+
 // Register middlewares and handlers
 botClient.RegisterMiddleware<BotMiddleware>()
     .RegisterHandler<BotHandler>()
@@ -70,6 +83,12 @@ botClient.RegisterMiddleware<BotMiddleware>()
 // Register services
 botClient.RegisterContainers(x =>
 {
+    x.RegisterInstance<ILoggerFactory>(new SerilogLoggerFactory(Log.Logger, dispose: false))
+        .SingleInstance();
+    x.RegisterGeneric(typeof(Logger<>))
+        .As(typeof(ILogger<>))
+        .SingleInstance();
+
     x.Register(ctx => dbContextOptions)
         .As<DbContextOptions<DataContext>>()
         .SingleInstance();
@@ -152,6 +171,11 @@ botClient.RegisterContainers(x =>
     x.RegisterType<ChatDigestBackgroundService>()
         .As<IStartable>()
         .SingleInstance();
+
+    x.RegisterType<LogRetentionBackgroundService>()
+        .As<IStartable>()
+        .WithParameter("dbConnectionString", dbConnectionString)
+        .SingleInstance();
     
     x.RegisterType<TeslaChatCounterService>()
         .As<ITeslaChatCounterService>()
@@ -167,7 +191,7 @@ botClient.Build();
 // Pre-load chat settings cache before receiving messages
 var chatSettingsService = PowerBot.Lite.Services.DIContainerInstance.Container.Resolve<IChatSettingsService>();
 await chatSettingsService.LoadAllChatSettings();
-Console.WriteLine("Chat settings loaded");
+Log.Information("Chat settings loaded");
 
 await botClient.StartReceiving();
 

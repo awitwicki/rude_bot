@@ -11,6 +11,7 @@ using RudeBot.Extensions;
 using RudeBot.Keyboards;
 using RudeBot.Domain.Resources;
 using Telegram.Bot;
+using Microsoft.Extensions.Logging;
 
 namespace RudeBot.Handlers;
 
@@ -19,15 +20,18 @@ public class ManageHandler : BaseHandler
     private IUserManager UserManager { get; set; }
     private IChatSettingsService ChatSettingsService { get; set; }
     private IChatDigestRunner ChatDigestRunner { get; set; }
+    private readonly ILogger<ManageHandler> _logger;
 
     public ManageHandler(
         IUserManager userManager,
         IChatSettingsService chatSettingsService,
-        IChatDigestRunner chatDigestRunner)
+        IChatDigestRunner chatDigestRunner,
+        ILogger<ManageHandler> logger)
     {
         UserManager = userManager;
         ChatSettingsService = chatSettingsService;
         ChatDigestRunner = chatDigestRunner;
+        _logger = logger;
     }
 
     [MessageReaction(ChatAction.Typing)]
@@ -674,7 +678,7 @@ public class ManageHandler : BaseHandler
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] /digest: {ex}");
+            _logger.LogError(ex, "/digest command failed");
             result = ChatDigestResult.GenerationFailed;
         }
 

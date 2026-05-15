@@ -9,6 +9,7 @@ using RudeBot.Services.UserProfileService;
 using Telegram.Bot;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
+using Microsoft.Extensions.Logging;
 
 namespace RudeBot.Tests.HandlersTests;
 
@@ -24,6 +25,7 @@ public class BotHandlerTests
     private readonly IChatMessageRepository _chatMessageRepository;
     private readonly IUserProfileService _userProfileService;
     private readonly ITelegramBotClient _telegramBotClient;
+    private readonly ILogger<BotHandler> _logger;
 
     public BotHandlerTests()
     {
@@ -36,6 +38,7 @@ public class BotHandlerTests
         _chatContextService = Substitute.For<IChatContextService>();
         _chatMessageRepository = Substitute.For<IChatMessageRepository>();
         _userProfileService = Substitute.For<IUserProfileService>();
+        _logger = Substitute.For<ILogger<BotHandler>>();
         _userProfileService.ListForChatAsync(Arg.Any<long>())
             .Returns(new List<RudeBot.Models.UserChatProfile>());
         _userProfileService.GetAsync(Arg.Any<long>(), Arg.Any<long>())
@@ -61,7 +64,8 @@ public class BotHandlerTests
             _delayService,
             _chatContextService,
             _chatMessageRepository,
-            _userProfileService)
+            _userProfileService,
+            _logger)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -98,7 +102,8 @@ public class BotHandlerTests
             _delayService,
             _chatContextService,
             _chatMessageRepository,
-            _userProfileService)
+            _userProfileService,
+            _logger)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -135,7 +140,8 @@ public class BotHandlerTests
             _delayService,
             _chatContextService,
             _chatMessageRepository,
-            _userProfileService)
+            _userProfileService,
+            _logger)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -172,7 +178,8 @@ public class BotHandlerTests
             _delayService,
             _chatContextService,
             _chatMessageRepository,
-            _userProfileService)
+            _userProfileService,
+            _logger)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -208,7 +215,8 @@ public class BotHandlerTests
             _delayService,
             _chatContextService,
             _chatMessageRepository,
-            _userProfileService)
+            _userProfileService,
+            _logger)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -253,7 +261,8 @@ public class BotHandlerTests
             _delayService,
             _chatContextService,
             _chatMessageRepository,
-            _userProfileService)
+            _userProfileService,
+            _logger)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -306,7 +315,8 @@ public class BotHandlerTests
             _delayService,
             _chatContextService,
             _chatMessageRepository,
-            _userProfileService)
+            _userProfileService,
+            _logger)
         {
             BotClient = _telegramBotClient,
             Update = new Update {
@@ -360,7 +370,8 @@ public class BotHandlerTests
             _delayService,
             _chatContextService,
             _chatMessageRepository,
-            _userProfileService)
+            _userProfileService,
+            _logger)
         {
             BotClient = _telegramBotClient,
             Update = new Update {

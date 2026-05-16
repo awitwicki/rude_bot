@@ -13,3 +13,4 @@ obj/
 *.user
 
 docs/superpowers
+/.claude

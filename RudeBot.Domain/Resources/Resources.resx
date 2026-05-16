@@ -399,6 +399,12 @@ I якшо не важко, пліз тут анкета на 8 питань</va
   <data name="GenerateUserProfilesOff" xml:space="preserve">
     <value>Генерація профілів користувачів вимкнена 🛑</value>
   </data>
+  <data name="GenerateUserProfiles" xml:space="preserve">
+    <value>Генерація профілів користувачів:</value>
+  </data>
+  <data name="GenerateUserProfilesCommandDescription" xml:space="preserve">
+    <value>Генерація профілів користувачів через AI (тільки для адмінів): /generateuserprofiles</value>
+  </data>
   <data name="DigestEmpty" xml:space="preserve">
     <value>За останню добу нічого підсумовувати 🤷</value>
   </data>

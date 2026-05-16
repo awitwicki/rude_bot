@@ -433,13 +433,15 @@ public class ManageHandler : BaseHandler
                             + $"{Resources.SendRandomMessages} `{chatSettings.SendRandomMessages}`\n"
                             + $"{Resources.SummarizeMessages} `{chatSettings.SummarizeMessages}`\n"
                             + $"{Resources.SendHelloMessage} `{chatSettings.SendHelloMessage}`\n"
+                            + $"{Resources.GenerateUserProfiles} `{chatSettings.GenerateUserProfiles}`\n"
                             + $"\n"
                             + $"{Resources.russianLangHateCommandDescription}\n"
                             + $"{Resources.PotuznistHateCommandDescription}\n"
                             + $"{Resources.UseChatGPTCommandDescription}\n"
                             + $"{Resources.SendRandomMessagesDescription}\n"
                             + $"{Resources.SummarizeMessagesCommandDescription}\n"
-                            + $"{Resources.SendHelloMessageCommandDescription}\n";
+                            + $"{Resources.SendHelloMessageCommandDescription}\n"
+                            + $"{Resources.GenerateUserProfilesCommandDescription}\n";
             }
         }
 

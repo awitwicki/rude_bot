@@ -561,6 +561,18 @@ namespace RudeBot.Domain.Resources {
             }
         }
 
+        public static string GenerateUserProfiles {
+            get {
+                return ResourceManager.GetString("GenerateUserProfiles", resourceCulture);
+            }
+        }
+
+        public static string GenerateUserProfilesCommandDescription {
+            get {
+                return ResourceManager.GetString("GenerateUserProfilesCommandDescription", resourceCulture);
+            }
+        }
+
         public static string DigestEmpty {
             get {
                 return ResourceManager.GetString("DigestEmpty", resourceCulture);

@@ -654,6 +654,45 @@ public class ManageHandler : BaseHandler
     }
 
     [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^/generateuserprofiles")]
+    public async Task ChangeGenerateUserProfiles()
+    {
+        Message msg = null;
+        string replyText;
+
+        var usrSenderRights = await BotClient.GetChatMember(ChatId, Message.From!.Id);
+        if (!usrSenderRights.IsHaveAdminRights())
+        {
+            replyText = Resources.CommandIsOnlyForAdmins;
+        }
+        else
+        {
+            var chatSettings = await ChatSettingsService.GetChatSettings(ChatId);
+            if (chatSettings == null)
+            {
+                replyText = $"{Resources.Error} 🤷🏻‍♂️";
+            }
+            else
+            {
+                chatSettings.GenerateUserProfiles = !chatSettings.GenerateUserProfiles;
+                await ChatSettingsService.AddOrUpdateChatSettings(chatSettings);
+
+                replyText = chatSettings.GenerateUserProfiles ? Resources.GenerateUserProfilesOn : Resources.GenerateUserProfilesOff;
+            }
+        }
+
+        msg = await BotClient.SendMessage(chatId: ChatId, text: replyText, replyParameters: new ReplyParameters
+                {
+                    MessageId = Message.MessageId
+                }, parseMode: ParseMode.Markdown);
+
+        await Task.Delay(30 * 1000);
+
+        await BotClient.TryDeleteMessage(msg);
+        await BotClient.TryDeleteMessage(Message);
+    }
+
+    [MessageReaction(ChatAction.Typing)]
     [MessageHandler("^/digest")]
     public async Task OnDigest()
     {

@@ -393,4 +393,54 @@ public class BotHandlerTests
                 r.Text.Contains("\\`код\\`") &&
                 r.Text.Contains("\\[дужки]")));
     }
+
+    [Fact]
+    public async Task MessageTrigger_WhenSendRandomMessagesOff_AndReplyingToBot_ShouldNotSendMessage()
+    {
+        // Arrange
+        const long botId = 999L;
+        _telegramBotClient.BotId.Returns(botId);
+        _chatSettingsService.GetChatSettings(Arg.Any<long>())
+            .Returns(Task.FromResult(new ChatSettings { SendRandomMessages = false }));
+
+        // Ensure the failing (pre-fix) path doesn't NRE on .PickRandom() before our assertion runs.
+        _advicesService.GetWords().Returns(new List<string> { "any advice" });
+
+        var handler = new BotHandler(_userManager,
+            _chatSettingsService,
+            _teslaChatCounterService,
+            _catService,
+            _advicesService,
+            _delayService,
+            _chatContextService,
+            _chatMessageRepository,
+            _userProfileService,
+            _logger)
+        {
+            BotClient = _telegramBotClient,
+            Update = new Update {
+                Id = 1,
+                Message = new Message {
+                    Id = 1,
+                    Chat = new Chat { Id = 1 },
+                    From = new User { Id = 1 },
+                    Text = "hello bot",
+                    ReplyToMessage = new Message {
+                        Id = 0,
+                        Chat = new Chat { Id = 1 },
+                        From = new User { Id = botId }
+                    }
+                }
+            }
+        };
+
+        // Act
+        await handler.MessageTrigger();
+
+        // Assert
+        await _telegramBotClient.DidNotReceive().SendRequest(
+            Arg.Any<SendMessageRequest>(),
+            Arg.Any<CancellationToken>()
+        );
+    }
 }

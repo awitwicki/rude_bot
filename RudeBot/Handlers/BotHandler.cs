@@ -475,9 +475,9 @@ public class BotHandler : BaseHandler
             var sendRandomMessage = (random.Next(1, 1000) > 985);
             var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
                 
-            if (!Message.IsCommand() && 
+            if (!Message.IsCommand() && chatSettings.SendRandomMessages &&
                 (Message?.ReplyToMessage?.From?.Id == BotClient.BotId ||
-                 (sendRandomMessage && chatSettings.SendRandomMessages)))
+                 sendRandomMessage))
             {
                 
                 // Is advice from text or use AI

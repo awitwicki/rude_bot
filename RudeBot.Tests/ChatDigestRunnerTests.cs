@@ -18,6 +18,7 @@ public class ChatDigestRunnerTests
     private readonly IChatDigestSummaryGenerator _summaryGenerator;
     private readonly IUserProfileService _profileService;
     private readonly IUserProfileMerger _profileMerger;
+    private readonly IChatSettingsService _chatSettingsService;
     private readonly ILifetimeScope _rootScope;
     private readonly ILogger<ChatDigestRunner> _logger;
 
@@ -28,12 +29,22 @@ public class ChatDigestRunnerTests
         _summaryGenerator = Substitute.For<IChatDigestSummaryGenerator>();
         _profileService = Substitute.For<IUserProfileService>();
         _profileMerger = Substitute.For<IUserProfileMerger>();
+        _chatSettingsService = Substitute.For<IChatSettingsService>();
         _logger = Substitute.For<ILogger<ChatDigestRunner>>();
+
+        // Default: profile generation enabled, so existing tests' assertions on MergeAsync still hold.
+        _chatSettingsService.GetChatSettings(Arg.Any<long>())
+            .Returns(call => Task.FromResult(new ChatSettings
+            {
+                ChatId = call.Arg<long>(),
+                GenerateUserProfiles = true
+            }));
 
         var builder = new ContainerBuilder();
         builder.RegisterInstance(_repo).As<IChatMessageRepository>();
         builder.RegisterInstance(_profileService).As<IUserProfileService>();
         builder.RegisterInstance(_profileMerger).As<IUserProfileMerger>();
+        builder.RegisterInstance(_chatSettingsService).As<IChatSettingsService>();
         _rootScope = builder.Build();
     }
 
@@ -140,5 +151,31 @@ public class ChatDigestRunnerTests
         Assert.Equal(ChatDigestResult.Posted, result);
         await _profileService.DidNotReceive().UpsertAsync(1, 10, Arg.Any<string>(), Arg.Any<string>());
         await _profileService.Received(1).UpsertAsync(1, 20, "bob", "profile of bob");
+    }
+
+    [Fact]
+    public async Task RunForChat_WhenGenerateUserProfilesOff_PostsDigestButSkipsProfileGeneration()
+    {
+        var messages = new List<ChatMessage>
+        {
+            new() { ChatId = 1, UserId = 10, UserName = "alice", Text = "hello", CreatedAt = DateTime.UtcNow },
+            new() { ChatId = 1, UserId = 20, UserName = "bob",   Text = "world", CreatedAt = DateTime.UtcNow },
+        };
+        _repo.GetSinceAsync(1, Arg.Any<DateTime>()).Returns(messages);
+        _summaryGenerator.GenerateSummary(messages).Returns("digest");
+        _chatSettingsService.GetChatSettings(1)
+            .Returns(Task.FromResult(new ChatSettings { ChatId = 1, GenerateUserProfiles = false }));
+
+        var result = await CreateRunner().RunForChat(1);
+
+        // Digest still posts.
+        Assert.Equal(ChatDigestResult.Posted, result);
+        await _botClient.Received(1).SendRequest(
+            Arg.Is<SendMessageRequest>(r => r.Text == "digest"),
+            Arg.Any<CancellationToken>());
+
+        // Profile generation is skipped for every user.
+        await _profileMerger.DidNotReceive().MergeAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<List<ChatMessage>>());
+        await _profileService.DidNotReceive().UpsertAsync(Arg.Any<long>(), Arg.Any<long>(), Arg.Any<string>(), Arg.Any<string>());
     }
 }

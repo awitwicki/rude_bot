@@ -46,13 +46,18 @@ public class ChatDigestRunner : IChatDigestRunner
             text: summary);
         await repo.PersistBotSentAsync(sent, summary);
 
-        try
+        var chatSettingsService = scope.Resolve<IChatSettingsService>();
+        var settings = await chatSettingsService.GetChatSettings(chatId);
+        if (settings.GenerateUserProfiles)
         {
-            await UpdateProfilesForActiveUsers(chatId, messages, profileService, profileMerger);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "ChatDigestRunner profile stage failed for chat {ChatId}", chatId);
+            try
+            {
+                await UpdateProfilesForActiveUsers(chatId, messages, profileService, profileMerger);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ChatDigestRunner profile stage failed for chat {ChatId}", chatId);
+            }
         }
 
         return ChatDigestResult.Posted;

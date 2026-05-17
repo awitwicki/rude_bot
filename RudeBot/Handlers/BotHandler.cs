@@ -13,6 +13,7 @@ using Autofac.Features.AttributeFilters;
 using RudeBot.Domain;
 using RudeBot.Domain.Interfaces;
 using RudeBot.Domain.Resources;
+using RudeBot.Filters;
 using RudeBot.Services.ChatContextService;
 using RudeBot.Services.UserProfileService;
 using GenerativeAI;
@@ -78,22 +79,12 @@ public class BotHandler : BaseHandler
         await BotClient.TryDeleteMessage(Message);
     }
 
+    [HandlerFilter<PotuzhnistEnabledFilter>]
+    [HandlerFilter<NotForwardedFromOthersFilter>]
     [MessageReaction(ChatAction.Typing)]
     [MessageHandler("потужн|пoтужн")]
     public async Task Potuzhnist()
     {
-        var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
-
-        // Ignore message forwards except self forwards or if hate settings turned off
-        if (!chatSettings.Potuzhnist)
-            return;
-
-        if (Message.ForwardFrom != null && Message.ForwardFrom.Id != User.Id)
-            return;
-
-        if (Message.ForwardFromChat != null)
-            return;
-
         var replyText = Resources.PotuznistHate;
 
         var msg = await BotClient.SendMessage(chatId: ChatId, text: replyText,
@@ -159,22 +150,12 @@ public class BotHandler : BaseHandler
         });
     }
 
+    [HandlerFilter<HaterussianLangEnabledFilter>]
+    [HandlerFilter<NotForwardedFromOthersFilter>]
     [MessageReaction(ChatAction.Typing)]
     [MessageHandler("ё|ъ|ы|э")]
     public async Task Palanytsa()
     {
-        var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
-
-        // Ignore message forwards except self forwards or if hate settings turned off
-        if (!chatSettings.HaterussianLang)
-            return;
-            
-        if (Message.ForwardFrom != null && Message.ForwardFrom.Id != User.Id)
-            return;
-        
-        if (Message.ForwardFromChat != null)
-            return;
-
         var replyText = Resources.Palanytsia;
 
         var msg = await BotClient.SendAnimation(
@@ -222,19 +203,13 @@ public class BotHandler : BaseHandler
         await _teslaChatCounterService.AddOrUpdateTeslaInChatDate(lastTeslaInChat);
     }
 
+    [HandlerFilter<NotForwardedFilter>]
+    [HandlerFilter<ReplyToOtherUserFilter>]
     [MessageReaction(ChatAction.Typing)]
     [MessageHandler(Consts.TnxWordsRegex)]
     public async Task IncreaseKarma()
     {
-        // Ignore message forwards
-        if (Message.ForwardFrom != null || Message.ForwardFromChat != null)
-            return;
-
-        // Filter only reply to other user, ignore bots
-        if (Message.ReplyToMessage == null || Message.ReplyToMessage.From!.Id == User.Id || Message.ReplyToMessage.From.IsBot)
-            return;
-
-        var userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+        var userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage!.From!.Id, ChatId);
 
         // If user not exists in db then ignore
         if (userStats == null)
@@ -255,20 +230,13 @@ public class BotHandler : BaseHandler
         await BotClient.TryDeleteMessage(msg);
     }
 
+    [HandlerFilter<NotForwardedFilter>]
+    [HandlerFilter<ReplyToOtherUserFilter>]
     [MessageReaction(ChatAction.Typing)]
     [MessageHandler("^-$")]
     public async Task DecreaseKarma()
     {
-        // OOh, look at here, is this code dUpLiCatIOn???
-        // Ignore message forwards
-        if (Message.ForwardFrom != null || Message.ForwardFromChat != null)
-            return;
-
-        // Filter only reply to other user, ignore bots
-        if (Message.ReplyToMessage == null || Message.ReplyToMessage.From!.Id == User.Id || Message.ReplyToMessage.From.IsBot)
-            return;
-
-        var userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage.From.Id, ChatId);
+        var userStats = await _userManager.GetUserChatStats(Message.ReplyToMessage!.From!.Id, ChatId);
 
         // If user not exists in db then ignore
         if (userStats == null)
@@ -421,16 +389,11 @@ public class BotHandler : BaseHandler
                 }, replyMarkup: keyboard);
     }
 
+    [HandlerFilter<UseChatGptEnabledFilter>]
     [MessageReaction(ChatAction.Typing)]
     [MessageHandler("^кіт ")]
     public async Task ChatGptAsk()
     {
-        var chatSettings = await _chatSettingsService.GetChatSettings(ChatId);
-        if (chatSettings == null || !chatSettings!.UseChatGpt)
-        {
-            return;
-        }
-            
         var inputMessageTest = Message!.Text!.Replace("кіт ", "").Replace("Кіт ", "");
         var returnMessage = ":)";
     

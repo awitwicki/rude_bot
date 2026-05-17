@@ -10,6 +10,7 @@ using PowerBot.Lite.Utils;
 using RudeBot.Extensions;
 using RudeBot.Keyboards;
 using RudeBot.Domain.Resources;
+using RudeBot.Filters;
 using Telegram.Bot;
 using Microsoft.Extensions.Logging;
 
@@ -34,14 +35,11 @@ public class ManageHandler : BaseHandler
         _logger = logger;
     }
 
+    [HandlerFilter<SendHelloMessageEnabledFilter>]
     [MessageReaction(ChatAction.Typing)]
     [MessageTypeFilter(MessageType.NewChatMembers)]
     public async Task NewUserInChat()
     {
-        var chatSettings = await ChatSettingsService.GetChatSettings(ChatId);
-        if (!chatSettings.SendHelloMessage)
-            return;
-
         // Process each new user in chat
         foreach (var newUser in Message.NewChatMembers!)
         {

@@ -98,7 +98,7 @@ public class BotHandler : BaseHandler
     }
 
     [MessageReaction(ChatAction.Typing)]
-    [MessageHandler("[\\w\\-]+\\.ru")]
+    [MessageHandler(Consts.DotRuRegex)]
     public async Task DotRu()
     {
         var messageText = Resources.ruPropaganda;

@@ -12,6 +12,7 @@ using RudeBot.Domain.Resources;
 using RudeBot.Handlers;
 using RudeBot.Managers;
 using RudeBot.Services;
+using RudeBot.Services.Ai;
 using RudeBot.Services.ChatContextService;
 using RudeBot.Services.ChatDigestService;
 using RudeBot.Services.UserProfileService;
@@ -142,6 +143,10 @@ botClient.RegisterContainers(x =>
 
     x.RegisterType<UserProfileService>()
         .As<IUserProfileService>()
+        .InstancePerLifetimeScope();
+
+    x.RegisterType<AiResponder>()
+        .As<IAiResponder>()
         .InstancePerLifetimeScope();
 
     x.RegisterType<UserProfileMerger>()

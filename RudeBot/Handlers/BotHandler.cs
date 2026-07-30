@@ -14,9 +14,8 @@ using RudeBot.Domain;
 using RudeBot.Domain.Interfaces;
 using RudeBot.Domain.Resources;
 using RudeBot.Filters;
-using RudeBot.Services.ChatContextService;
 using RudeBot.Services.UserProfileService;
-using GenerativeAI;
+using RudeBot.Services.Ai;
 using RudeBot.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -30,9 +29,9 @@ public class BotHandler : BaseHandler
     private static Object _topLocked { get; set; } = new Object();
     private IChatSettingsService _chatSettingsService { get; set; }
     private readonly IDelayService _delayService;
-    private readonly IChatContextService _chatContextService;
     private readonly IChatMessageRepository _chatMessageRepository;
     private readonly IUserProfileService _userProfileService;
+    private readonly IAiResponder _aiResponder;
 
     private ITeslaChatCounterService _teslaChatCounterService { get; set; }
     private readonly ILogger<BotHandler> _logger;
@@ -43,9 +42,9 @@ public class BotHandler : BaseHandler
         ICatService catService,
         [KeyFilter(Consts.AdvicesService)] ITxtWordsDataset advicesService,
         IDelayService delayService,
-        IChatContextService chatContextService,
         IChatMessageRepository chatMessageRepository,
         IUserProfileService userProfileService,
+        IAiResponder aiResponder,
         ILogger<BotHandler> logger)
     {
         _userManager = userManager;
@@ -54,9 +53,9 @@ public class BotHandler : BaseHandler
         _catService = catService;
         AdvicesService = advicesService;
         _delayService = delayService;
-        _chatContextService = chatContextService;
         _chatMessageRepository = chatMessageRepository;
         _userProfileService = userProfileService;
+        _aiResponder = aiResponder;
         _logger = logger;
     }
 
@@ -404,15 +403,13 @@ public class BotHandler : BaseHandler
     
         try
         {
-            var googleAi = new GoogleAi(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_API_KEY")!);
-            var googleModel = googleAi.CreateGenerativeModel(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_MODEL_NAME")!);
-
             var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
-            var profiles = await _userProfileService.ListForChatAsync(ChatId);
-            var prompt = BuildAiPrompt(User.Id, currentUserName, inputMessageTest, await _chatContextService.GetMessagesAsync(ChatId), profiles);
+            returnMessage = await _aiResponder.RespondAsync(ChatId, User.Id, currentUserName, inputMessageTest);
 
-            var googleModelResponse = await googleModel.GenerateContentAsync(prompt);
-            returnMessage = googleModelResponse.Text();
+            if (string.IsNullOrWhiteSpace(returnMessage))
+            {
+                returnMessage = Resources.OopsIDidntAgain;
+            }
         }
         catch (Exception ex)
         {
@@ -449,15 +446,14 @@ public class BotHandler : BaseHandler
                     try
                     {
                         await BotClient.SendChatAction(ChatId, ChatAction.Typing);
-                        var googleAi = new GoogleAi(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_API_KEY")!);
-                        var googleModel = googleAi.CreateGenerativeModel(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_MODEL_NAME")!);
 
                         var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
-                        var profiles = await _userProfileService.ListForChatAsync(ChatId);
-                        var prompt = BuildAiPrompt(User.Id, currentUserName, Message!.Text!, await _chatContextService.GetMessagesAsync(ChatId), profiles);
+                        replyText = await _aiResponder.RespondAsync(ChatId, User.Id, currentUserName, Message!.Text!);
 
-                        var googleModelResponse = await googleModel.GenerateContentAsync(prompt);
-                        replyText = googleModelResponse.Text();
+                        if (string.IsNullOrWhiteSpace(replyText))
+                        {
+                            replyText = Resources.OopsIDidntAgain;
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -484,44 +480,5 @@ public class BotHandler : BaseHandler
                 await _chatMessageRepository.PersistBotSentAsync(sentMessage, replyText);
             }
         }
-    }
-
-    private static string BuildAiPrompt(
-        long userId,
-        string currentUserName,
-        string currentMessage,
-        List<ChatContextMessage> context,
-        List<UserChatProfile> profiles)
-    {
-        var basePrompt = Consts.CreatorId.HasValue && userId == Consts.CreatorId.Value
-            ? Resources.AiPromptCreator
-            : Resources.AiPrompt;
-
-        var prompt = basePrompt + "\n\n";
-
-        if (profiles.Count > 0)
-        {
-            prompt += "Що ти пам'ятаєш про учасників чату (твоя довготривала пам'ять):\n";
-            foreach (var p in profiles)
-            {
-                prompt += $"{p.UserName}: {p.Profile}\n";
-            }
-            prompt += "\n";
-        }
-
-        if (context.Count > 0)
-        {
-            prompt += "Контекст останніх повідомлень в чаті (рядки з позначкою [твоя відповідь] — це повідомлення, які ти, надіслав раніше):\n";
-            foreach (var msg in context)
-            {
-                var prefix = msg.UserId == Consts.BotUserId ? "[твоя відповідь] " : "";
-                prompt += $"{prefix}{msg.UserName}: {msg.Text}\n";
-            }
-            prompt += "\n";
-        }
-
-        prompt += $"Повідомлення від {currentUserName}:\n{currentMessage}";
-
-        return prompt;
     }
 }

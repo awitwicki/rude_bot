@@ -4,8 +4,8 @@ using RudeBot.Handlers;
 using RudeBot.Managers;
 using RudeBot.Models;
 using RudeBot.Services;
-using RudeBot.Services.ChatContextService;
 using RudeBot.Services.UserProfileService;
+using RudeBot.Services.Ai;
 using Telegram.Bot;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
@@ -21,9 +21,9 @@ public class BotHandlerTests
     private readonly ICatService _catService;
     private readonly ITxtWordsDataset _advicesService;
     private readonly IDelayService _delayService;
-    private readonly IChatContextService _chatContextService;
     private readonly IChatMessageRepository _chatMessageRepository;
     private readonly IUserProfileService _userProfileService;
+    private readonly IAiResponder _aiResponder;
     private readonly ITelegramBotClient _telegramBotClient;
     private readonly ILogger<BotHandler> _logger;
 
@@ -35,9 +35,9 @@ public class BotHandlerTests
         _catService = Substitute.For<ICatService>();
         _advicesService = Substitute.For<ITxtWordsDataset>();
         _delayService = Substitute.For<IDelayService>();
-        _chatContextService = Substitute.For<IChatContextService>();
         _chatMessageRepository = Substitute.For<IChatMessageRepository>();
         _userProfileService = Substitute.For<IUserProfileService>();
+        _aiResponder = Substitute.For<IAiResponder>();
         _logger = Substitute.For<ILogger<BotHandler>>();
         _userProfileService.ListForChatAsync(Arg.Any<long>())
             .Returns(new List<RudeBot.Models.UserChatProfile>());
@@ -62,9 +62,9 @@ public class BotHandlerTests
             _catService,
             _advicesService,
             _delayService,
-            _chatContextService,
             _chatMessageRepository,
             _userProfileService,
+            _aiResponder,
             _logger)
         {
             BotClient = _telegramBotClient,
@@ -100,9 +100,9 @@ public class BotHandlerTests
             _catService,
             _advicesService,
             _delayService,
-            _chatContextService,
             _chatMessageRepository,
             _userProfileService,
+            _aiResponder,
             _logger)
         {
             BotClient = _telegramBotClient,
@@ -146,9 +146,9 @@ public class BotHandlerTests
             _catService,
             _advicesService,
             _delayService,
-            _chatContextService,
             _chatMessageRepository,
             _userProfileService,
+            _aiResponder,
             _logger)
         {
             BotClient = _telegramBotClient,
@@ -200,9 +200,9 @@ public class BotHandlerTests
             _catService,
             _advicesService,
             _delayService,
-            _chatContextService,
             _chatMessageRepository,
             _userProfileService,
+            _aiResponder,
             _logger)
         {
             BotClient = _telegramBotClient,
@@ -255,9 +255,9 @@ public class BotHandlerTests
             _catService,
             _advicesService,
             _delayService,
-            _chatContextService,
             _chatMessageRepository,
             _userProfileService,
+            _aiResponder,
             _logger)
         {
             BotClient = _telegramBotClient,
@@ -299,9 +299,9 @@ public class BotHandlerTests
             _catService,
             _advicesService,
             _delayService,
-            _chatContextService,
             _chatMessageRepository,
             _userProfileService,
+            _aiResponder,
             _logger)
         {
             BotClient = _telegramBotClient,

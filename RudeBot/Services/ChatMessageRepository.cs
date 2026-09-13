@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RudeBot.Database;
+using RudeBot.Domain;
 using RudeBot.Models;
 
 namespace RudeBot.Services;
@@ -40,7 +41,7 @@ public class ChatMessageRepository : IChatMessageRepository
     {
         return await _dbContext.ChatMessages
             .AsNoTracking()
-            .Where(m => m.ChatId == chatId && m.CreatedAt > since)
+            .Where(m => m.ChatId == chatId && m.CreatedAt > since && m.UserId != Consts.BotUserId)
             .OrderBy(m => m.CreatedAt)
             .ToListAsync();
     }

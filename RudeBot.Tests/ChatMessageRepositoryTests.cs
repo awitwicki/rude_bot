@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RudeBot.Database;
+using RudeBot.Domain;
 using RudeBot.Models;
 using RudeBot.Services;
 
@@ -83,9 +84,9 @@ public class ChatMessageRepositoryTests
         var repo = new ChatMessageRepository(ctx);
         var t0 = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        ctx.ChatMessages.Add(new ChatMessage { ChatId = 1, UserName = "u", Text = "old", CreatedAt = t0 });
-        ctx.ChatMessages.Add(new ChatMessage { ChatId = 1, UserName = "u", Text = "new1", CreatedAt = t0.AddHours(2) });
-        ctx.ChatMessages.Add(new ChatMessage { ChatId = 1, UserName = "u", Text = "new2", CreatedAt = t0.AddHours(3) });
+        ctx.ChatMessages.Add(new ChatMessage { ChatId = 1, UserId = 7, UserName = "u", Text = "old", CreatedAt = t0 });
+        ctx.ChatMessages.Add(new ChatMessage { ChatId = 1, UserId = 7, UserName = "u", Text = "new1", CreatedAt = t0.AddHours(2) });
+        ctx.ChatMessages.Add(new ChatMessage { ChatId = 1, UserId = 7, UserName = "u", Text = "new2", CreatedAt = t0.AddHours(3) });
         await ctx.SaveChangesAsync();
 
         var result = await repo.GetSinceAsync(1, t0.AddHours(1));
@@ -93,6 +94,32 @@ public class ChatMessageRepositoryTests
         Assert.Equal(2, result.Count);
         Assert.Equal("new1", result[0].Text);
         Assert.Equal("new2", result[1].Text);
+    }
+
+    [Fact]
+    public async Task GetSinceAsync_ExcludesBotsOwnMessages()
+    {
+        var originalBotUserId = Consts.BotUserId;
+        Consts.BotUserId = 999;
+        try
+        {
+            await using var ctx = CreateInMemoryContext();
+            var repo = new ChatMessageRepository(ctx);
+            var t0 = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            ctx.ChatMessages.Add(new ChatMessage { ChatId = 1, UserId = 7, UserName = "u", Text = "human msg", CreatedAt = t0.AddHours(2) });
+            ctx.ChatMessages.Add(new ChatMessage { ChatId = 1, UserId = Consts.BotUserId, UserName = "rude кіт", Text = "yesterday's digest", CreatedAt = t0.AddHours(3) });
+            await ctx.SaveChangesAsync();
+
+            var result = await repo.GetSinceAsync(1, t0.AddHours(1));
+
+            Assert.Single(result);
+            Assert.Equal("human msg", result[0].Text);
+        }
+        finally
+        {
+            Consts.BotUserId = originalBotUserId;
+        }
     }
 
     [Fact]

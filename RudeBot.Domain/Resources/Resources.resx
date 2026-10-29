@@ -132,6 +132,7 @@
 `/settings` - настройки бота для цього чату,
 `/digest` - дайджест чату, найсвіжіший,
 `кіт {{а ти маму мав?}}` - задай своє запитання коту, бажано англійською,
+`/roastme` - кіт тебе засмажить (раз на день),
 А ще я вітаю новеньких у чаті.
 
 Версія `{0}`</value>
@@ -503,5 +504,15 @@ I якшо не важко, пліз тут анкета на 8 питань</va
 — Без вступів типу "Ось відповідь:" — одразу по суті
 
 Завдання: дай корисну, серйозну відповідь на повідомлення творця, використовуючи контекст чату за потреби.</value>
+  </data>
+  <data name="RoastMePrompt" xml:space="preserve">
+    <value>Based on everything you know about me, roast and don’t hold back. Say it in Ukrainian slang Just like this, but add way more Ukrainian swear words.
+
+Keep it short: 3-6 sentences max.
+Plain text only: no Markdown, no HTML, no bold, no italics, no headers, no links. Newlines and simple symbols like * or - are fine.
+Start right away with the roast, no intro.</value>
+  </data>
+  <data name="RoastMeAlreadyUsed" xml:space="preserve">
+    <value>Тебе сьогодні вже засмажили 🔥 Приходь завтра.</value>
   </data>
 </root>

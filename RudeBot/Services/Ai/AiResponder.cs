@@ -16,6 +16,8 @@ public class AiResponder : IAiResponder
     private readonly IChatMessageRepository _chatMessageRepository;
     private readonly ILogger<AiResponder> _logger;
 
+    private const int RoastMessagesCount = 50;
+
     public AiResponder(
         IUserManager userManager,
         IUserProfileService userProfileService,
@@ -61,6 +63,27 @@ public class AiResponder : IAiResponder
             AutoReplyFunction = true,
             AutoHandleBadFunctionCalls = true,
         });
+
+        var response = await model.GenerateContentAsync(prompt, cancellationToken);
+
+        return response.Text();
+    }
+
+    public async Task<string> RoastAsync(
+        long chatId,
+        long userId,
+        string userName,
+        CancellationToken cancellationToken = default)
+    {
+        // Sequential on purpose: shared request-scoped DataContext (see RespondAsync)
+        var profile = await _userProfileService.GetAsync(chatId, userId);
+        var stats = await _userManager.GetUserChatStats(userId, chatId);
+        var messages = await _chatMessageRepository.GetLastNByUserAsync(chatId, userId, RoastMessagesCount);
+
+        var prompt = RoastPromptBuilder.Build(userName, profile, stats, messages);
+
+        var googleAi = new GoogleAi(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_API_KEY")!);
+        var model = googleAi.CreateGenerativeModel(Environment.GetEnvironmentVariable("RUDEBOT_GEMINI_MODEL_NAME")!);
 
         var response = await model.GenerateContentAsync(prompt, cancellationToken);
 

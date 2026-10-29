@@ -18,6 +18,7 @@ using RudeBot.Services.ChatDigestService;
 using RudeBot.Services.UserProfileService;
 using RudeBot.Services.DuplicateDetectorService;
 using RudeBot.Services.LogRetentionService;
+using RudeBot.Services.RoastLimiter;
 using Cron.NET;
 using Telegram.Bot;
 using RudeBot.Logging;
@@ -148,6 +149,10 @@ botClient.RegisterContainers(x =>
     x.RegisterType<AiResponder>()
         .As<IAiResponder>()
         .InstancePerLifetimeScope();
+
+    x.RegisterType<RoastLimiter>()
+        .As<IRoastLimiter>()
+        .SingleInstance();
 
     x.RegisterType<UserProfileMerger>()
         .As<IUserProfileMerger>()

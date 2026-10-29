@@ -12,4 +12,14 @@ public interface IAiResponder
         string userName,
         string message,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Roast користувача (/roastme) на основі його профілю, статистики та повідомлень.
+    /// Кидає виняток, якщо Gemini недоступний.
+    /// </summary>
+    Task<string> RoastAsync(
+        long chatId,
+        long userId,
+        string userName,
+        CancellationToken cancellationToken = default);
 }

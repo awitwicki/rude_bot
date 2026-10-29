@@ -16,6 +16,7 @@ using RudeBot.Domain.Resources;
 using RudeBot.Filters;
 using RudeBot.Services.UserProfileService;
 using RudeBot.Services.Ai;
+using RudeBot.Services.RoastLimiter;
 using RudeBot.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -32,6 +33,7 @@ public class BotHandler : BaseHandler
     private readonly IChatMessageRepository _chatMessageRepository;
     private readonly IUserProfileService _userProfileService;
     private readonly IAiResponder _aiResponder;
+    private readonly IRoastLimiter _roastLimiter;
 
     private ITeslaChatCounterService _teslaChatCounterService { get; set; }
     private readonly ILogger<BotHandler> _logger;
@@ -45,6 +47,7 @@ public class BotHandler : BaseHandler
         IChatMessageRepository chatMessageRepository,
         IUserProfileService userProfileService,
         IAiResponder aiResponder,
+        IRoastLimiter roastLimiter,
         ILogger<BotHandler> logger)
     {
         _userManager = userManager;
@@ -56,6 +59,7 @@ public class BotHandler : BaseHandler
         _chatMessageRepository = chatMessageRepository;
         _userProfileService = userProfileService;
         _aiResponder = aiResponder;
+        _roastLimiter = roastLimiter;
         _logger = logger;
     }
 
@@ -423,6 +427,54 @@ public class BotHandler : BaseHandler
         });
 
         await _chatMessageRepository.PersistBotSentAsync(sentMessage, returnMessage!);
+    }
+
+    [HandlerFilter<UseChatGptEnabledFilter>]
+    [MessageReaction(ChatAction.Typing)]
+    [MessageHandler("^/roastme(@\\w+)?$")]
+    public async Task RoastMe()
+    {
+        var replyParameters = new ReplyParameters
+        {
+            MessageId = Message.MessageId
+        };
+
+        if (!_roastLimiter.TryAcquire(ChatId, User.Id))
+        {
+            var limitMessage = await BotClient.SendMessage(chatId: ChatId, text: Resources.RoastMeAlreadyUsed,
+                replyParameters: replyParameters);
+
+            await _delayService.DelaySeconds(30);
+            await BotClient.TryDeleteMessage(limitMessage);
+            await BotClient.TryDeleteMessage(Message);
+
+            return;
+        }
+
+        string returnMessage;
+
+        try
+        {
+            var currentUserName = User.Username ?? User.FirstName ?? User.Id.ToString();
+            returnMessage = await _aiResponder.RoastAsync(ChatId, User.Id, currentUserName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "RoastMe Gemini call failed");
+            returnMessage = "";
+        }
+
+        if (string.IsNullOrWhiteSpace(returnMessage))
+        {
+            // Failed roast shouldn't burn the daily slot
+            _roastLimiter.Release(ChatId, User.Id);
+            returnMessage = Resources.OopsIDidntAgain;
+        }
+
+        // No parseMode on purpose: plain text, model output may contain stray * or _
+        var sentMessage = await BotClient.SendMessage(chatId: ChatId, text: returnMessage, replyParameters: replyParameters);
+
+        await _chatMessageRepository.PersistBotSentAsync(sentMessage, returnMessage);
     }
 
     [MessageTypeFilter(MessageType.Text)]

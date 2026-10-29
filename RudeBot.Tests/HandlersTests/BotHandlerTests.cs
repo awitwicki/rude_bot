@@ -6,6 +6,7 @@ using RudeBot.Models;
 using RudeBot.Services;
 using RudeBot.Services.UserProfileService;
 using RudeBot.Services.Ai;
+using RudeBot.Services.RoastLimiter;
 using Telegram.Bot;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
@@ -24,6 +25,7 @@ public class BotHandlerTests
     private readonly IChatMessageRepository _chatMessageRepository;
     private readonly IUserProfileService _userProfileService;
     private readonly IAiResponder _aiResponder;
+    private readonly IRoastLimiter _roastLimiter;
     private readonly ITelegramBotClient _telegramBotClient;
     private readonly ILogger<BotHandler> _logger;
 
@@ -38,6 +40,7 @@ public class BotHandlerTests
         _chatMessageRepository = Substitute.For<IChatMessageRepository>();
         _userProfileService = Substitute.For<IUserProfileService>();
         _aiResponder = Substitute.For<IAiResponder>();
+        _roastLimiter = Substitute.For<IRoastLimiter>();
         _logger = Substitute.For<ILogger<BotHandler>>();
         _userProfileService.ListForChatAsync(Arg.Any<long>())
             .Returns(new List<RudeBot.Models.UserChatProfile>());
@@ -65,6 +68,7 @@ public class BotHandlerTests
             _chatMessageRepository,
             _userProfileService,
             _aiResponder,
+            _roastLimiter,
             _logger)
         {
             BotClient = _telegramBotClient,
@@ -103,6 +107,7 @@ public class BotHandlerTests
             _chatMessageRepository,
             _userProfileService,
             _aiResponder,
+            _roastLimiter,
             _logger)
         {
             BotClient = _telegramBotClient,
@@ -149,6 +154,7 @@ public class BotHandlerTests
             _chatMessageRepository,
             _userProfileService,
             _aiResponder,
+            _roastLimiter,
             _logger)
         {
             BotClient = _telegramBotClient,
@@ -203,6 +209,7 @@ public class BotHandlerTests
             _chatMessageRepository,
             _userProfileService,
             _aiResponder,
+            _roastLimiter,
             _logger)
         {
             BotClient = _telegramBotClient,
@@ -258,6 +265,7 @@ public class BotHandlerTests
             _chatMessageRepository,
             _userProfileService,
             _aiResponder,
+            _roastLimiter,
             _logger)
         {
             BotClient = _telegramBotClient,
@@ -302,6 +310,7 @@ public class BotHandlerTests
             _chatMessageRepository,
             _userProfileService,
             _aiResponder,
+            _roastLimiter,
             _logger)
         {
             BotClient = _telegramBotClient,
@@ -329,5 +338,80 @@ public class BotHandlerTests
             Arg.Any<SendMessageRequest>(),
             Arg.Any<CancellationToken>()
         );
+    }
+
+    private BotHandler CreateRoastMeHandler() => new(_userManager,
+        _chatSettingsService,
+        _teslaChatCounterService,
+        _catService,
+        _advicesService,
+        _delayService,
+        _chatMessageRepository,
+        _userProfileService,
+        _aiResponder,
+        _roastLimiter,
+        _logger)
+    {
+        BotClient = _telegramBotClient,
+        Update = new Update {
+            Id = 1,
+            Message = new Message {
+                Id = 1,
+                Chat = new Chat { Id = 1 },
+                From = new User { Id = 7, Username = "vasya" },
+                Text = "/roastme"
+            }
+        }
+    };
+
+    [Fact]
+    public async Task RoastMe_FirstTimeToday_SendsRoast()
+    {
+        // Arrange
+        _roastLimiter.TryAcquire(1, 7).Returns(true);
+        _aiResponder.RoastAsync(1, 7, "vasya", Arg.Any<CancellationToken>()).Returns("засмажений");
+
+        // Act
+        await CreateRoastMeHandler().RoastMe();
+
+        // Assert
+        await _telegramBotClient.Received(1).SendRequest(
+            Arg.Is<SendMessageRequest>(r => r.Text == "засмажений" && r.ParseMode == default),
+            Arg.Any<CancellationToken>());
+        _roastLimiter.DidNotReceive().Release(Arg.Any<long>(), Arg.Any<long>());
+    }
+
+    [Fact]
+    public async Task RoastMe_AlreadyUsedToday_DoesNotCallAi()
+    {
+        // Arrange
+        _roastLimiter.TryAcquire(1, 7).Returns(false);
+
+        // Act
+        await CreateRoastMeHandler().RoastMe();
+
+        // Assert
+        await _aiResponder.DidNotReceive().RoastAsync(Arg.Any<long>(), Arg.Any<long>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _telegramBotClient.Received(1).SendRequest(
+            Arg.Is<SendMessageRequest>(r => r.Text == RudeBot.Domain.Resources.Resources.RoastMeAlreadyUsed),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RoastMe_AiFails_ReleasesSlot()
+    {
+        // Arrange
+        _roastLimiter.TryAcquire(1, 7).Returns(true);
+        _aiResponder.RoastAsync(Arg.Any<long>(), Arg.Any<long>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns<string>(_ => throw new HttpRequestException("boom"));
+
+        // Act
+        await CreateRoastMeHandler().RoastMe();
+
+        // Assert
+        _roastLimiter.Received(1).Release(1, 7);
+        await _telegramBotClient.Received(1).SendRequest(
+            Arg.Is<SendMessageRequest>(r => r.Text == RudeBot.Domain.Resources.Resources.OopsIDidntAgain),
+            Arg.Any<CancellationToken>());
     }
 }
